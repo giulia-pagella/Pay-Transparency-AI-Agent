@@ -1,0 +1,20 @@
+{
+  "country_code": "EU",
+  "country_name": "Unione Europea",
+  "document_type": "direttiva",
+  "document_title": "Direttiva UE 2023/970",
+  "status": "definitive",
+  "version": "2026-04",
+  "date": "2026-04-24",
+  "source_pdf_filename": "direttiva_pay_transparency.pdf",
+  "source_url": null,
+  "sections": [
+    {
+      "topic": "da_revisionare",
+      "title": "Direttiva UE 2023/970 — estrazione preliminare",
+      "content": "Contenuto estratto dal PDF sorgente da validare manualmente prima dell'uso in produzione.",
+      "article_references": [],
+      "needs_review": true
+    }
+  ]
+}
