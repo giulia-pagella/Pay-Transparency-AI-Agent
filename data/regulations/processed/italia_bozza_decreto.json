@@ -1,0 +1,20 @@
+{
+  "country_code": "IT",
+  "country_name": "Italia",
+  "document_type": "bozza_decreto",
+  "document_title": "Schema di decreto legislativo di recepimento della Direttiva UE 2023/970",
+  "status": "draft",
+  "version": "2026-04",
+  "date": "2026-04-24",
+  "source_pdf_filename": "proposta_decreto_italia.pdf",
+  "source_url": null,
+  "sections": [
+    {
+      "topic": "da_revisionare",
+      "title": "Bozza decreto Italia — estrazione preliminare",
+      "content": "Contenuto estratto dal PDF sorgente da validare manualmente prima dell'uso in produzione.",
+      "article_references": [],
+      "needs_review": true
+    }
+  ]
+}
