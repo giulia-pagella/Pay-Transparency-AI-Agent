@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<title>Pay Transparency Assessment Tool — Hi-Fi Design</title>
+<link rel="stylesheet" href="assets/colors_and_type.css" />
+<link rel="stylesheet" href="assets/app.css" />
+<style>
+  html, body { margin: 0; background: #E8EAED; font-family: var(--font-sans); height: 100%; }
+  #root { height: 100%; }
+</style>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script src="data.js"></script>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="components/common.jsx"></script>
+<script type="text/babel" src="components/screens/landing.jsx"></script>
+<script type="text/babel" src="components/screens/step1.jsx"></script>
+<script type="text/babel" src="components/screens/step2.jsx"></script>
+<script type="text/babel" src="components/screens/step3.jsx"></script>
+<script type="text/babel" src="components/screens/report.jsx"></script>
+<script type="text/babel" src="components/screens/pdf.jsx"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" data-presets="react">
+function App() {
+  const { useState } = React;
+  const defaults = /*EDITMODE-BEGIN*/{
+    "countriesVariant": "list",
+    "maturityVariant": "cards"
+  }/*EDITMODE-END*/;
+  const [tw, setTw] = useTweaks(defaults);
+
+  return (
+    <>
+      <DesignCanvas title="Pay Transparency Assessment Tool" subtitle="Prototipo hi-fi · NTT DATA Design System · 6 schermate">
+        <DCSection id="flow" title="Flusso utente · 6 schermate">
+          <DCArtboard id="landing" label="01 · Landing page" width={1280} height={820}>
+            <Landing />
+          </DCArtboard>
+          <DCArtboard id="step1" label="02 · Questionario · Step 1 · Dati azienda" width={1280} height={820}>
+            <Step1Company />
+          </DCArtboard>
+          <DCArtboard id="step2-list" label={tw.countriesVariant === "list" ? "03 · Step 2 · Paesi (vista lista) ✓" : "03 · Step 2 · Paesi (vista lista)"} width={1280} height={820}>
+            <Step2Countries variant="list" />
+          </DCArtboard>
+          <DCArtboard id="step2-grid" label={tw.countriesVariant === "grid" ? "03b · Step 2 · Paesi (vista griglia) ✓" : "03b · Step 2 · Paesi (vista griglia)"} width={1280} height={820}>
+            <Step2Countries variant="grid" />
+          </DCArtboard>
+          <DCArtboard id="step3-cards" label={tw.maturityVariant === "cards" ? "04 · Step 3 · Maturità (card orizzontali) ✓" : "04 · Step 3 · Maturità (card orizzontali)"} width={1280} height={1400}>
+            <Step3Maturity variant="cards" />
+          </DCArtboard>
+          <DCArtboard id="step3-radar" label={tw.maturityVariant === "radar" ? "04b · Step 3 · Maturità (radar chart) ✓" : "04b · Step 3 · Maturità (radar chart)"} width={1280} height={820}>
+            <Step3Maturity variant="radar" />
+          </DCArtboard>
+          <DCArtboard id="report" label="05 · Report web (sidebar + accordion)" width={1440} height={1400}>
+            <Report />
+          </DCArtboard>
+          <DCArtboard id="pdf" label="06 · PDF layout preview" width={1280} height={1400}>
+            <PdfPreview />
+          </DCArtboard>
+        </DCSection>
+      </DesignCanvas>
+
+      <TweaksPanel title="Tweaks">
+        <TweakSection title="Varianti">
+          <TweakRadio
+            label="Selezione paesi (Step 2)"
+            value={tw.countriesVariant}
+            options={[
+              { value: "list", label: "Lista a due colonne" },
+              { value: "grid", label: "Griglia di card" }
+            ]}
+            onChange={v => setTw({ countriesVariant: v })}
+          />
+          <TweakRadio
+            label="Maturità (Step 3)"
+            value={tw.maturityVariant}
+            options={[
+              { value: "cards", label: "Card orizzontali (4 livelli)" },
+              { value: "radar", label: "Radar chart + barre" }
+            ]}
+            onChange={v => setTw({ maturityVariant: v })}
+          />
+        </TweakSection>
+      </TweaksPanel>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

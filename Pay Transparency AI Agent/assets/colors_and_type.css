@@ -1,0 +1,257 @@
+/* ============================================================
+   NTT DATA Design System — colors_and_type.css
+   Source of truth: 2025 NTT DATA Brand Guidelines v5.2.2
+   ============================================================ */
+
+/* ---------- Fonts ---------- */
+@font-face { font-family: 'Noto Sans'; font-weight: 300; font-style: normal;
+  src: url('fonts/NotoSans-Light.woff2') format('woff2'); font-display: swap; }
+@font-face { font-family: 'Noto Sans'; font-weight: 400; font-style: normal;
+  src: url('fonts/NotoSans-Regular.woff2') format('woff2'); font-display: swap; }
+@font-face { font-family: 'Noto Sans'; font-weight: 700; font-style: normal;
+  src: url('fonts/NotoSans-Bold.woff2') format('woff2'); font-display: swap; }
+@font-face { font-family: 'Noto Sans'; font-weight: 400; font-style: italic;
+  src: url('fonts/NotoSans-Italic.woff2') format('woff2'); font-display: swap; }
+@font-face { font-family: 'Noto Sans'; font-weight: 700; font-style: italic;
+  src: url('fonts/NotoSans-BoldItalic.woff2') format('woff2'); font-display: swap; }
+@font-face { font-family: 'Noto Serif'; font-weight: 400; font-style: normal;
+  src: url('fonts/NotoSerif-Regular.woff2') format('woff2'); font-display: swap; }
+@font-face { font-family: 'Noto Serif'; font-weight: 700; font-style: normal;
+  src: url('fonts/NotoSerif-Bold.woff2') format('woff2'); font-display: swap; }
+
+:root {
+  /* ==========  BRAND COLORS  ========== */
+  /* Primary */
+  --ntt-future-blue:       #0072BC;  /* Primary brand color */
+  --ntt-smart-navy:        #070F26;  /* Primary background 1 */
+  --ntt-white:             #FFFFFF;  /* Primary background 2 */
+
+  /* Future Blue scale */
+  --ntt-future-blue-50:    #19A3FC;  /* Lighter */
+  --ntt-future-blue-100:   #0072BC;  /* = Future Blue */
+  --ntt-future-blue-150:   #005B96;  /* Darker — for light bgs */
+
+  /* Secondary accents */
+  --ntt-turquoise-50:      #7BF7FF;
+  --ntt-turquoise:         #00DFED;
+  --ntt-turquoise-100:     #009AA4;  /* darker variant */
+
+  --ntt-green-50:          #38F990;
+  --ntt-green:             #00CB5D;
+  --ntt-green-150:         #068941;
+
+  /* Attention-grabbers (USE SPARINGLY) */
+  --ntt-yellow-50:         #FFEDB2;
+  --ntt-yellow:            #FFC400;
+  --ntt-yellow-100:        #FFDB66;
+
+  --ntt-orange:            #FF7A00;
+  --ntt-orange-100:        #E42600;
+  --ntt-orange-150:        #B22000;
+
+  /* Neutrals */
+  --ntt-text-gray:         #2E404D;  /* Body text on light */
+  --ntt-gray-50:           #E8E8E8;  /* Subtle bg, dividers */
+  --ntt-gray-100:          #949494;  /* Pipe divider, dim text */
+  --ntt-black:             #000000;
+
+  /* ==========  SEMANTIC TOKENS (light mode default)  ========== */
+  --color-bg:              var(--ntt-white);
+  --color-bg-alt:          var(--ntt-gray-50);
+  --color-bg-inverse:      var(--ntt-smart-navy);
+  --color-surface:         var(--ntt-white);
+
+  --color-fg:              var(--ntt-smart-navy);
+  --color-fg-body:         var(--ntt-text-gray);   /* body copy */
+  --color-fg-muted:        var(--ntt-gray-100);
+  --color-fg-inverse:      var(--ntt-white);
+
+  --color-brand:           var(--ntt-future-blue);
+  --color-brand-hover:     var(--ntt-future-blue-150);  /* darker on light */
+  --color-brand-active:    var(--ntt-future-blue-50);   /* for dark bgs */
+  --color-link:            var(--ntt-future-blue-150);  /* passes AA on white */
+
+  --color-accent-turquoise: var(--ntt-turquoise);
+  --color-accent-green:    var(--ntt-green);
+  --color-accent-yellow:   var(--ntt-yellow);
+  --color-accent-orange:   var(--ntt-orange);
+
+  --color-success:         var(--ntt-green-150);
+  --color-warning:         var(--ntt-yellow);
+  --color-danger:          var(--ntt-orange-100);
+
+  --color-border:          var(--ntt-gray-50);
+  --color-border-strong:   var(--ntt-gray-100);
+  --color-divider:         var(--ntt-gray-100);      /* pipe divider */
+
+  /* ==========  TYPOGRAPHY  ========== */
+  --font-sans: 'Noto Sans', Arial, system-ui, -apple-system, sans-serif;
+  --font-serif: 'Noto Serif', Georgia, 'Times New Roman', serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* Type scale (px reference; translate to rem in use) */
+  --fs-xs:   12px;
+  --fs-sm:   14px;
+  --fs-md:   16px;
+  --fs-lg:   18px;
+  --fs-xl:   20px;
+  --fs-2xl:  24px;
+  --fs-3xl:  32px;
+  --fs-4xl:  40px;
+  --fs-5xl:  56px;
+  --fs-6xl:  72px;
+  --fs-7xl:  96px;
+
+  /* Line heights */
+  --lh-tight:   1.1;
+  --lh-snug:    1.25;
+  --lh-normal:  1.5;
+  --lh-loose:   1.7;
+
+  /* Letter spacing */
+  --ls-tight:  -0.01em;
+  --ls-normal:  0;
+  --ls-wide:    0.04em;
+  --ls-label:   0.08em;
+
+  /* Weights */
+  --fw-light:    300;
+  --fw-regular:  400;
+  --fw-bold:     700;
+
+  /* ==========  SPACING  ========== */
+  --space-0:   0;
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:   12px;
+  --space-4:   16px;
+  --space-5:   24px;
+  --space-6:   32px;
+  --space-7:   48px;
+  --space-8:   64px;
+  --space-9:   96px;
+  --space-10:  128px;
+
+  /* ==========  RADII  ========== */
+  /* NTT DATA's geometric language keeps radii restrained */
+  --radius-none:   0;
+  --radius-sm:     2px;
+  --radius-md:     4px;
+  --radius-lg:     8px;
+  --radius-pill:   999px;
+
+  /* ==========  SHADOWS / ELEVATION  ========== */
+  --shadow-xs: 0 1px 2px rgba(7, 15, 38, 0.06);
+  --shadow-sm: 0 2px 4px rgba(7, 15, 38, 0.08);
+  --shadow-md: 0 4px 12px rgba(7, 15, 38, 0.10);
+  --shadow-lg: 0 12px 32px rgba(7, 15, 38, 0.14);
+  --shadow-focus: 0 0 0 3px rgba(0, 114, 188, 0.35);
+
+  /* ==========  MOTION  ========== */
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-1: 120ms;
+  --dur-2: 200ms;
+  --dur-3: 320ms;
+  --dur-4: 500ms;
+
+  /* ==========  LAYOUT  ========== */
+  --container-narrow: 720px;
+  --container:        1120px;
+  --container-wide:   1440px;
+  --grid-gap:         24px;
+
+  /* ==========  SEMANTIC TYPE ROLES  ========== */
+  /* L1 — Headline: SERIF (only for L1/quotes/callouts) */
+  --role-h1-family: var(--font-serif);
+  --role-h1-weight: var(--fw-regular);
+  --role-h1-size:   var(--fs-5xl);
+  --role-h1-leading: var(--lh-tight);
+  --role-h1-tracking: var(--ls-tight);
+
+  /* L2 — Subhead: SANS bold */
+  --role-h2-family: var(--font-sans);
+  --role-h2-weight: var(--fw-bold);
+  --role-h2-size:   var(--fs-3xl);
+  --role-h2-leading: var(--lh-snug);
+
+  /* L3 — Body */
+  --role-body-family: var(--font-sans);
+  --role-body-weight: var(--fw-regular);
+  --role-body-size:   var(--fs-md);
+  --role-body-leading: var(--lh-normal);
+
+  /* L4 — Label: sans, uppercase tracking */
+  --role-label-family: var(--font-sans);
+  --role-label-weight: var(--fw-bold);
+  --role-label-size:   var(--fs-xs);
+  --role-label-leading: var(--lh-tight);
+  --role-label-tracking: var(--ls-label);
+  --role-label-case: uppercase;
+}
+
+/* ==========  BASE ELEMENTS  ========== */
+html { font-family: var(--font-sans); color: var(--color-fg-body); background: var(--color-bg); }
+body { font-size: var(--role-body-size); line-height: var(--role-body-leading); margin: 0; }
+
+h1, .h1 {
+  font-family: var(--role-h1-family);
+  font-weight: var(--role-h1-weight);
+  font-size: var(--role-h1-size);
+  line-height: var(--role-h1-leading);
+  letter-spacing: var(--role-h1-tracking);
+  color: var(--color-fg);
+  margin: 0 0 var(--space-5);
+}
+h2, .h2 {
+  font-family: var(--role-h2-family);
+  font-weight: var(--role-h2-weight);
+  font-size: var(--role-h2-size);
+  line-height: var(--role-h2-leading);
+  color: var(--color-fg);
+  margin: 0 0 var(--space-4);
+}
+h3, .h3 {
+  font-family: var(--font-sans);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-xl);
+  line-height: var(--lh-snug);
+  color: var(--color-fg);
+  margin: 0 0 var(--space-3);
+}
+h4, .h4, .label {
+  font-family: var(--role-label-family);
+  font-weight: var(--role-label-weight);
+  font-size: var(--role-label-size);
+  letter-spacing: var(--role-label-tracking);
+  text-transform: var(--role-label-case);
+  color: var(--color-fg);
+  margin: 0 0 var(--space-2);
+}
+p { margin: 0 0 var(--space-4); }
+a { color: var(--color-link); text-decoration: underline; text-underline-offset: 2px; }
+a:hover { color: var(--color-brand); }
+strong, b { font-weight: var(--fw-bold); }
+small { font-size: var(--fs-sm); }
+hr { border: 0; border-top: 1px solid var(--color-border); margin: var(--space-6) 0; }
+
+.quote, blockquote {
+  font-family: var(--font-serif);
+  font-size: var(--fs-3xl);
+  line-height: var(--lh-snug);
+  color: var(--color-fg);
+  border-left: 3px solid var(--color-brand);
+  padding-left: var(--space-5);
+  margin: var(--space-6) 0;
+}
+
+/* Utility: dark-mode surface (on Smart Navy) */
+.on-navy {
+  background: var(--ntt-smart-navy);
+  color: var(--ntt-white);
+  --color-fg: var(--ntt-white);
+  --color-fg-body: var(--ntt-white);
+  --color-brand: var(--ntt-future-blue-50);
+  --color-link: var(--ntt-future-blue-50);
+  --color-border: rgba(255,255,255,0.12);
+}
