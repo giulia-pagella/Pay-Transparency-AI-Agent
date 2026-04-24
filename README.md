@@ -58,3 +58,12 @@ Lo script `scripts/preprocess-pdf.ts`:
 - I PDF sorgente **non vengono versionati nel repository** (niente file binari in Git).
 - Copiare localmente i PDF in `data/regulations/source_pdfs/` prima di eseguire lo script di preprocess.
 - I JSON generati in `data/regulations/processed/` sono i file da versionare.
+
+
+## Versione Node.js
+- Versione richiesta: **Node.js >= 20**
+- Se usi `nvm`:
+  ```bash
+  nvm use
+  ```
+  (legge automaticamente `.nvmrc`)
