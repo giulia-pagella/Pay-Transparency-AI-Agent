@@ -12,17 +12,39 @@ export default function ConfigurazionePage() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const trimmedKey = apiKey.trim();
+    if (!trimmedKey) return setError('Inserisci una chiave API valida.');
+
     setLoading(true);
     setError('');
-    const res = await fetch('/api/ai/session/init', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ api_key: apiKey }),
-    });
-    const data = await res.json();
-    setLoading(false);
-    if (!res.ok) return setError(data.error ?? 'Errore');
-    router.push('/questionario');
+
+    try {
+      const res = await fetch('/api/ai/session/init', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ api_key: trimmedKey }),
+      });
+
+      const text = await res.text();
+      let data: { error?: string } = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = { error: 'Risposta non valida dal server. Controlla i log del terminale.' };
+      }
+
+      if (!res.ok) {
+        setLoading(false);
+        setError(data.error ?? 'Errore durante la validazione della chiave API.');
+        return;
+      }
+
+      setLoading(false);
+      router.push('/questionario');
+    } catch {
+      setLoading(false);
+      setError('Errore di rete o server non raggiungibile. Verifica che `npm run dev` sia attivo.');
+    }
   }
 
   return (

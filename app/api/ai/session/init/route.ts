@@ -10,13 +10,15 @@ export async function POST(req: Request) {
   const body = bodySchema.safeParse(await req.json().catch(() => null));
   if (!body.success) return NextResponse.json({ error: 'Input non valido.' }, { status: 400 });
 
-  if (!GEMINI_API_KEY_REGEX.test(body.data.api_key)) {
+  const apiKey = body.data.api_key.trim();
+
+  if (!GEMINI_API_KEY_REGEX.test(apiKey)) {
     return NextResponse.json({ error: 'La chiave API inserita non è valida o è stata revocata. Verifica la chiave su Google AI Studio e reinseriscila. I dati del questionario sono conservati.' }, { status: 400 });
   }
 
   try {
-    await validateGeminiKey(body.data.api_key);
-    const sessionId = createSession(body.data.api_key);
+    await validateGeminiKey(apiKey);
+    const sessionId = createSession(apiKey);
     const res = NextResponse.json({ ok: true });
     res.cookies.set('session_id', sessionId, {
       httpOnly: true,
