@@ -18,7 +18,15 @@ export type SessionData = {
   };
 };
 
-const store = new Map<string, SessionData>();
+declare global {
+  // eslint-disable-next-line no-var
+  var __PTT_SESSION_STORE__: Map<string, SessionData> | undefined;
+}
+
+const store = globalThis.__PTT_SESSION_STORE__ ?? new Map<string, SessionData>();
+if (!globalThis.__PTT_SESSION_STORE__) {
+  globalThis.__PTT_SESSION_STORE__ = store;
+}
 
 function purgeExpired() {
   const now = Date.now();
@@ -36,7 +44,12 @@ export function createSession(apiKey: string) {
     reportJson: null,
     partialReportJson: null,
     lastActivity: Date.now(),
-    rateLimitCounter: { callsThisMinute: 0, minuteWindowStart: Date.now(), callsLast24h: 0, dayWindowStart: Date.now() },
+    rateLimitCounter: {
+      callsThisMinute: 0,
+      minuteWindowStart: Date.now(),
+      callsLast24h: 0,
+      dayWindowStart: Date.now(),
+    },
   });
   return sessionId;
 }
@@ -67,7 +80,9 @@ export function checkRateLimit(session: SessionData) {
   }
 
   if (session.rateLimitCounter.callsThisMinute >= 5) {
-    const remainingSeconds = Math.ceil((60_000 - (now - session.rateLimitCounter.minuteWindowStart)) / 1000);
+    const remainingSeconds = Math.ceil(
+      (60_000 - (now - session.rateLimitCounter.minuteWindowStart)) / 1000,
+    );
     return { ok: false as const, type: 'minute', remainingSeconds };
   }
   if (session.rateLimitCounter.callsLast24h >= 20) {
