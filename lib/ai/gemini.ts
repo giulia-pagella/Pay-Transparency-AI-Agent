@@ -22,17 +22,31 @@ function runtimePrompt(input: GenerateInput, retryMessage?: string) {
   return retryMessage ? `${retryMessage}\n\n${base}` : base;
 }
 
+function extractTextFromResponse(json: any) {
+  const parts = json?.candidates?.[0]?.content?.parts;
+  if (!Array.isArray(parts)) return '';
+  return parts.map((p: any) => p?.text ?? '').join('\n').trim();
+}
+
+function stripCodeFence(text: string) {
+  return text
+    .replace(/^```json\s*/i, '')
+    .replace(/^```\s*/i, '')
+    .replace(/\s*```$/i, '')
+    .trim();
+}
+
 async function callGemini(apiKey: string, prompt: string) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
   const response = await fetch(url, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
-      system_instruction: { parts: [{ text: systemPrompt }] },
+      systemInstruction: { parts: [{ text: systemPrompt }] },
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       generationConfig: {
         temperature: 0.2,
-        response_mime_type: 'application/json',
+        responseMimeType: 'application/json',
       },
     }),
   });
@@ -43,14 +57,36 @@ async function callGemini(apiKey: string, prompt: string) {
   }
 
   const json = await response.json();
-  return json?.candidates?.[0]?.content?.parts?.[0]?.text as string;
+  const text = extractTextFromResponse(json);
+  if (!text) throw new Error('EMPTY_RESPONSE');
+  return stripCodeFence(text);
 }
 
 function normalizeError(error: unknown) {
   const msg = String(error);
-  if (msg.includes('429')) return { code: 'RATE_LIMIT', message: 'Hai raggiunto il limite di 5 richieste al minuto del piano Gemini.' };
-  if (msg.toLowerCase().includes('safety')) return { code: 'SAFETY', message: 'Il contenuto generato è stato filtrato dai sistemi di sicurezza di Google. Questo è raro; prova a rigenerare il report.' };
-  if (msg.toLowerCase().includes('timeout')) return { code: 'TIMEOUT', message: 'La generazione del report ha impiegato più tempo del previsto. Riprova: se l\'errore persiste, potrebbe essere un problema temporaneo del servizio Gemini.' };
+  if (msg.includes('429'))
+    return {
+      code: 'RATE_LIMIT',
+      message: 'Hai raggiunto il limite di 5 richieste al minuto del piano Gemini.',
+    };
+  if (msg.toLowerCase().includes('safety'))
+    return {
+      code: 'SAFETY',
+      message:
+        'Il contenuto generato è stato filtrato dai sistemi di sicurezza di Google. Questo è raro; prova a rigenerare il report.',
+    };
+  if (msg.toLowerCase().includes('timeout'))
+    return {
+      code: 'TIMEOUT',
+      message:
+        "La generazione del report ha impiegato più tempo del previsto. Riprova: se l'errore persiste, potrebbe essere un problema temporaneo del servizio Gemini.",
+    };
+  if (msg.includes('400'))
+    return {
+      code: 'BAD_REQUEST',
+      message:
+        'La richiesta a Gemini non è stata accettata. Verifica la chiave API e riprova.',
+    };
   return { code: 'UNKNOWN', message: 'Si è verificato un errore imprevisto. Riprova.' };
 }
 
@@ -73,12 +109,14 @@ export async function generateReportJson(input: GenerateInput): Promise<ReportJs
     ]);
   } catch (e) {
     const err = normalizeError(e);
-    if (err.code === 'RATE_LIMIT' || err.code === 'SAFETY') {
+    if (err.code === 'RATE_LIMIT' || err.code === 'SAFETY' || err.code === 'BAD_REQUEST') {
       throw Object.assign(new Error(err.message), { code: err.code });
     }
     try {
       return await Promise.race([
-        attempt('ATTENZIONE: la tua risposta precedente aveva problemi di parsing/validazione. Rigenera JSON valido.'),
+        attempt(
+          'ATTENZIONE: la tua risposta precedente aveva problemi di parsing/validazione. Rigenera JSON valido.',
+        ),
         new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 90_000)),
       ]);
     } catch {
