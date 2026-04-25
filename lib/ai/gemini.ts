@@ -1,6 +1,3 @@
-import { ZodError } from 'zod';
-import { reportSchema, type ReportJson } from '@/lib/schemas/report';
-
 type GenerateInput = {
   apiKey: string;
   assessmentInput: unknown;
@@ -96,27 +93,14 @@ export async function validateGeminiKey(apiKey: string) {
   return true;
 }
 
-export async function generateReportJson(input: GenerateInput): Promise<ReportJson> {
+export async function generateReportJson(input: GenerateInput): Promise<unknown> {
   const attempt = async (retryMessage?: string) => {
     const text = await callGemini(input.apiKey, runtimePrompt(input, retryMessage));
 
-    let parsed: unknown;
     try {
-      parsed = JSON.parse(text);
+      return JSON.parse(text);
     } catch {
       throw Object.assign(new Error('JSON_PARSE_ERROR'), { code: 'JSON_PARSE_ERROR' });
-    }
-
-    try {
-      return reportSchema.parse(parsed);
-    } catch (err) {
-      if (err instanceof ZodError) {
-        throw Object.assign(new Error('SCHEMA_VALIDATION_ERROR'), {
-          code: 'SCHEMA_VALIDATION_ERROR',
-          details: err.issues.slice(0, 3),
-        });
-      }
-      throw err;
     }
   };
 
@@ -131,7 +115,8 @@ export async function generateReportJson(input: GenerateInput): Promise<ReportJs
       err.code === 'RATE_LIMIT' ||
       err.code === 'SAFETY' ||
       err.code === 'BAD_REQUEST' ||
-      err.code === 'EMPTY_RESPONSE'
+      err.code === 'EMPTY_RESPONSE' ||
+      err.code === 'JSON_PARSE_ERROR'
     ) {
       throw Object.assign(new Error(err.message ?? String(err)), { code: err.code });
     }

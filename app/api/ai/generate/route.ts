@@ -4,6 +4,8 @@ import { z } from 'zod';
 import { generateReportJson } from '@/lib/ai/gemini';
 import { calculateAttention } from '@/lib/attention/rules';
 import { getMaturityConfig, readProcessedRegulations } from '@/lib/report/data';
+import { buildReportSkeleton, repairReportFromAi } from '@/lib/report/assembler';
+import { reportSchema } from '@/lib/schemas/report';
 import { questionnaireSchema } from '@/lib/schemas/questionnaire';
 import { checkRateLimit, getSession, increaseRate } from '@/lib/session/store';
 
@@ -58,7 +60,7 @@ export async function POST(req: Request) {
   };
 
   try {
-    const report = await generateReportJson({
+    const aiDraft = await generateReportJson({
       apiKey: session.apiKey,
       assessmentInput,
       attentionLevels: attention,
@@ -66,6 +68,23 @@ export async function POST(req: Request) {
       partialData: compiled < 9,
       hasDraftSources,
     });
+
+    const skeleton = buildReportSkeleton({
+      company: parsed.data.company,
+      selectedCountries: parsed.data.selected_countries,
+      completedAreasCount: compiled,
+      hasDraftSources,
+      hasPartialDataFlag: compiled < 9,
+      selectedRegulations: selectedRegs,
+      euRegulation: eu,
+      maturityConfig,
+      maturityValues: parsed.data.maturity,
+      attentionByArea: attention.byArea as any,
+      overallAttention: attention.overall,
+    });
+
+    const repaired = repairReportFromAi(aiDraft, skeleton);
+    const report = reportSchema.parse(repaired);
 
     session.questionnaireData = parsed.data as any;
     session.reportJson = report;
@@ -94,6 +113,7 @@ export async function POST(req: Request) {
     if (code === 'JSON_PARSE_ERROR') return NextResponse.json({ error: 'Gemini ha restituito un JSON non valido. Riprova tra qualche secondo.' }, { status: 502 });
     if (code === 'SCHEMA_VALIDATION_ERROR') return NextResponse.json({ error: 'Gemini ha restituito un JSON incompleto rispetto allo schema richiesto. Riprova.' }, { status: 502 });
     if (code === 'EMPTY_RESPONSE') return NextResponse.json({ error: 'Gemini ha restituito una risposta vuota. Riprova.' }, { status: 502 });
+    if ((error as any)?.name === 'ZodError') return NextResponse.json({ error: "L'output AI è stato riparato ma resta incompleto rispetto allo schema. Riprova." }, { status: 502 });
     return NextResponse.json({ error: 'Si è verificato un errore nell\'elaborazione del report. Il sistema sta riprovando automaticamente...' }, { status: 500 });
   }
 }
