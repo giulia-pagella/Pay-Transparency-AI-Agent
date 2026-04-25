@@ -1,3 +1,4 @@
+import { ZodError } from 'zod';
 import { reportSchema, type ReportJson } from '@/lib/schemas/report';
 
 type GenerateInput = {
@@ -58,12 +59,13 @@ async function callGemini(apiKey: string, prompt: string) {
 
   const json = await response.json();
   const text = extractTextFromResponse(json);
-  if (!text) throw new Error('EMPTY_RESPONSE');
+  if (!text) throw Object.assign(new Error('EMPTY_RESPONSE'), { code: 'EMPTY_RESPONSE' });
   return stripCodeFence(text);
 }
 
 function normalizeError(error: unknown) {
   const msg = String(error);
+  if ((error as any)?.code) return error as any;
   if (msg.includes('429'))
     return {
       code: 'RATE_LIMIT',
@@ -84,8 +86,7 @@ function normalizeError(error: unknown) {
   if (msg.includes('400'))
     return {
       code: 'BAD_REQUEST',
-      message:
-        'La richiesta a Gemini non è stata accettata. Verifica la chiave API e riprova.',
+      message: 'La richiesta a Gemini non è stata accettata. Verifica la chiave API e riprova.',
     };
   return { code: 'UNKNOWN', message: 'Si è verificato un errore imprevisto. Riprova.' };
 }
@@ -98,8 +99,25 @@ export async function validateGeminiKey(apiKey: string) {
 export async function generateReportJson(input: GenerateInput): Promise<ReportJson> {
   const attempt = async (retryMessage?: string) => {
     const text = await callGemini(input.apiKey, runtimePrompt(input, retryMessage));
-    const parsed = JSON.parse(text);
-    return reportSchema.parse(parsed);
+
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(text);
+    } catch {
+      throw Object.assign(new Error('JSON_PARSE_ERROR'), { code: 'JSON_PARSE_ERROR' });
+    }
+
+    try {
+      return reportSchema.parse(parsed);
+    } catch (err) {
+      if (err instanceof ZodError) {
+        throw Object.assign(new Error('SCHEMA_VALIDATION_ERROR'), {
+          code: 'SCHEMA_VALIDATION_ERROR',
+          details: err.issues.slice(0, 3),
+        });
+      }
+      throw err;
+    }
   };
 
   try {
@@ -109,9 +127,15 @@ export async function generateReportJson(input: GenerateInput): Promise<ReportJs
     ]);
   } catch (e) {
     const err = normalizeError(e);
-    if (err.code === 'RATE_LIMIT' || err.code === 'SAFETY' || err.code === 'BAD_REQUEST') {
-      throw Object.assign(new Error(err.message), { code: err.code });
+    if (
+      err.code === 'RATE_LIMIT' ||
+      err.code === 'SAFETY' ||
+      err.code === 'BAD_REQUEST' ||
+      err.code === 'EMPTY_RESPONSE'
+    ) {
+      throw Object.assign(new Error(err.message ?? String(err)), { code: err.code });
     }
+
     try {
       return await Promise.race([
         attempt(
@@ -119,8 +143,11 @@ export async function generateReportJson(input: GenerateInput): Promise<ReportJs
         ),
         new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 90_000)),
       ]);
-    } catch {
-      throw Object.assign(new Error(err.message), { code: err.code });
+    } catch (retryError) {
+      const retryMapped = normalizeError(retryError);
+      throw Object.assign(new Error(retryMapped.message ?? 'Errore generazione report'), {
+        code: retryMapped.code,
+      });
     }
   }
 }
