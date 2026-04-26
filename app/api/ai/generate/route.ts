@@ -60,15 +60,6 @@ export async function POST(req: Request) {
   };
 
   try {
-    const aiDraft = await generateReportJson({
-      apiKey: session.apiKey,
-      assessmentInput,
-      attentionLevels: attention,
-      sources: [eu, ...selectedRegs],
-      partialData: compiled < 9,
-      hasDraftSources,
-    });
-
     const skeleton = buildReportSkeleton({
       company: parsed.data.company,
       selectedCountries: parsed.data.selected_countries,
@@ -81,6 +72,16 @@ export async function POST(req: Request) {
       maturityValues: parsed.data.maturity,
       attentionByArea: attention.byArea as any,
       overallAttention: attention.overall,
+    });
+
+    const aiDraft = await generateReportJson({
+      apiKey: session.apiKey,
+      assessmentInput,
+      attentionLevels: attention,
+      sources: [eu, ...selectedRegs],
+      partialData: compiled < 9,
+      hasDraftSources,
+      schemaTemplate: skeleton,
     });
 
     const repaired = repairReportFromAi(aiDraft, skeleton);

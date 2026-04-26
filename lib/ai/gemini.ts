@@ -5,18 +5,24 @@ type GenerateInput = {
   sources: unknown;
   partialData: boolean;
   hasDraftSources: boolean;
+  schemaTemplate?: unknown;
 };
 
 const systemPrompt = `Sei un agente esperto di normativa europea sulla trasparenza retributiva e di assessment HR.
 Il tuo compito è generare un report strutturato in italiano, in formato JSON valido, basato esclusivamente sugli input forniti e sulle fonti normative ricevute in questo messaggio.
-OUTPUT: un singolo oggetto JSON conforme allo schema fornito, senza testo fuori dal JSON.`;
+OUTPUT: un singolo oggetto JSON conforme allo schema fornito, senza testo fuori dal JSON.
+Non omettere campi. Non restituire sezioni vuote quando i dati minimi sono presenti.`;
 
 function runtimePrompt(input: GenerateInput, retryMessage?: string) {
   const base = `Genera un report di assessment sulla pay transparency in formato JSON.
 ## Input utente:\n${JSON.stringify(input.assessmentInput)}
 ## Livelli di attenzione già calcolati dal sistema:\n${JSON.stringify(input.attentionLevels)}
 ## Fonti normative da utilizzare:\n${JSON.stringify(input.sources)}
-## Istruzioni finali:\n- Rispondi solo con il JSON.\n- Usa esclusivamente le fonti sopra fornite.`;
+## Template JSON da rispettare (stesse chiavi, stessa struttura):\n${JSON.stringify(input.schemaTemplate ?? {}, null, 2)}
+## Istruzioni finali:\n- Rispondi solo con il JSON.
+- Compila tutti i campi testuali in italiano professionale.
+- Se un'informazione non è disponibile, usa formulazioni prudenti ma non lasciare campi vuoti.
+- Raccomandazioni: da 1 a 5 elementi, con priorità e descrizione concreta.`;
   return retryMessage ? `${retryMessage}\n\n${base}` : base;
 }
 
@@ -43,7 +49,7 @@ async function callGemini(apiKey: string, prompt: string) {
       systemInstruction: { parts: [{ text: systemPrompt }] },
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       generationConfig: {
-        temperature: 0.2,
+        temperature: 0.15,
         responseMimeType: 'application/json',
       },
     }),
@@ -63,29 +69,23 @@ async function callGemini(apiKey: string, prompt: string) {
 function normalizeError(error: unknown) {
   const msg = String(error);
   if ((error as any)?.code) return error as any;
-  if (msg.includes('429'))
-    return {
-      code: 'RATE_LIMIT',
-      message: 'Hai raggiunto il limite di 5 richieste al minuto del piano Gemini.',
-    };
-  if (msg.toLowerCase().includes('safety'))
-    return {
-      code: 'SAFETY',
-      message:
-        'Il contenuto generato è stato filtrato dai sistemi di sicurezza di Google. Questo è raro; prova a rigenerare il report.',
-    };
-  if (msg.toLowerCase().includes('timeout'))
-    return {
-      code: 'TIMEOUT',
-      message:
-        "La generazione del report ha impiegato più tempo del previsto. Riprova: se l'errore persiste, potrebbe essere un problema temporaneo del servizio Gemini.",
-    };
-  if (msg.includes('400'))
-    return {
-      code: 'BAD_REQUEST',
-      message: 'La richiesta a Gemini non è stata accettata. Verifica la chiave API e riprova.',
-    };
+  if (msg.includes('429')) return { code: 'RATE_LIMIT', message: 'Hai raggiunto il limite di 5 richieste al minuto del piano Gemini.' };
+  if (msg.toLowerCase().includes('safety')) return { code: 'SAFETY', message: 'Il contenuto generato è stato filtrato dai sistemi di sicurezza di Google. Questo è raro; prova a rigenerare il report.' };
+  if (msg.toLowerCase().includes('timeout')) return { code: 'TIMEOUT', message: "La generazione del report ha impiegato più tempo del previsto. Riprova: se l'errore persiste, potrebbe essere un problema temporaneo del servizio Gemini." };
+  if (msg.includes('400')) return { code: 'BAD_REQUEST', message: 'La richiesta a Gemini non è stata accettata. Verifica la chiave API e riprova.' };
   return { code: 'UNKNOWN', message: 'Si è verificato un errore imprevisto. Riprova.' };
+}
+
+function assessQuality(draft: any) {
+  const issues: string[] = [];
+  if (!draft || typeof draft !== 'object') issues.push('Oggetto report assente.');
+  const synth = draft?.executive_summary?.synthesis_sentence;
+  if (!synth || typeof synth !== 'string' || synth.length < 20) issues.push('Executive summary troppo breve.');
+  if (String(synth).toLowerCase().includes('fallback')) issues.push('Executive summary in fallback.');
+  if (!Array.isArray(draft?.recommendations) || draft.recommendations.length === 0) issues.push('Raccomandazioni assenti.');
+  if (!Array.isArray(draft?.country_analysis) || draft.country_analysis.length === 0) issues.push('Analisi paese assente.');
+  if (!Array.isArray(draft?.impacts_by_area) || draft.impacts_by_area.length < 6) issues.push('Impatti per area insufficienti.');
+  return issues;
 }
 
 export async function validateGeminiKey(apiKey: string) {
@@ -96,7 +96,6 @@ export async function validateGeminiKey(apiKey: string) {
 export async function generateReportJson(input: GenerateInput): Promise<unknown> {
   const attempt = async (retryMessage?: string) => {
     const text = await callGemini(input.apiKey, runtimePrompt(input, retryMessage));
-
     try {
       return JSON.parse(text);
     } catch {
@@ -105,34 +104,33 @@ export async function generateReportJson(input: GenerateInput): Promise<unknown>
   };
 
   try {
-    return await Promise.race([
+    const first = await Promise.race([
       attempt(),
       new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 90_000)),
     ]);
+
+    const issues = assessQuality(first);
+    if (issues.length === 0) return first;
+
+    const enriched = await Promise.race([
+      attempt(`ATTENZIONE: la risposta è formalmente valida ma qualitativamente insufficiente. Problemi: ${issues.join(' ')}. Rigenera un report completo e concreto mantenendo esattamente la stessa struttura JSON.`),
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 90_000)),
+    ]);
+    return enriched;
   } catch (e) {
     const err = normalizeError(e);
-    if (
-      err.code === 'RATE_LIMIT' ||
-      err.code === 'SAFETY' ||
-      err.code === 'BAD_REQUEST' ||
-      err.code === 'EMPTY_RESPONSE' ||
-      err.code === 'JSON_PARSE_ERROR'
-    ) {
+    if (err.code === 'RATE_LIMIT' || err.code === 'SAFETY' || err.code === 'BAD_REQUEST' || err.code === 'EMPTY_RESPONSE' || err.code === 'JSON_PARSE_ERROR') {
       throw Object.assign(new Error(err.message ?? String(err)), { code: err.code });
     }
 
     try {
       return await Promise.race([
-        attempt(
-          'ATTENZIONE: la tua risposta precedente aveva problemi di parsing/validazione. Rigenera JSON valido.',
-        ),
+        attempt('ATTENZIONE: la tua risposta precedente aveva problemi di parsing/validazione. Rigenera JSON valido.'),
         new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 90_000)),
       ]);
     } catch (retryError) {
       const retryMapped = normalizeError(retryError);
-      throw Object.assign(new Error(retryMapped.message ?? 'Errore generazione report'), {
-        code: retryMapped.code,
-      });
+      throw Object.assign(new Error(retryMapped.message ?? 'Errore generazione report'), { code: retryMapped.code });
     }
   }
 }
