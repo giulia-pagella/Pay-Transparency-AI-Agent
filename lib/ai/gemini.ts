@@ -144,14 +144,33 @@ Usa TUTTI questi input in modo coerente.`;
 
 function runtimePrompt(input: GenerateInput, retryMessage?: string) {
   const base = `Genera un report di assessment sulla pay transparency in formato JSON.
-## Input utente:\n${JSON.stringify(input.assessmentInput)}
-## Livelli di attenzione già calcolati dal sistema:\n${JSON.stringify(input.attentionLevels)}
-## Fonti normative da utilizzare:\n${JSON.stringify(input.sources)}
-## Template JSON da rispettare (stesse chiavi, stessa struttura):\n${JSON.stringify(input.schemaTemplate ?? {}, null, 2)}
-## Istruzioni finali:\n- Rispondi solo con il JSON.
+
+Lo schema JSON fornito di seguito definisce esclusivamente la struttura attesa dell'output.
+Non copiare i testi placeholder, i fallback o le stringhe di esempio eventualmente presenti nello schema.
+Ogni campo descrittivo deve essere popolato con contenuto sostanziale, specifico per l'azienda analizzata, basato sugli input ricevuti, sui livelli di maturità, sui livelli di attenzione e sulle fonti normative.
+Se un campo è presente nello schema ma non ci sono elementi sufficienti per svilupparlo in modo approfondito, produci comunque un contenuto breve, concreto e coerente con gli input, evitando formule generiche riutilizzabili per qualsiasi azienda.
+
+## Input utente:
+${JSON.stringify(input.assessmentInput, null, 2)}
+
+## Livelli di attenzione già calcolati dal sistema:
+${JSON.stringify(input.attentionLevels, null, 2)}
+
+## Fonti normative da utilizzare:
+${JSON.stringify(input.sources, null, 2)}
+
+## STRUTTURA JSON ATTESA:
+${JSON.stringify(input.schemaTemplate ?? {}, null, 2)}
+
+## Istruzioni finali:
+- Rispondi solo con il JSON.
 - Compila tutti i campi testuali in italiano professionale.
+- Non copiare il contenuto dello schema: usalo solo come struttura.
+- Collega in modo esplicito maturità, gap, normativa e raccomandazioni.
+- Personalizza il testo usando settore, dimensione aziendale e modello organizzativo.
 - Se un'informazione non è disponibile, usa formulazioni prudenti ma non lasciare campi vuoti.
-- Raccomandazioni: da 1 a 5 elementi, con priorità e descrizione concreta.`;
+- Raccomandazioni: da 3 a 5 elementi, con priorità, descrizione concreta, related_areas e related_countries quando applicabili.`;
+
   return retryMessage ? `${retryMessage}\n\n${base}` : base;
 }
 
@@ -205,15 +224,186 @@ function normalizeError(error: unknown) {
   return { code: 'UNKNOWN', message: 'Si è verificato un errore imprevisto. Riprova.' };
 }
 
-function assessQuality(draft: any) {
+function assessQuality(
+  draft: any,
+  input: {
+    assessmentInput: any;
+  },
+) {
   const issues: string[] = [];
-  if (!draft || typeof draft !== 'object') issues.push('Oggetto report assente.');
-  const synth = draft?.executive_summary?.synthesis_sentence;
-  if (!synth || typeof synth !== 'string' || synth.length < 20) issues.push('Executive summary troppo breve.');
-  if (String(synth).toLowerCase().includes('fallback')) issues.push('Executive summary in fallback.');
-  if (!Array.isArray(draft?.recommendations) || draft.recommendations.length === 0) issues.push('Raccomandazioni assenti.');
-  if (!Array.isArray(draft?.country_analysis) || draft.country_analysis.length === 0) issues.push('Analisi paese assente.');
-  if (!Array.isArray(draft?.impacts_by_area) || draft.impacts_by_area.length < 6) issues.push('Impatti per area insufficienti.');
+
+  if (!draft || typeof draft !== 'object') {
+    issues.push('Oggetto report assente.');
+    return issues;
+  }
+
+  const assessmentInput = input?.assessmentInput ?? {};
+  const company = assessmentInput?.company ?? {};
+  const maturityInput = assessmentInput?.maturity ?? {};
+  const selectedCountries = Array.isArray(assessmentInput?.selected_countries)
+    ? assessmentInput.selected_countries
+    : [];
+
+  const synthesis =
+    typeof draft?.executive_summary?.synthesis_sentence === 'string'
+      ? draft.executive_summary.synthesis_sentence.trim()
+      : '';
+
+  const briefContext =
+    typeof draft?.executive_summary?.brief_context === 'string'
+      ? draft.executive_summary.brief_context.trim()
+      : '';
+
+  const keyPoints = Array.isArray(draft?.executive_summary?.key_points)
+    ? draft.executive_summary.key_points.filter(
+        (x: unknown) => typeof x === 'string' && x.trim().length > 0,
+      )
+    : [];
+
+  const recommendations = Array.isArray(draft?.recommendations) ? draft.recommendations : [];
+  const countryAnalysis = Array.isArray(draft?.country_analysis) ? draft.country_analysis : [];
+  const impacts = Array.isArray(draft?.impacts_by_area) ? draft.impacts_by_area : [];
+  const maturity = Array.isArray(draft?.maturity) ? draft.maturity : [];
+
+  const companyName = typeof company?.company_name === 'string' ? company.company_name.trim() : '';
+  const sector =
+    typeof company?.sector === 'string' ? company.sector.trim().toLowerCase() : '';
+  const employeeRange =
+    typeof company?.employee_range === 'string'
+      ? company.employee_range.trim().toLowerCase()
+      : '';
+  const organizationalModel =
+    typeof company?.organizational_model === 'string'
+      ? company.organizational_model.trim().toLowerCase()
+      : '';
+
+  const summaryText = `${synthesis} ${briefContext}`.toLowerCase();
+
+  const maturityEntries = Object.entries(maturityInput).filter(([, value]) => value !== null);
+  const lowOrMediumAreas = Object.entries(maturityInput)
+    .filter(([, value]) => value === 1 || value === 2)
+    .map(([key]) => key);
+
+  if (!synthesis || synthesis.length < 80) {
+    issues.push('Executive summary troppo breve o assente.');
+  }
+
+  if (!briefContext || briefContext.length < 50) {
+    issues.push('Brief context troppo breve o assente.');
+  }
+
+  if (keyPoints.length < 3) {
+    issues.push('Key points insufficienti.');
+  }
+
+  if (String(synthesis).toLowerCase().includes('fallback')) {
+    issues.push('Executive summary in fallback.');
+  }
+
+  if (companyName && !synthesis.includes(companyName) && !briefContext.includes(companyName)) {
+    issues.push('Executive summary non personalizzata sul nome azienda.');
+  }
+
+  if (sector && !summaryText.includes(sector)) {
+    issues.push('Executive summary non personalizzata sul settore.');
+  }
+
+  if (employeeRange && !summaryText.includes(employeeRange)) {
+    issues.push('Executive summary non personalizzata sulla dimensione aziendale.');
+  }
+
+  if (organizationalModel && !summaryText.includes(organizationalModel)) {
+    issues.push('Executive summary non personalizzata sul modello organizzativo.');
+  }
+
+  if (recommendations.length < 3) {
+    issues.push('Raccomandazioni insufficienti.');
+  }
+
+  const recommendationsWithDescription = recommendations.filter(
+    (r: any) => typeof r?.description === 'string' && r.description.trim().length >= 80,
+  );
+
+  if (recommendationsWithDescription.length < 3) {
+    issues.push('Raccomandazioni troppo brevi o generiche.');
+  }
+
+  const recommendationsLinkedToAreas = recommendations.filter(
+    (r: any) => Array.isArray(r?.related_areas) && r.related_areas.length > 0,
+  );
+
+  if (recommendationsLinkedToAreas.length < 2) {
+    issues.push('Raccomandazioni non sufficientemente collegate alle aree di maturità.');
+  }
+
+  const recommendationsLinkedToCountries = recommendations.filter(
+    (r: any) => Array.isArray(r?.related_countries) && r.related_countries.length > 0,
+  );
+
+  if (selectedCountries.length > 0 && recommendationsLinkedToCountries.length < 1) {
+    issues.push('Raccomandazioni non collegate ai paesi selezionati.');
+  }
+
+  if (countryAnalysis.length < selectedCountries.length) {
+    issues.push('Analisi paese assente o incompleta rispetto ai paesi selezionati.');
+  }
+
+  const countryAnalysisWithContent = countryAnalysis.filter(
+    (c: any) =>
+      typeof c?.national_framework_summary === 'string' &&
+      c.national_framework_summary.trim().length >= 50,
+  );
+
+  if (selectedCountries.length > 0 && countryAnalysisWithContent.length < selectedCountries.length) {
+    issues.push('Country analysis troppo generica o incompleta.');
+  }
+
+  if (impacts.length < Math.max(3, Math.min(maturityEntries.length, 6))) {
+    issues.push('Impatti per area insufficienti.');
+  }
+
+  const impactsWithRealContent = impacts.filter(
+    (i: any) =>
+      typeof i?.impact_description === 'string' &&
+      i.impact_description.trim().length >= 40 &&
+      typeof i?.regulatory_reference === 'string' &&
+      i.regulatory_reference.trim().length >= 10,
+  );
+
+  if (impactsWithRealContent.length < Math.max(2, Math.min(maturityEntries.length, 4))) {
+    issues.push('Impacts by area troppo generici.');
+  }
+
+  if (maturity.length < Math.max(3, Math.min(maturityEntries.length, 6))) {
+    issues.push('Sezione maturity troppo incompleta.');
+  }
+
+  const maturityWithRealContent = maturity.filter(
+    (m: any) =>
+      typeof m?.gap_description === 'string' &&
+      m.gap_description.trim().length >= 40 &&
+      typeof m?.recommendation === 'string' &&
+      m.recommendation.trim().length >= 40,
+  );
+
+  if (maturityWithRealContent.length < Math.max(2, Math.min(maturityEntries.length, 4))) {
+    issues.push('Sezione maturity troppo generica o non sviluppata.');
+  }
+
+  if (lowOrMediumAreas.length > 0) {
+    const recommendationsCoveringCriticalAreas = recommendations.filter(
+      (r: any) =>
+        Array.isArray(r?.related_areas) &&
+        r.related_areas.some(
+          (areaId: unknown) => typeof areaId === 'string' && lowOrMediumAreas.includes(areaId),
+        ),
+    );
+
+    if (recommendationsCoveringCriticalAreas.length < 1) {
+      issues.push('Le raccomandazioni non coprono le aree con maturità più critica.');
+    }
+  }
+
   return issues;
 }
 
@@ -238,8 +428,9 @@ export async function generateReportJson(input: GenerateInput): Promise<unknown>
       new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 90_000)),
     ]);
 
-    const issues = assessQuality(first);
-    if (issues.length === 0) return first;
+    const issues = assessQuality(first, {
+  assessmentInput: input.assessmentInput,
+});
 
     const enriched = await Promise.race([
       attempt(`ATTENZIONE: la risposta è formalmente valida ma qualitativamente insufficiente. Problemi: ${issues.join(' ')}. Rigenera un report completo e concreto mantenendo esattamente la stessa struttura JSON.`),
