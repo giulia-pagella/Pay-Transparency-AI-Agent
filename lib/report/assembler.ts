@@ -13,8 +13,32 @@ function asStatus(value: any, fallback: Status): Status {
   return value === 'definitive' || value === 'draft' ? value : fallback;
 }
 
-const str = (v: any, fallback = '') => (typeof v === 'string' && v.trim() ? v : fallback);
+const str = (v: any, fallback = '') => (typeof v === 'string' && v.trim() ? v.trim() : fallback);
 const arr = <T>(v: any): T[] => (Array.isArray(v) ? v : []);
+
+function isNonEmptyString(v: unknown): v is string {
+  return typeof v === 'string' && v.trim().length > 0;
+}
+
+function nonEmptyStrings(v: unknown, max?: number): string[] {
+  const items = arr<unknown>(v)
+    .filter(isNonEmptyString)
+    .map((x) => x.trim());
+
+  return typeof max === 'number' ? items.slice(0, max) : items;
+}
+
+function minText(v: unknown, fallback: string): string {
+  return isNonEmptyString(v) ? v.trim() : fallback;
+}
+
+function normalizeLevelLabel(
+  area: MaturityAssessment['areas'][number],
+  current: number | null,
+): string {
+  if (!current) return 'Non valutata';
+  return area.levels.find((l) => l.value === current)?.label ?? 'Non valutata';
+}
 
 export function buildReportSkeleton(args: {
   company: {
@@ -34,42 +58,6 @@ export function buildReportSkeleton(args: {
   attentionByArea: Record<string, Attention | null>;
   overallAttention: Attention;
 }): ReportJson {
-  const countryRows = args.selectedRegulations.map((r) => ({
-    code: r.country_code,
-    name: r.country_name,
-    status: r.status,
-  }));
-
-  const impacts = args.maturityConfig.areas.map((a) => ({
-    area_id: a.id,
-    area_name: a.name,
-    attention_level: args.attentionByArea[a.id],
-    impact_description: args.attentionByArea[a.id]
-      ? `Impatto da approfondire per ${a.name} sulla base delle fonti disponibili.`
-      : 'Area non valutata.',
-    priority: args.attentionByArea[a.id],
-    regulatory_reference: 'Fonti normative integrate nel sistema',
-  }));
-
-  const maturity = args.maturityConfig.areas.map((a) => {
-    const current = args.maturityValues[a.id] ?? null;
-    const label = current
-      ? a.levels.find((l) => l.value === current)?.label ?? 'Non valutata'
-      : 'Non valutata';
-    return {
-      area_id: a.id,
-      area_name: a.name,
-      current_level: current as 1 | 2 | 3 | 4 | null,
-      current_level_label: label,
-      gap_description: current
-        ? 'Gap da definire in base all’assetto organizzativo corrente.'
-        : 'Area non valutata.',
-      recommendation: current
-        ? 'Definire azioni progressive coerenti con le fonti normative disponibili.'
-        : 'Completare prima la valutazione dell’area.',
-    };
-  });
-
   return {
     metadata: {
       company_name: args.company.company_name,
@@ -83,17 +71,14 @@ export function buildReportSkeleton(args: {
       has_partial_data_flag: args.hasPartialDataFlag,
       tool_version: '1.0.0',
     },
+
     executive_summary: {
       overall_attention: args.overallAttention,
-      synthesis_sentence: 'Sintesi preliminare generata con fallback strutturale.',
-      key_points: [
-        'Le fonti normative selezionate sono state considerate nel perimetro.',
-        'Il livello di attenzione deriva da regole deterministiche lato backend.',
-        'Le raccomandazioni richiedono validazione umana prima dell’uso operativo.',
-      ],
-      brief_context:
-        'Questo report è stato completato con struttura di fallback per garantire validità dello schema anche in presenza di output AI parziale.',
+      synthesis_sentence: '',
+      key_points: [],
+      brief_context: '',
     },
+
     perimeter: {
       company_block: {
         company_name: args.company.company_name,
@@ -101,63 +86,62 @@ export function buildReportSkeleton(args: {
         employee_range: args.company.employee_range,
         organizational_model: args.company.organizational_model,
       },
-      countries_analyzed: countryRows,
-      excluded_scope:
-        'Il report non include consulenza legale vincolante né analisi automatica di documenti aziendali.',
+      countries_analyzed: args.selectedRegulations.map((r) => ({
+        code: r.country_code,
+        name: r.country_name,
+        status: r.status,
+      })),
+      excluded_scope: '',
     },
+
     eu_directive: {
-      overview: 'Sintesi Direttiva UE disponibile nelle fonti integrate.',
-      key_obligations: [
-        {
-          title: 'Trasparenza retributiva',
-          description: 'Obblighi sintetizzati dalle fonti integrate disponibili.',
-          article_reference: 'Fonte UE integrata',
-          relevance: 'alta',
-        },
-      ],
-      timeline_summary: 'Timeline da verificare sulle fonti ufficiali più aggiornate.',
+      overview: '',
+      key_obligations: [],
+      timeline_summary: '',
     },
+
     country_analysis: args.selectedRegulations.map((r) => ({
       country_code: r.country_code,
       country_name: r.country_name,
       status: r.status,
-      national_framework_summary: 'Quadro nazionale sintetizzato dalle fonti integrate.',
-      key_differences_vs_eu: ['Differenze da approfondire sulle sezioni tematiche.'],
-      specific_obligations: [
-        {
-          title: 'Obblighi specifici',
-          description: 'Dettagli da confermare nelle fonti nazionali disponibili.',
-          article_reference: 'Fonte nazionale integrata',
-        },
-      ],
-      implementation_notes:
-        'Le indicazioni nazionali sono preliminari e richiedono verifica umana, soprattutto per fonti in bozza.',
+      national_framework_summary: '',
+      key_differences_vs_eu: [],
+      specific_obligations: [],
+      implementation_notes: '',
     })),
+
     countries_comparison: {
-      table_rows: [
-        {
-          topic: 'Stato normativa',
-          cells: Object.fromEntries(args.selectedRegulations.map((r) => [r.country_code, r.status])),
-        },
-      ],
-      narrative:
-        'Confronto sintetico disponibile; espandere con ulteriori fonti nazionali quando presenti.',
+      table_rows: [],
+      narrative: '',
     },
-    impacts_by_area: impacts,
-    maturity,
+
+    impacts_by_area: args.maturityConfig.areas.map((a) => ({
+      area_id: a.id,
+      area_name: a.name,
+      attention_level: args.attentionByArea[a.id],
+      impact_description: '',
+      priority: args.attentionByArea[a.id],
+      regulatory_reference: '',
+    })),
+
+    maturity: args.maturityConfig.areas.map((a) => ({
+      area_id: a.id,
+      area_name: a.name,
+      current_level: (args.maturityValues[a.id] ?? null) as 1 | 2 | 3 | 4 | null,
+      current_level_label: normalizeLevelLabel(a, args.maturityValues[a.id] ?? null),
+      gap_description: '',
+      recommendation: '',
+    })),
+
     recommendations: [],
+
     limits: {
-      scope_limitations:
-        'Output preliminare basato su dati utente e fonti integrate; non sostituisce consulenza legale.',
-      methodological_caveats:
-        'Il modello AI può produrre output parziali; il sistema applica fallback strutturale per preservare coerenza.',
-      draft_warning: args.hasDraftSources
-        ? 'Sono presenti fonti in bozza: i contenuti potrebbero cambiare in fase di adozione definitiva.'
-        : null,
-      partial_data_warning: args.hasPartialDataFlag
-        ? 'Assessment parziale: alcune aree non sono state valutate.'
-        : null,
+      scope_limitations: '',
+      methodological_caveats: '',
+      draft_warning: args.hasDraftSources ? '' : null,
+      partial_data_warning: args.hasPartialDataFlag ? '' : null,
     },
+
     sources: [args.euRegulation, ...args.selectedRegulations].map((r) => ({
       country_code: r.country_code,
       document_title: r.document_title,
@@ -173,162 +157,197 @@ export function buildReportSkeleton(args: {
 export function repairReportFromAi(aiDraft: any, skeleton: ReportJson): ReportJson {
   const ai = aiDraft && typeof aiDraft === 'object' ? aiDraft : {};
 
-  const skeletonCountries = skeleton.country_analysis;
-  const aiCountries = arr<any>(ai.country_analysis);
-
+  const aiCountries = new Map(arr<any>(ai.country_analysis).map((c) => [c?.country_code, c]));
   const aiImpacts = new Map(arr<any>(ai.impacts_by_area).map((x) => [x?.area_id, x]));
   const aiMaturity = new Map(arr<any>(ai.maturity).map((x) => [x?.area_id, x]));
 
-  const recs = arr<any>(ai.recommendations)
+  const recommendations = arr<any>(ai.recommendations)
     .slice(0, 5)
     .map((r, idx) => ({
       id: str(r?.id, `R${idx + 1}`),
       title: str(r?.title, `Raccomandazione ${idx + 1}`),
       priority: asAtt(r?.priority, 'media'),
-      description: str(r?.description, 'Raccomandazione da validare.'),
-      related_areas: arr<string>(r?.related_areas).filter((x) => typeof x === 'string'),
-      related_countries: arr<string>(r?.related_countries).filter((x) => typeof x === 'string'),
+      description: minText(
+        r?.description,
+        'Da completare in base agli input e alle fonti disponibili.',
+      ),
+      related_areas: nonEmptyStrings(r?.related_areas, 5),
+      related_countries: nonEmptyStrings(r?.related_countries, 5),
     }));
-
-  const keyPoints = arr<string>(ai?.executive_summary?.key_points).filter(
-    (x) => typeof x === 'string' && x.trim(),
-  );
 
   return {
     metadata: {
-      ...skeleton.metadata,
-      ...(ai.metadata ?? {}),
-      completed_areas_count: [6, 7, 8, 9].includes(ai?.metadata?.completed_areas_count)
-        ? ai.metadata.completed_areas_count
-        : skeleton.metadata.completed_areas_count,
-      selected_countries:
-        arr<string>(ai?.metadata?.selected_countries).filter((x) => typeof x === 'string').length > 0
-          ? arr<string>(ai.metadata.selected_countries).filter((x) => typeof x === 'string')
-          : skeleton.metadata.selected_countries,
+      company_name: skeleton.metadata.company_name,
+      sector: skeleton.metadata.sector,
+      employee_range: skeleton.metadata.employee_range,
+      organizational_model: skeleton.metadata.organizational_model,
+      generated_at: skeleton.metadata.generated_at,
+      selected_countries: skeleton.metadata.selected_countries,
+      completed_areas_count: skeleton.metadata.completed_areas_count,
+      has_draft_sources: skeleton.metadata.has_draft_sources,
+      has_partial_data_flag: skeleton.metadata.has_partial_data_flag,
+      tool_version: skeleton.metadata.tool_version,
     },
+
     executive_summary: {
-      ...skeleton.executive_summary,
-      ...(ai.executive_summary ?? {}),
       overall_attention: asAtt(
         ai?.executive_summary?.overall_attention,
         skeleton.executive_summary.overall_attention,
       ),
-      synthesis_sentence: str(
+      synthesis_sentence: minText(
         ai?.executive_summary?.synthesis_sentence,
-        skeleton.executive_summary.synthesis_sentence,
+        'Sintesi non generata in modo completo.',
       ),
       key_points:
-        keyPoints.length >= 3 ? keyPoints.slice(0, 5) : skeleton.executive_summary.key_points,
-      brief_context: str(ai?.executive_summary?.brief_context, skeleton.executive_summary.brief_context),
+        nonEmptyStrings(ai?.executive_summary?.key_points, 5).length > 0
+          ? nonEmptyStrings(ai?.executive_summary?.key_points, 5)
+          : ['Contenuto da completare sulla base di input, maturità e fonti.'],
+      brief_context: minText(
+        ai?.executive_summary?.brief_context,
+        'Contesto sintetico non generato in modo completo.',
+      ),
     },
+
     perimeter: {
-      ...skeleton.perimeter,
-      ...(ai.perimeter ?? {}),
-      countries_analyzed:
-        arr<any>(ai?.perimeter?.countries_analyzed).length > 0
-          ? arr<any>(ai.perimeter.countries_analyzed).map((c) => ({
-              code: str(c?.code, 'NA'),
-              name: str(c?.name, 'N/A'),
-              status: asStatus(c?.status, 'draft'),
-            }))
-          : skeleton.perimeter.countries_analyzed,
+      company_block: skeleton.perimeter.company_block,
+      countries_analyzed: skeleton.perimeter.countries_analyzed,
+      excluded_scope: minText(
+        ai?.perimeter?.excluded_scope,
+        'Il report non costituisce consulenza legale vincolante.',
+      ),
     },
+
     eu_directive: {
-      ...skeleton.eu_directive,
-      ...(ai.eu_directive ?? {}),
+      overview: minText(
+        ai?.eu_directive?.overview,
+        'Sintesi della direttiva non generata in modo completo.',
+      ),
       key_obligations:
         arr<any>(ai?.eu_directive?.key_obligations).length > 0
-          ? arr<any>(ai.eu_directive.key_obligations).map((o) => ({
+          ? arr<any>(ai.eu_directive.key_obligations).slice(0, 8).map((o) => ({
               title: str(o?.title, 'Obbligo'),
-              description: str(o?.description, 'Descrizione non disponibile.'),
+              description: minText(o?.description, 'Descrizione non disponibile.'),
               article_reference: str(o?.article_reference, 'Fonte UE'),
               relevance: asAtt(o?.relevance, 'media'),
             }))
-          : skeleton.eu_directive.key_obligations,
+          : [],
+      timeline_summary: minText(
+        ai?.eu_directive?.timeline_summary,
+        'Timeline non generata in modo completo.',
+      ),
     },
-    country_analysis: skeletonCountries.map((base) => {
-      const found = aiCountries.find((x) => x?.country_code === base.country_code) ?? {};
+
+    country_analysis: skeleton.country_analysis.map((base) => {
+      const found = aiCountries.get(base.country_code) ?? {};
       return {
-        country_code: str(found.country_code, base.country_code),
-        country_name: str(found.country_name, base.country_name),
-        status: asStatus(found.status, base.status),
-        national_framework_summary: str(found.national_framework_summary, base.national_framework_summary),
-        key_differences_vs_eu:
-          arr<string>(found.key_differences_vs_eu).filter((x) => typeof x === 'string').length > 0
-            ? arr<string>(found.key_differences_vs_eu).filter((x) => typeof x === 'string')
-            : base.key_differences_vs_eu,
-        specific_obligations:
-          arr<any>(found.specific_obligations).length > 0
-            ? arr<any>(found.specific_obligations).map((o) => ({
-                title: str(o?.title, 'Obbligo specifico'),
-                description: str(o?.description, 'Descrizione non disponibile.'),
-                article_reference: str(o?.article_reference, 'Fonte nazionale'),
-              }))
-            : base.specific_obligations,
-        implementation_notes: str(found.implementation_notes, base.implementation_notes),
+        country_code: base.country_code,
+        country_name: base.country_name,
+        status: base.status,
+        national_framework_summary: minText(
+          found?.national_framework_summary,
+          'Analisi nazionale non generata in modo completo.',
+        ),
+        key_differences_vs_eu: nonEmptyStrings(found?.key_differences_vs_eu, 6),
+        specific_obligations: arr<any>(found?.specific_obligations)
+          .slice(0, 8)
+          .map((o) => ({
+            title: str(o?.title, 'Obbligo specifico'),
+            description: minText(o?.description, 'Descrizione non disponibile.'),
+            article_reference: str(o?.article_reference, 'Fonte nazionale'),
+          })),
+        implementation_notes: minText(
+          found?.implementation_notes,
+          'Indicazioni implementative non generate in modo completo.',
+        ),
       };
     }),
+
     countries_comparison: {
-      ...skeleton.countries_comparison,
-      ...(ai.countries_comparison ?? {}),
-      table_rows:
-        arr<any>(ai?.countries_comparison?.table_rows).length > 0
-          ? arr<any>(ai.countries_comparison.table_rows).map((r) => ({
-              topic: str(r?.topic, 'Topic'),
-              cells: typeof r?.cells === 'object' && r?.cells ? r.cells : {},
-            }))
-          : skeleton.countries_comparison.table_rows,
-      narrative: str(ai?.countries_comparison?.narrative, skeleton.countries_comparison.narrative),
+      table_rows: arr<any>(ai?.countries_comparison?.table_rows).map((row) => ({
+        topic: str(row?.topic, 'Tema'),
+        cells: row?.cells && typeof row.cells === 'object' ? row.cells : {},
+      })),
+      narrative: minText(
+        ai?.countries_comparison?.narrative,
+        'Confronto non generato in modo completo.',
+      ),
     },
+
     impacts_by_area: skeleton.impacts_by_area.map((base) => {
       const found = aiImpacts.get(base.area_id) ?? {};
       return {
-        area_id: str(found.area_id, base.area_id),
-        area_name: str(found.area_name, base.area_name),
-        attention_level: found.attention_level ? asAtt(found.attention_level, 'media') : base.attention_level,
-        impact_description: str(found.impact_description, base.impact_description),
-        priority: found.priority ? asAtt(found.priority, 'media') : base.priority,
-        regulatory_reference: str(found.regulatory_reference, base.regulatory_reference),
+        area_id: base.area_id,
+        area_name: base.area_name,
+        attention_level: asAtt(found?.attention_level, base.attention_level ?? 'media'),
+        impact_description: minText(
+          found?.impact_description,
+          'Impatto da approfondire sulla base di input e fonti.',
+        ),
+        priority: asAtt(found?.priority, base.priority ?? 'media'),
+        regulatory_reference: minText(
+          found?.regulatory_reference,
+          'Fonte normativa integrata.',
+        ),
       };
     }),
+
     maturity: skeleton.maturity.map((base) => {
       const found = aiMaturity.get(base.area_id) ?? {};
-      const lvl = [1, 2, 3, 4].includes(found.current_level) ? found.current_level : base.current_level;
       return {
-        area_id: str(found.area_id, base.area_id),
-        area_name: str(found.area_name, base.area_name),
-        current_level: lvl,
-        current_level_label: str(found.current_level_label, base.current_level_label),
-        gap_description: str(found.gap_description, base.gap_description),
-        recommendation: str(found.recommendation, base.recommendation),
+        area_id: base.area_id,
+        area_name: base.area_name,
+        current_level: base.current_level,
+        current_level_label: base.current_level_label,
+        gap_description: minText(
+          found?.gap_description,
+          base.current_level === null
+            ? 'Area non valutata.'
+            : 'Gap da definire in relazione ai requisiti normativi applicabili.',
+        ),
+        recommendation: minText(
+          found?.recommendation,
+          base.current_level === null
+            ? 'Completare la valutazione dell’area.'
+            : 'Definire azioni sulla base del gap rilevato.',
+        ),
       };
     }),
-    recommendations: recs.length > 0 ? recs : skeleton.recommendations,
+
+    recommendations:
+      recommendations.length > 0
+        ? recommendations
+        : [
+            {
+              id: 'R1',
+              title: 'Completare l’analisi dei gap',
+              priority: skeleton.executive_summary.overall_attention,
+              description:
+                'Il contenuto generato non è risultato sufficientemente completo. È necessario rieseguire la generazione del report.',
+              related_areas: [],
+              related_countries: skeleton.metadata.selected_countries,
+            },
+          ],
+
     limits: {
-      ...skeleton.limits,
-      ...(ai.limits ?? {}),
-      scope_limitations: str(ai?.limits?.scope_limitations, skeleton.limits.scope_limitations),
-      methodological_caveats: str(ai?.limits?.methodological_caveats, skeleton.limits.methodological_caveats),
-      draft_warning:
-        ai?.limits?.draft_warning === null
-          ? null
-          : str(ai?.limits?.draft_warning, skeleton.limits.draft_warning ?? ''),
-      partial_data_warning:
-        ai?.limits?.partial_data_warning === null
-          ? null
-          : str(ai?.limits?.partial_data_warning, skeleton.limits.partial_data_warning ?? ''),
+      scope_limitations: minText(
+        ai?.limits?.scope_limitations,
+        'Output preliminare basato su dati utente e fonti integrate.',
+      ),
+      methodological_caveats: minText(
+        ai?.limits?.methodological_caveats,
+        'Il contenuto AI richiede validazione umana prima dell’uso operativo.',
+      ),
+      draft_warning: skeleton.metadata.has_draft_sources
+        ? minText(ai?.limits?.draft_warning, 'Sono presenti fonti in bozza.')
+        : null,
+      partial_data_warning: skeleton.metadata.has_partial_data_flag
+        ? minText(
+            ai?.limits?.partial_data_warning,
+            'Assessment parziale: alcune aree non sono state valutate.',
+          )
+        : null,
     },
-    sources:
-      arr<any>(ai.sources).length > 0
-        ? arr<any>(ai.sources).map((s, idx) => ({
-            country_code: str(s?.country_code, skeleton.sources[idx]?.country_code ?? 'NA'),
-            document_title: str(s?.document_title, skeleton.sources[idx]?.document_title ?? 'Fonte'),
-            document_type: str(s?.document_type, skeleton.sources[idx]?.document_type ?? 'documento'),
-            status: asStatus(s?.status, skeleton.sources[idx]?.status ?? 'draft'),
-            version: str(s?.version, skeleton.sources[idx]?.version ?? 'n/a'),
-            date: str(s?.date, skeleton.sources[idx]?.date ?? new Date().toISOString().slice(0, 10)),
-            pdf_link: s?.pdf_link === null ? null : str(s?.pdf_link, ''),
-          }))
-        : skeleton.sources,
+
+    sources: skeleton.sources,
   };
 }
