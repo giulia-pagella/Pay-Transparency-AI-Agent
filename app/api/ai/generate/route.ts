@@ -5,7 +5,7 @@ import { generateReportJson } from '@/lib/ai/gemini';
 import { calculateAttention } from '@/lib/attention/rules';
 import { getMaturityConfig, readProcessedRegulations } from '@/lib/report/data';
 import { buildReportSkeleton, repairReportFromAi } from '@/lib/report/assembler';
-import { reportSchema } from '@/lib/schemas/report';
+import { reportSchema, type ReportJson } from '@/lib/schemas/report';
 import { questionnaireSchema } from '@/lib/schemas/questionnaire';
 import { checkRateLimit, getSession, increaseRate } from '@/lib/session/store';
 
@@ -14,6 +14,103 @@ const bodySchema = z.object({
   selected_countries: z.array(z.string()).min(1),
   maturity: z.record(z.number().int().min(1).max(4).nullable()),
 });
+
+function buildAiSchemaTemplate(skeleton: ReportJson) {
+  return {
+    metadata: {
+      company_name: '',
+      sector: '',
+      employee_range: '',
+      organizational_model: '',
+      generated_at: '',
+      selected_countries: [],
+      completed_areas_count: 0,
+      has_draft_sources: false,
+      has_partial_data_flag: false,
+      tool_version: '',
+    },
+
+    executive_summary: {
+      overall_attention: 'media',
+      synthesis_sentence: '',
+      key_points: [],
+      brief_context: '',
+    },
+
+    perimeter: {
+      company_block: {
+        company_name: '',
+        sector: '',
+        employee_range: '',
+        organizational_model: '',
+      },
+      countries_analyzed: skeleton.perimeter.countries_analyzed.map(() => ({
+        code: '',
+        name: '',
+        status: 'draft',
+      })),
+      excluded_scope: '',
+    },
+
+    eu_directive: {
+      overview: '',
+      key_obligations: [],
+      timeline_summary: '',
+    },
+
+    country_analysis: skeleton.country_analysis.map(() => ({
+      country_code: '',
+      country_name: '',
+      status: 'draft',
+      national_framework_summary: '',
+      key_differences_vs_eu: [],
+      specific_obligations: [],
+      implementation_notes: '',
+    })),
+
+    countries_comparison: {
+      table_rows: [],
+      narrative: '',
+    },
+
+    impacts_by_area: skeleton.impacts_by_area.map((x) => ({
+      area_id: x.area_id,
+      area_name: x.area_name,
+      attention_level: x.attention_level ?? 'media',
+      impact_description: '',
+      priority: x.priority ?? 'media',
+      regulatory_reference: '',
+    })),
+
+    maturity: skeleton.maturity.map((x) => ({
+      area_id: x.area_id,
+      area_name: x.area_name,
+      current_level: x.current_level,
+      current_level_label: x.current_level_label,
+      gap_description: '',
+      recommendation: '',
+    })),
+
+    recommendations: [],
+
+    limits: {
+      scope_limitations: '',
+      methodological_caveats: '',
+      draft_warning: '',
+      partial_data_warning: '',
+    },
+
+    sources: skeleton.sources.map(() => ({
+      country_code: '',
+      document_title: '',
+      document_type: '',
+      status: 'draft',
+      version: '',
+      date: '',
+      pdf_link: null,
+    })),
+  };
+}
 
 export async function POST(req: Request) {
   const sid = (await cookies()).get('session_id')?.value;
@@ -61,28 +158,30 @@ export async function POST(req: Request) {
 
   try {
     const skeleton = buildReportSkeleton({
-      company: parsed.data.company,
-      selectedCountries: parsed.data.selected_countries,
-      completedAreasCount: compiled,
-      hasDraftSources,
-      hasPartialDataFlag: compiled < 9,
-      selectedRegulations: selectedRegs,
-      euRegulation: eu,
-      maturityConfig,
-      maturityValues: parsed.data.maturity,
-      attentionByArea: attention.byArea as any,
-      overallAttention: attention.overall,
-    });
+  company: parsed.data.company,
+  selectedCountries: parsed.data.selected_countries,
+  completedAreasCount: compiled,
+  hasDraftSources,
+  hasPartialDataFlag: compiled < 9,
+  selectedRegulations: selectedRegs,
+  euRegulation: eu,
+  maturityConfig,
+  maturityValues: parsed.data.maturity,
+  attentionByArea: attention.byArea as any,
+  overallAttention: attention.overall,
+});
 
-    const aiDraft = await generateReportJson({
-      apiKey: session.apiKey,
-      assessmentInput,
-      attentionLevels: attention,
-      sources: [eu, ...selectedRegs],
-      partialData: compiled < 9,
-      hasDraftSources,
-      schemaTemplate: skeleton,
-    });
+const schemaTemplate = buildAiSchemaTemplate(skeleton);
+
+const aiDraft = await generateReportJson({
+  apiKey: session.apiKey,
+  assessmentInput,
+  attentionLevels: attention,
+  sources: [eu, ...selectedRegs],
+  partialData: compiled < 9,
+  hasDraftSources,
+  schemaTemplate,
+});
 
     const repaired = repairReportFromAi(aiDraft, skeleton);
     const report = reportSchema.parse(repaired);
