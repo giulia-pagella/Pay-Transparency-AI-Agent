@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 999 999" preserveAspectRatio="xMidYMid meet">
+  <g stroke="#FFFFFF" stroke-width="6" fill="none">
+    <rect x="3" y="3" width="993" height="993"></rect>
+    <line x1="333" y1="0" x2="333" y2="999"></line>
+    <line x1="666" y1="0" x2="666" y2="999"></line>
+    <line x1="0" y1="333" x2="999" y2="333"></line>
+    <line x1="0" y1="666" x2="999" y2="666"></line>
+  </g>
+  <path d="M 0,333 A 333,333 0 0 1 666,333 M 333,333 L 333,999" stroke="#FFFFFF" stroke-width="12" fill="none" stroke-linecap="butt"></path>
+</svg>
