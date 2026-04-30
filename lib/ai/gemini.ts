@@ -429,8 +429,12 @@ export async function generateReportJson(input: GenerateInput): Promise<unknown>
     ]);
 
     const issues = assessQuality(first, {
-  assessmentInput: input.assessmentInput,
-});
+      assessmentInput: input.assessmentInput,
+    });
+
+    if (issues.length === 0) {
+      return first;
+    }
 
     const enriched = await Promise.race([
       attempt(`ATTENZIONE: la risposta è formalmente valida ma qualitativamente insufficiente. Problemi: ${issues.join(' ')}. Rigenera un report completo e concreto mantenendo esattamente la stessa struttura JSON.`),
