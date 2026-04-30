@@ -446,6 +446,10 @@ export async function generateReportJson(input: GenerateInput): Promise<unknown>
       assessmentInput: input.assessmentInput,
     });
 
+    if (issues.length === 0) {
+      return first;
+    }
+
     const enriched = await attempt(`ATTENZIONE: la risposta è formalmente valida ma qualitativamente insufficiente. Problemi: ${issues.join(' ')}. Rigenera un report completo e concreto mantenendo esattamente la stessa struttura JSON.`);
     return enriched;
   } catch (e) {
