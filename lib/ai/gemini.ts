@@ -174,6 +174,9 @@ ${JSON.stringify(input.schemaTemplate ?? {}, null, 2)}
   return retryMessage ? `${retryMessage}\n\n${base}` : base;
 }
 
+
+const GEMINI_TIMEOUT_MS = Number(process.env.GEMINI_TIMEOUT_MS ?? 90_000);
+
 function extractTextFromResponse(json: any) {
   const parts = json?.candidates?.[0]?.content?.parts;
   if (!Array.isArray(parts)) return '';
@@ -189,34 +192,48 @@ function stripCodeFence(text: string) {
 }
 
 async function callGemini(apiKey: string, prompt: string) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: systemPrompt }] },
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: {
-        temperature: 0.15,
-        responseMimeType: 'application/json',
-      },
-    }),
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), GEMINI_TIMEOUT_MS);
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`${response.status}:${errorText}`);
+  try {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      signal: controller.signal,
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: systemPrompt }] },
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.15,
+          responseMimeType: 'application/json',
+        },
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`${response.status}:${errorText}`);
+    }
+
+    const json = await response.json();
+    const text = extractTextFromResponse(json);
+    if (!text) throw Object.assign(new Error('EMPTY_RESPONSE'), { code: 'EMPTY_RESPONSE' });
+    return stripCodeFence(text);
+  } finally {
+    clearTimeout(timeout);
   }
-
-  const json = await response.json();
-  const text = extractTextFromResponse(json);
-  if (!text) throw Object.assign(new Error('EMPTY_RESPONSE'), { code: 'EMPTY_RESPONSE' });
-  return stripCodeFence(text);
 }
 
 function normalizeError(error: unknown) {
   const msg = String(error);
   if ((error as any)?.code) return error as any;
+  if ((error as any)?.name === 'AbortError')
+    return {
+      code: 'TIMEOUT',
+      message:
+        'La richiesta a Gemini ha superato il tempo massimo di attesa. Riprova tra qualche istante.',
+    };
   if (msg.includes('429')) return { code: 'RATE_LIMIT', message: 'Hai raggiunto il limite di 5 richieste al minuto del piano Gemini.' };
   if (msg.toLowerCase().includes('safety')) return { code: 'SAFETY', message: 'Il contenuto generato è stato filtrato dai sistemi di sicurezza di Google. Questo è raro; prova a rigenerare il report.' };
   if (msg.toLowerCase().includes('timeout')) return { code: 'TIMEOUT', message: "La generazione del report ha impiegato più tempo del previsto. Riprova: se l'errore persiste, potrebbe essere un problema temporaneo del servizio Gemini." };
@@ -423,10 +440,7 @@ export async function generateReportJson(input: GenerateInput): Promise<unknown>
   };
 
   try {
-    const first = await Promise.race([
-      attempt(),
-      new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 90_000)),
-    ]);
+    const first = await attempt();
 
     const issues = assessQuality(first, {
       assessmentInput: input.assessmentInput,
@@ -436,10 +450,7 @@ export async function generateReportJson(input: GenerateInput): Promise<unknown>
       return first;
     }
 
-    const enriched = await Promise.race([
-      attempt(`ATTENZIONE: la risposta è formalmente valida ma qualitativamente insufficiente. Problemi: ${issues.join(' ')}. Rigenera un report completo e concreto mantenendo esattamente la stessa struttura JSON.`),
-      new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 90_000)),
-    ]);
+    const enriched = await attempt(`ATTENZIONE: la risposta è formalmente valida ma qualitativamente insufficiente. Problemi: ${issues.join(' ')}. Rigenera un report completo e concreto mantenendo esattamente la stessa struttura JSON.`);
     return enriched;
   } catch (e) {
     const err = normalizeError(e);
@@ -448,10 +459,7 @@ export async function generateReportJson(input: GenerateInput): Promise<unknown>
     }
 
     try {
-      return await Promise.race([
-        attempt('ATTENZIONE: la tua risposta precedente aveva problemi di parsing/validazione. Rigenera JSON valido.'),
-        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 90_000)),
-      ]);
+      return await attempt('ATTENZIONE: la tua risposta precedente aveva problemi di parsing/validazione. Rigenera JSON valido.');
     } catch (retryError) {
       const retryMapped = normalizeError(retryError);
       throw Object.assign(new Error(retryMapped.message ?? 'Errore generazione report'), { code: retryMapped.code });
