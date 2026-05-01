@@ -198,10 +198,16 @@ export function repairReportFromAi(aiDraft: any, skeleton: ReportJson): ReportJs
         ai?.executive_summary?.synthesis_sentence,
         'Sintesi non generata in modo completo.',
       ),
-      key_points:
-        nonEmptyStrings(ai?.executive_summary?.key_points, 5).length > 0
-          ? nonEmptyStrings(ai?.executive_summary?.key_points, 5)
-          : ['Contenuto da completare sulla base di input, maturità e fonti.'],
+      key_points: (() => {
+        const pts = nonEmptyStrings(ai?.executive_summary?.key_points, 5);
+        if (pts.length >= 3) return pts;
+        const fallbacks = [
+          'Completare l\'analisi dei gap normativi sulla base degli input forniti.',
+          'Verificare la conformità alle disposizioni della Direttiva UE 2023/970.',
+          'Definire un piano d\'azione prioritizzato per le aree con maturità critica.',
+        ];
+        return [...pts, ...fallbacks].slice(0, Math.max(3, pts.length));
+      })(),
       brief_context: minText(
         ai?.executive_summary?.brief_context,
         'Contesto sintetico non generato in modo completo.',

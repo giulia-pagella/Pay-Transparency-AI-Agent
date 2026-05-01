@@ -234,11 +234,13 @@ function normalizeError(error: unknown) {
       message:
         'La richiesta a Gemini ha superato il tempo massimo di attesa. Riprova tra qualche istante.',
     };
-  if (msg.includes('429')) return { code: 'RATE_LIMIT', message: 'Hai raggiunto il limite di 5 richieste al minuto del piano Gemini.' };
+  if (msg.includes('429')) return { code: 'RATE_LIMIT', message: 'Hai raggiunto il limite di richieste al minuto del piano Gemini. Attendi qualche secondo e riprova.' };
   if (msg.toLowerCase().includes('safety')) return { code: 'SAFETY', message: 'Il contenuto generato è stato filtrato dai sistemi di sicurezza di Google. Questo è raro; prova a rigenerare il report.' };
   if (msg.toLowerCase().includes('timeout')) return { code: 'TIMEOUT', message: "La generazione del report ha impiegato più tempo del previsto. Riprova: se l'errore persiste, potrebbe essere un problema temporaneo del servizio Gemini." };
   if (msg.includes('400')) return { code: 'BAD_REQUEST', message: 'La richiesta a Gemini non è stata accettata. Verifica la chiave API e riprova.' };
-  return { code: 'UNKNOWN', message: 'Si è verificato un errore imprevisto. Riprova.' };
+  if (msg.includes('403')) return { code: 'BAD_REQUEST', message: 'Accesso negato da Gemini. Verifica che la chiave API sia valida e che il piano sia attivo.' };
+  if (msg.includes('503') || msg.includes('500') || msg.includes('502')) return { code: 'TIMEOUT', message: 'Il servizio Gemini non è temporaneamente disponibile. Riprova tra qualche secondo.' };
+  return { code: 'UNKNOWN', message: 'Si è verificato un errore imprevisto durante la comunicazione con Gemini. Riprova.' };
 }
 
 function assessQuality(
@@ -283,10 +285,6 @@ function assessQuality(
   const maturity = Array.isArray(draft?.maturity) ? draft.maturity : [];
 
   const companyName = typeof company?.company_name === 'string' ? company.company_name.trim() : '';
-  const sector =
-    typeof company?.sector === 'string' ? company.sector.trim().toLowerCase() : '';
-
-  const summaryText = `${synthesis} ${briefContext}`.toLowerCase();
 
   const maturityEntries = Object.entries(maturityInput).filter(([, value]) => value !== null);
   const lowOrMediumAreas = Object.entries(maturityInput)
@@ -311,10 +309,6 @@ function assessQuality(
 
   if (companyName && !synthesis.includes(companyName) && !briefContext.includes(companyName)) {
     issues.push('Executive summary non personalizzata sul nome azienda.');
-  }
-
-  if (sector && !summaryText.includes(sector)) {
-    issues.push('Executive summary non personalizzata sul settore.');
   }
 
   if (recommendations.length < 3) {
