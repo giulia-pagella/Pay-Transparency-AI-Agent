@@ -9,6 +9,8 @@ import { reportSchema, type ReportJson } from '@/lib/schemas/report';
 import { questionnaireSchema } from '@/lib/schemas/questionnaire';
 import { checkRateLimit, getSession, increaseRate } from '@/lib/session/store';
 
+export const maxDuration = 300;
+
 const bodySchema = z.object({
   company: questionnaireSchema.shape.company,
   selected_countries: z.array(z.string()).min(1),

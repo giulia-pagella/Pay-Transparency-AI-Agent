@@ -285,14 +285,6 @@ function assessQuality(
   const companyName = typeof company?.company_name === 'string' ? company.company_name.trim() : '';
   const sector =
     typeof company?.sector === 'string' ? company.sector.trim().toLowerCase() : '';
-  const employeeRange =
-    typeof company?.employee_range === 'string'
-      ? company.employee_range.trim().toLowerCase()
-      : '';
-  const organizationalModel =
-    typeof company?.organizational_model === 'string'
-      ? company.organizational_model.trim().toLowerCase()
-      : '';
 
   const summaryText = `${synthesis} ${briefContext}`.toLowerCase();
 
@@ -323,14 +315,6 @@ function assessQuality(
 
   if (sector && !summaryText.includes(sector)) {
     issues.push('Executive summary non personalizzata sul settore.');
-  }
-
-  if (employeeRange && !summaryText.includes(employeeRange)) {
-    issues.push('Executive summary non personalizzata sulla dimensione aziendale.');
-  }
-
-  if (organizationalModel && !summaryText.includes(organizationalModel)) {
-    issues.push('Executive summary non personalizzata sul modello organizzativo.');
   }
 
   if (recommendations.length < 3) {
@@ -454,7 +438,7 @@ export async function generateReportJson(input: GenerateInput): Promise<unknown>
     return enriched;
   } catch (e) {
     const err = normalizeError(e);
-    if (err.code === 'RATE_LIMIT' || err.code === 'SAFETY' || err.code === 'BAD_REQUEST' || err.code === 'EMPTY_RESPONSE' || err.code === 'JSON_PARSE_ERROR') {
+    if (err.code === 'RATE_LIMIT' || err.code === 'SAFETY' || err.code === 'BAD_REQUEST' || err.code === 'EMPTY_RESPONSE' || err.code === 'JSON_PARSE_ERROR' || err.code === 'TIMEOUT') {
       throw Object.assign(new Error(err.message ?? String(err)), { code: err.code });
     }
 
