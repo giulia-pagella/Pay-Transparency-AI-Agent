@@ -101,19 +101,28 @@ export default function PaesiPage() {
   async function generate() {
     setLoading(true);
     setGenError('');
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 300_000);
     try {
       const res = await fetch('/api/ai/generate', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ company, selected_countries: countries, maturity }),
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
       const data = await parseApiResponse(res);
       setLoading(false);
       if (!res.ok) { setGenError(data.error ?? 'Errore durante la generazione del report.'); return; }
       router.push('/report');
-    } catch {
+    } catch (err) {
+      clearTimeout(timeoutId);
       setLoading(false);
-      setGenError('Errore di rete o server non raggiungibile. Verifica che il server sia attivo.');
+      if ((err as Error)?.name === 'AbortError') {
+        setGenError('La generazione ha superato il tempo massimo (5 minuti). Riprova tra qualche istante.');
+      } else {
+        setGenError('Errore di rete o server non raggiungibile. Verifica che il server sia attivo.');
+      }
     }
   }
 
