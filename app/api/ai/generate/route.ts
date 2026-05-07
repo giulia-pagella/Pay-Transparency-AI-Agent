@@ -17,6 +17,30 @@ const bodySchema = z.object({
   maturity: z.record(z.number().int().min(1).max(4).nullable()),
 });
 
+
+function compactSourcesForAi(regs: any[]) {
+  return regs.map((r) => ({
+    country_code: r.country_code,
+    country_name: r.country_name,
+    document_type: r.document_type,
+    document_title: r.document_title,
+    status: r.status,
+    version: r.version,
+    date: r.date,
+    source_url: r.source_url ?? null,
+    sections: Array.isArray(r.sections)
+      ? r.sections.slice(0, 10).map((s: any) => ({
+          topic: s.topic,
+          title: s.title,
+          article_references: Array.isArray(s.article_references)
+            ? s.article_references.slice(0, 5)
+            : [],
+          content: typeof s.content === 'string' ? s.content.slice(0, 700) : '',
+        }))
+      : [],
+  }));
+}
+
 function buildAiSchemaTemplate(skeleton: ReportJson) {
   return {
     metadata: {
@@ -147,6 +171,7 @@ export async function POST(req: Request) {
 
   const hasDraftSources = selectedRegs.some((r) => r.status === 'draft');
   const attention = calculateAttention(maturityConfig, parsed.data.maturity, hasDraftSources);
+  const aiSources = compactSourcesForAi([eu, ...selectedRegs]);
 
   increaseRate(session);
 
@@ -179,7 +204,7 @@ const aiDraft = await generateReportJson({
   apiKey: session.apiKey,
   assessmentInput,
   attentionLevels: attention,
-  sources: [eu, ...selectedRegs],
+  sources: aiSources,
   partialData: compiled < 9,
   hasDraftSources,
   schemaTemplate,
