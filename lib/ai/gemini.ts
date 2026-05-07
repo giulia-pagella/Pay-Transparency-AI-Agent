@@ -409,7 +409,10 @@ function assessQuality(
 }
 
 export async function validateGeminiKey(apiKey: string) {
-  await callGemini(apiKey, 'pong');
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}&pageSize=1`,
+  );
+  if (!res.ok) throw new Error(`${res.status}`);
   return true;
 }
 
