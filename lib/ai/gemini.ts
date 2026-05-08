@@ -205,7 +205,8 @@ ${JSON.stringify(input.schemaTemplate ?? {}, null, 2)}
 - Raccomandazioni: da 3 a 5 elementi, con priorità, descrizione concreta, related_areas e related_countries quando applicabili.
 - key_points nell'executive_summary: ESATTAMENTE 4 bullet, ognuno apre con verbo d'azione.
 - headline: singola frase max 30 parole, apre con il finding (non con il nome del cliente).
-- paragraph: 3-4 frasi con dati concreti e riferimento normativo al paese più urgente.`;
+- paragraph: 3-4 frasi con dati concreti e riferimento normativo al paese più urgente.
+- countries_comparison.table_rows: OBBLIGATORIO popolare con almeno 4-6 righe tematiche (es. Trasparenza pre-assunzione, Reporting retributivo, Definizione "lavoro di pari valore", Sanzioni, Tempistiche di recepimento). Per ogni riga, il campo "cells" DEVE contenere una chiave per CIASCUN paese presente in metadata.selected_countries (usa i codici paese esattamente come appaiono nello schema, es. "IT", "DE", "FR"). Il valore di ogni cella deve essere una stringa concisa (max 30 parole) che descrive la situazione normativa di quel paese per quel tema.`;
 
   return retryMessage ? `${retryMessage}\n\n${base}` : base;
 }
