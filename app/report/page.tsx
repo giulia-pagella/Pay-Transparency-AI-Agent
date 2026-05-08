@@ -6,6 +6,70 @@ import { SessionHeader } from '@/components/session-header';
 import { Icon } from '@/components/icon';
 import type { ReportJson } from '@/lib/schemas/report';
 
+function ScoringPanel({ report }: { report: ReportJson }) {
+  const es = report.executive_summary;
+  const breakdown = es.attention_breakdown;
+  const score = es.attention_score;
+  const triggers = es.attention_triggers ?? [];
+
+  if (!breakdown || score === undefined) return null;
+
+  const rows = [
+    { label: 'Maturità nelle 9 aree', weight: '50%', value: breakdown.maturity.value, contribution: breakdown.maturity.contribution },
+    { label: 'Dimensione e complessità organizzativa', weight: '25%', value: breakdown.organization.value, contribution: breakdown.organization.contribution },
+    { label: 'Urgenza normativa (time-to-compliance)', weight: '15%', value: breakdown.timeToCompliance.value, contribution: breakdown.timeToCompliance.contribution },
+    { label: 'Visibilità settore e rischio sanzioni', weight: '10%', value: breakdown.sectorRisk.value, contribution: breakdown.sectorRisk.contribution },
+  ];
+
+  return (
+    <div style={{ marginTop: 14, padding: 16, background: 'rgba(255,255,255,.07)', borderRadius: 4, border: '1px solid rgba(255,255,255,.12)' }}>
+      <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,.5)', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 10 }}>
+        Dettagli scoring
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 14 }}>
+        <span style={{ fontSize: 28, fontWeight: 700, color: 'white', fontFamily: 'var(--font-serif)' }}>{score}</span>
+        <span style={{ fontSize: 13, color: 'rgba(255,255,255,.5)' }}>/100</span>
+      </div>
+
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11, marginBottom: 14 }}>
+        <thead>
+          <tr style={{ borderBottom: '1px solid rgba(255,255,255,.12)' }}>
+            {['Fattore', 'Peso', 'Valore', 'Contributo'].map((h) => (
+              <th key={h} style={{ textAlign: 'left', padding: '4px 6px', color: 'rgba(255,255,255,.45)', fontWeight: 600, letterSpacing: '.05em', textTransform: 'uppercase', fontSize: 10 }}>{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.label} style={{ borderBottom: '1px solid rgba(255,255,255,.06)' }}>
+              <td style={{ padding: '5px 6px', color: 'rgba(255,255,255,.75)' }}>{r.label}</td>
+              <td style={{ padding: '5px 6px', color: 'rgba(255,255,255,.45)' }}>{r.weight}</td>
+              <td style={{ padding: '5px 6px', color: 'rgba(255,255,255,.75)' }}>{r.value}/100</td>
+              <td style={{ padding: '5px 6px', color: 'white', fontWeight: 600 }}>{r.contribution}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {triggers.length > 0 && (
+        <div style={{ marginBottom: 12 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,.45)', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 6 }}>Fattori rilevanti</div>
+          <ul style={{ margin: 0, padding: '0 0 0 14px', display: 'flex', flexDirection: 'column', gap: 3 }}>
+            {triggers.map((t, i) => (
+              <li key={i} style={{ fontSize: 11, color: 'rgba(255,255,255,.65)', lineHeight: 1.5 }}>{t}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <div style={{ fontSize: 10, color: 'rgba(255,255,255,.4)', lineHeight: 1.6, borderTop: '1px solid rgba(255,255,255,.08)', paddingTop: 8 }}>
+        Il livello di attenzione è calcolato pesando maturità organizzativa (50%), dimensione e complessità (25%), urgenza normativa (15%) e rischio settoriale (10%).
+      </div>
+    </div>
+  );
+}
+
 type Section = { id: string; num: string; title: string };
 
 const SECTIONS: Section[] = [
@@ -59,6 +123,7 @@ export default function ReportPage() {
   const [report, setReport] = useState<ReportJson | null>(null);
   const [error, setError] = useState('');
   const [activeSection, setActiveSection] = useState('exec');
+  const [scoringOpen, setScoringOpen] = useState(false);
   const router = useRouter();
   const mainRef = useRef<HTMLDivElement>(null);
 
@@ -202,23 +267,32 @@ export default function ReportPage() {
             {/* Navy card */}
             <div style={{ background: 'var(--ntt-smart-navy)', color: 'white', padding: 28, borderRadius: 4, position: 'relative', overflow: 'hidden', marginBottom: 18 }}>
               <div style={{ position: 'absolute', right: -60, top: -60, width: 300, height: 300, backgroundImage: "url('/assets/innovation-curve-twothirds-white.svg')", backgroundSize: 'contain', backgroundRepeat: 'no-repeat', opacity: .08 }} />
-              <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 32, alignItems: 'center', position: 'relative', zIndex: 2 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 32, alignItems: 'flex-start', position: 'relative', zIndex: 2 }}>
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,.5)', textTransform: 'uppercase', letterSpacing: '.1em', marginBottom: 10 }}>Livello complessivo</div>
                   <div style={{ width: 120, height: 120, border: `2px solid ${attColor}`, borderRadius: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: attBg }}>
                     <div className="serif" style={{ fontSize: 30, color: attColor, lineHeight: 1, textTransform: 'capitalize' }}>{r.executive_summary.overall_attention}</div>
                     <div style={{ fontSize: 9, color: 'rgba(255,255,255,.55)', marginTop: 5, letterSpacing: '.08em' }}>ATTENZIONE</div>
                   </div>
+                  {r.executive_summary.attention_score !== undefined && (
+                    <button
+                      onClick={() => setScoringOpen((v) => !v)}
+                      style={{ marginTop: 10, background: 'none', border: '1px solid rgba(255,255,255,.2)', borderRadius: 2, color: 'rgba(255,255,255,.55)', fontSize: 10, padding: '4px 8px', cursor: 'pointer', fontFamily: 'var(--font-sans)', letterSpacing: '.04em' }}
+                    >
+                      {scoringOpen ? 'Nascondi dettagli' : 'Mostra dettagli scoring'}
+                    </button>
+                  )}
                 </div>
                 <div>
                   <p className="serif" style={{ fontSize: 20, lineHeight: 1.35, color: 'white', margin: '0 0 16px', fontWeight: 400 }}>
-                    &ldquo;{r.executive_summary.synthesis_sentence}&rdquo;
+                    &ldquo;{r.executive_summary.headline}&rdquo;
                   </p>
                   <p style={{ fontSize: 13, lineHeight: 1.65, color: 'rgba(255,255,255,.7)', margin: 0, maxWidth: 560 }}>
-                    {r.executive_summary.brief_context}
+                    {r.executive_summary.paragraph}
                   </p>
                 </div>
               </div>
+              {scoringOpen && <ScoringPanel report={r} />}
             </div>
 
             {/* KPI grid */}

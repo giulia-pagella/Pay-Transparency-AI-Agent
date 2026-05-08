@@ -2,6 +2,13 @@ import { z } from 'zod';
 
 const att = z.enum(['alta', 'media', 'bassa']);
 
+const attentionBreakdownSchema = z.object({
+  maturity: z.object({ value: z.number(), weight: z.literal(0.5), contribution: z.number() }),
+  organization: z.object({ value: z.number(), weight: z.literal(0.25), contribution: z.number() }),
+  timeToCompliance: z.object({ value: z.number(), weight: z.literal(0.15), contribution: z.number() }),
+  sectorRisk: z.object({ value: z.number(), weight: z.literal(0.10), contribution: z.number() }),
+});
+
 export const reportSchema = z.object({
   metadata: z.object({
     company_name: z.string(),
@@ -17,9 +24,12 @@ export const reportSchema = z.object({
   }),
   executive_summary: z.object({
     overall_attention: att,
-    synthesis_sentence: z.string(),
-    key_points: z.array(z.string()).min(3).max(5),
-    brief_context: z.string(),
+    attention_score: z.number().optional(),
+    attention_breakdown: attentionBreakdownSchema.optional(),
+    attention_triggers: z.array(z.string()).optional(),
+    headline: z.string(),
+    paragraph: z.string(),
+    key_points: z.array(z.string()).min(4).max(4),
   }),
   perimeter: z.object({
     company_block: z.record(z.string(), z.any()),
