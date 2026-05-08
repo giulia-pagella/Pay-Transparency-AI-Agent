@@ -228,8 +228,8 @@ export function ProfiloMaturitaRadar({ areas }: { areas: MaturityArea[] }) {
           </svg>
         </div>
 
-        {/* ── Right column: List + Detail ── */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        {/* ── Right column: List only ── */}
+        <div>
 
           {/* Compact list */}
           <div
@@ -317,115 +317,115 @@ export function ProfiloMaturitaRadar({ areas }: { areas: MaturityArea[] }) {
             })}
           </div>
 
-          {/* Detail panel */}
-          <div style={{ border: '1px solid #E8E8E8', borderRadius: 4, minHeight: 130 }}>
-            {!selected ? (
-              <div style={{
-                padding: '24px 20px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+        </div>
+      </div>
+
+      {/* ── Detail panel: full width, below both columns ── */}
+      <div style={{ border: '1px solid #E8E8E8', borderRadius: 4, minHeight: 130, marginTop: 14 }}>
+        {!selected ? (
+          <div style={{
+            padding: '24px 20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            <p style={{
+              fontSize: 13,
+              color: '#AAAAAA',
+              textAlign: 'center',
+              lineHeight: 1.55,
+              margin: 0,
+              maxWidth: 300,
+            }}>
+              Seleziona un&apos;area dal grafico o dalla lista per visualizzare l&apos;analisi dettagliata e le raccomandazioni
+            </p>
+          </div>
+        ) : (
+          <div
+            key={selected.area_id}
+            style={{ padding: '16px 18px', animation: 'pmr-fadein 0.2s ease' }}
+          >
+            {/* Header: number + name + dot */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+              <span style={{
+                fontSize: 12,
+                color: '#949494',
+                fontFamily: 'Noto Serif, Georgia, serif',
+                lineHeight: 1,
+                minWidth: 22,
+                flexShrink: 0,
               }}>
+                {String(selectedIndex + 1).padStart(2, '0')}
+              </span>
+              <span style={{
+                fontSize: 14.5,
+                fontWeight: 700,
+                color: '#070F26',
+                flex: 1,
+                lineHeight: 1.3,
+              }}>
+                {selected.area_name}
+              </span>
+              <div style={{
+                width: 10,
+                height: 10,
+                borderRadius: '50%',
+                background: levelColor(selected.current_level),
+                flexShrink: 0,
+              }} />
+            </div>
+
+            {/* Current level label */}
+            <div style={{ fontSize: 12, color: '#949494', marginBottom: 14 }}>
+              Stato attuale:{' '}
+              <strong style={{ color: '#070F26' }}>
+                {selected.current_level_label}
+              </strong>
+            </div>
+
+            {/* Gap analysis */}
+            <div style={{ marginBottom: 12 }}>
+              <div style={{
+                fontSize: 9.5,
+                fontWeight: 700,
+                color: '#AAAAAA',
+                textTransform: 'uppercase',
+                letterSpacing: '0.09em',
+                marginBottom: 5,
+              }}>
+                Analisi
+              </div>
+              <p style={{ fontSize: 13, color: '#2E404D', lineHeight: 1.6, margin: 0 }}>
+                {selected.gap_description}
+              </p>
+            </div>
+
+            {/* Recommendation */}
+            {selected.recommendation && (
+              <div>
+                <div style={{
+                  fontSize: 9.5,
+                  fontWeight: 700,
+                  color: '#AAAAAA',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.09em',
+                  marginBottom: 5,
+                }}>
+                  Raccomandazione
+                </div>
                 <p style={{
                   fontSize: 13,
-                  color: '#AAAAAA',
-                  textAlign: 'center',
-                  lineHeight: 1.55,
+                  color: '#005B96',
+                  lineHeight: 1.6,
                   margin: 0,
-                  maxWidth: 300,
+                  fontStyle: 'italic',
                 }}>
-                  Seleziona un&apos;area dal grafico o dalla lista per visualizzare l&apos;analisi dettagliata e le raccomandazioni
+                  {selected.recommendation}
                 </p>
-              </div>
-            ) : (
-              <div
-                key={selected.area_id}
-                style={{ padding: '16px 18px', animation: 'pmr-fadein 0.2s ease' }}
-              >
-                {/* Header: number + name + dot */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                  <span style={{
-                    fontSize: 12,
-                    color: '#949494',
-                    fontFamily: 'Noto Serif, Georgia, serif',
-                    lineHeight: 1,
-                    minWidth: 22,
-                    flexShrink: 0,
-                  }}>
-                    {String(selectedIndex + 1).padStart(2, '0')}
-                  </span>
-                  <span style={{
-                    fontSize: 14.5,
-                    fontWeight: 700,
-                    color: '#070F26',
-                    flex: 1,
-                    lineHeight: 1.3,
-                  }}>
-                    {selected.area_name}
-                  </span>
-                  <div style={{
-                    width: 10,
-                    height: 10,
-                    borderRadius: '50%',
-                    background: levelColor(selected.current_level),
-                    flexShrink: 0,
-                  }} />
-                </div>
-
-                {/* Current level label */}
-                <div style={{ fontSize: 12, color: '#949494', marginBottom: 14 }}>
-                  Stato attuale:{' '}
-                  <strong style={{ color: '#070F26' }}>
-                    {selected.current_level_label}
-                  </strong>
-                </div>
-
-                {/* Gap analysis */}
-                <div style={{ marginBottom: 12 }}>
-                  <div style={{
-                    fontSize: 9.5,
-                    fontWeight: 700,
-                    color: '#AAAAAA',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.09em',
-                    marginBottom: 5,
-                  }}>
-                    Analisi
-                  </div>
-                  <p style={{ fontSize: 13, color: '#2E404D', lineHeight: 1.6, margin: 0 }}>
-                    {selected.gap_description}
-                  </p>
-                </div>
-
-                {/* Recommendation */}
-                {selected.recommendation && (
-                  <div>
-                    <div style={{
-                      fontSize: 9.5,
-                      fontWeight: 700,
-                      color: '#AAAAAA',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.09em',
-                      marginBottom: 5,
-                    }}>
-                      Raccomandazione
-                    </div>
-                    <p style={{
-                      fontSize: 13,
-                      color: '#005B96',
-                      lineHeight: 1.6,
-                      margin: 0,
-                      fontStyle: 'italic',
-                    }}>
-                      {selected.recommendation}
-                    </p>
-                  </div>
-                )}
               </div>
             )}
           </div>
-
-        </div>
+        )}
       </div>
 
       {/* Legend */}
