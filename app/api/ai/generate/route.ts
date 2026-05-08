@@ -95,7 +95,15 @@ function buildAiSchemaTemplate(skeleton: ReportJson) {
     })),
 
     countries_comparison: {
-      table_rows: [],
+      // Provide example rows so the AI knows the exact shape of cells keys (country codes)
+      table_rows: [
+        {
+          topic: 'Esempio tema di confronto',
+          cells: Object.fromEntries(
+            skeleton.metadata.selected_countries.map((c) => [c, '']),
+          ),
+        },
+      ],
       narrative: '',
     },
 
