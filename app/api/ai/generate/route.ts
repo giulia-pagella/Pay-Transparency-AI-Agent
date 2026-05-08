@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { z } from 'zod';
 import { generateReportJson } from '@/lib/ai/gemini';
-import { calculateAttention } from '@/lib/attention/rules';
+import { calculateAttention, calculateAttentionLevel } from '@/lib/attention/rules';
 import { getMaturityConfig, readProcessedRegulations } from '@/lib/report/data';
 import { buildReportSkeleton, repairReportFromAi } from '@/lib/report/assembler';
 import { reportSchema, type ReportJson } from '@/lib/schemas/report';
@@ -58,9 +58,9 @@ function buildAiSchemaTemplate(skeleton: ReportJson) {
 
     executive_summary: {
       overall_attention: 'media',
-      synthesis_sentence: '',
-      key_points: [],
-      brief_context: '',
+      headline: '',
+      paragraph: '',
+      key_points: ['', '', '', ''],
     },
 
     perimeter: {
@@ -171,6 +171,12 @@ export async function POST(req: Request) {
 
   const hasDraftSources = selectedRegs.some((r) => r.status === 'draft');
   const attention = calculateAttention(maturityConfig, parsed.data.maturity, hasDraftSources);
+  const attentionLevel = calculateAttentionLevel(
+    parsed.data.maturity,
+    parsed.data.company,
+    parsed.data.selected_countries,
+    selectedRegs,
+  );
   const aiSources = compactSourcesForAi([eu, ...selectedRegs]);
 
   increaseRate(session);
@@ -185,25 +191,33 @@ export async function POST(req: Request) {
 
   try {
     const skeleton = buildReportSkeleton({
-  company: parsed.data.company,
-  selectedCountries: parsed.data.selected_countries,
-  completedAreasCount: compiled,
-  hasDraftSources,
-  hasPartialDataFlag: compiled < 9,
-  selectedRegulations: selectedRegs,
-  euRegulation: eu,
-  maturityConfig,
-  maturityValues: parsed.data.maturity,
-  attentionByArea: attention.byArea as any,
-  overallAttention: attention.overall,
-});
+    company: parsed.data.company,
+    selectedCountries: parsed.data.selected_countries,
+    completedAreasCount: compiled,
+    hasDraftSources,
+    hasPartialDataFlag: compiled < 9,
+    selectedRegulations: selectedRegs,
+    euRegulation: eu,
+    maturityConfig,
+    maturityValues: parsed.data.maturity,
+    attentionByArea: attention.byArea as any,
+    overallAttention: attentionLevel.level,
+    attentionScore: attentionLevel.score,
+    attentionBreakdown: attentionLevel.breakdown,
+    attentionTriggers: attentionLevel.triggers,
+  });
 
 const schemaTemplate = buildAiSchemaTemplate(skeleton);
 
 const aiDraft = await generateReportJson({
   apiKey: session.apiKey,
   assessmentInput,
-  attentionLevels: attention,
+  attentionLevels: {
+    byArea: attention.byArea,
+    overall: attentionLevel.level,
+    score: attentionLevel.score,
+    triggers: attentionLevel.triggers,
+  },
   sources: aiSources,
   partialData: compiled < 9,
   hasDraftSources,

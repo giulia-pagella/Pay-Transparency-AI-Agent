@@ -1,6 +1,7 @@
 import type { MaturityAssessment } from '@/lib/schemas/maturity';
 import type { Regulation } from '@/lib/schemas/regulations';
 import type { ReportJson } from '@/lib/schemas/report';
+import type { AttentionLevelBreakdown } from '@/lib/attention/rules';
 
 type Attention = 'alta' | 'media' | 'bassa';
 type Status = 'definitive' | 'draft';
@@ -57,6 +58,9 @@ export function buildReportSkeleton(args: {
   maturityValues: Record<string, number | null>;
   attentionByArea: Record<string, Attention | null>;
   overallAttention: Attention;
+  attentionScore?: number;
+  attentionBreakdown?: AttentionLevelBreakdown;
+  attentionTriggers?: string[];
 }): ReportJson {
   return {
     metadata: {
@@ -74,9 +78,12 @@ export function buildReportSkeleton(args: {
 
     executive_summary: {
       overall_attention: args.overallAttention,
-      synthesis_sentence: '',
+      attention_score: args.attentionScore,
+      attention_breakdown: args.attentionBreakdown,
+      attention_triggers: args.attentionTriggers,
+      headline: '',
+      paragraph: '',
       key_points: [],
-      brief_context: '',
     },
 
     perimeter: {
@@ -190,21 +197,26 @@ export function repairReportFromAi(aiDraft: any, skeleton: ReportJson): ReportJs
     },
 
     executive_summary: {
-      overall_attention: asAtt(
-        ai?.executive_summary?.overall_attention,
-        skeleton.executive_summary.overall_attention,
+      // overall_attention is always deterministic — never let AI override it
+      overall_attention: skeleton.executive_summary.overall_attention,
+      // scoring fields come from deterministic calculation, not AI
+      attention_score: skeleton.executive_summary.attention_score,
+      attention_breakdown: skeleton.executive_summary.attention_breakdown,
+      attention_triggers: skeleton.executive_summary.attention_triggers,
+      headline: minText(
+        ai?.executive_summary?.headline,
+        'Headline non generata in modo completo.',
       ),
-      synthesis_sentence: minText(
-        ai?.executive_summary?.synthesis_sentence,
-        'Sintesi non generata in modo completo.',
-      ),
-      key_points:
-        nonEmptyStrings(ai?.executive_summary?.key_points, 5).length > 0
-          ? nonEmptyStrings(ai?.executive_summary?.key_points, 5)
-          : ['Contenuto da completare sulla base di input, maturità e fonti.'],
-      brief_context: minText(
-        ai?.executive_summary?.brief_context,
-        'Contesto sintetico non generato in modo completo.',
+      key_points: (() => {
+        const pts = nonEmptyStrings(ai?.executive_summary?.key_points, 4);
+        if (pts.length === 4) return pts;
+        // Pad to exactly 4 if AI returned fewer
+        while (pts.length < 4) pts.push('Punto chiave da completare.');
+        return pts;
+      })(),
+      paragraph: minText(
+        ai?.executive_summary?.paragraph,
+        'Paragrafo descrittivo non generato in modo completo.',
       ),
     },
 

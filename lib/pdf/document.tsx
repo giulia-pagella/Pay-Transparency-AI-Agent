@@ -266,8 +266,8 @@ export function ReportPdf({ report: r }: { report: ReportJson }) {
               <Text style={[s.attLabel, { color: 'rgba(255,255,255,0.55)' }]}>Attenzione</Text>
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={[s.navyQuote]}>"{r.executive_summary.synthesis_sentence}"</Text>
-              <Text style={s.navyBody}>{r.executive_summary.brief_context}</Text>
+              <Text style={[s.navyQuote]}>"{r.executive_summary.headline}"</Text>
+              <Text style={s.navyBody}>{r.executive_summary.paragraph}</Text>
             </View>
           </View>
         </View>
