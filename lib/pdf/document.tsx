@@ -617,21 +617,11 @@ export function ReportPdf({ report: r }: { report: ReportJson }) {
         </View>
       </Page>
 
-      {/* ── PAGE 7a: Maturity — Overview ──────────────────────── */}
+      {/* ── PAGE 7: Maturity — Overview + Dettaglio aree ─────── */}
       <Page size="A4" style={[s.page, s.pagePadded]}>
         <PageFooter report={r} />
         <SectionHeader num="07" title="Profilo di maturità" pageNum={7} />
         <PdfMaturityRadar areas={r.maturity} />
-        <View style={s.mt8}>
-          <PdfMaturityTable areas={r.maturity} />
-          <PdfMaturityLegend />
-        </View>
-      </Page>
-
-      {/* ── PAGE 7b: Maturity — Dettaglio aree ───────────────── */}
-      <Page size="A4" style={[s.page, s.pagePadded]}>
-        <PageFooter report={r} />
-        <SectionHeader num="07" title="Profilo di maturità — Analisi dettagliata" pageNum={7} />
         {r.maturity.map((area, i) => (
           <PdfMaturityDetailCard key={area.area_id} area={area} num={i + 1} />
         ))}
