@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { SessionHeader } from '@/components/session-header';
 import { Icon } from '@/components/icon';
+import { ProfiloMaturitaRadar } from '@/components/ProfiloMaturitaRadar';
 import type { ReportJson } from '@/lib/schemas/report';
 
 function ScoringPanel({ report }: { report: ReportJson }) {
@@ -429,25 +430,7 @@ export default function ReportPage() {
             </AccordionItem>
 
             <AccordionItem section={SECTIONS[6]!}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {r.maturity.map((area) => (
-                  <div key={area.area_id} className="card" style={{ padding: 16 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                      <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--ntt-smart-navy)' }}>{area.area_name}</span>
-                      <span className="badge badge-blue">{area.current_level_label}</span>
-                    </div>
-                    {area.current_level !== null && (
-                      <div style={{ display: 'flex', gap: 3, marginBottom: 10 }}>
-                        {[1, 2, 3, 4].map((k) => (
-                          <div key={k} style={{ flex: 1, height: 4, borderRadius: 1, background: area.current_level && k <= area.current_level ? 'var(--ntt-future-blue)' : 'var(--ntt-gray-50)' }} />
-                        ))}
-                      </div>
-                    )}
-                    <p style={{ margin: '0 0 6px', fontSize: 12, color: 'var(--ntt-text-gray)', lineHeight: 1.5 }}>{area.gap_description}</p>
-                    {area.recommendation && <p style={{ margin: 0, fontSize: 12, color: 'var(--ntt-future-blue-150)', lineHeight: 1.5, fontStyle: 'italic' }}>{area.recommendation}</p>}
-                  </div>
-                ))}
-              </div>
+              <ProfiloMaturitaRadar areas={r.maturity} />
             </AccordionItem>
 
             <AccordionItem section={SECTIONS[7]!} defaultOpen>

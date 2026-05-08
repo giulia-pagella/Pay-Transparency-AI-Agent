@@ -1,5 +1,7 @@
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Svg, Path, Line, Circle, G } from '@react-pdf/renderer';
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const SvgText = Text as any; // react-pdf Text doubles as SVG Text inside <Svg>
 import type { ReportJson } from '@/lib/schemas/report';
 import { DISCLAIMER } from '@/lib/utils/validation';
 
@@ -172,6 +174,202 @@ function MaturityBar({ level }: { level: number | null }) {
       {[1, 2, 3, 4].map((k) => (
         <View key={k} style={level && k <= level ? s.barSegActive : s.barSegEmpty} />
       ))}
+    </View>
+  );
+}
+
+/* ── Maturity PDF helpers ────────────────────────────────────── */
+
+// 4 shades of NTT blue, light → dark
+const M_LEVEL_COLORS: Record<number, string> = {
+  1: '#B3D9F5',
+  2: '#4AABF0',
+  3: '#0072BC',
+  4: '#005B96',
+};
+const M_LEVEL_LABELS: Record<number, string> = {
+  1: 'Iniziale', 2: 'Parziale', 3: 'Strutturato', 4: 'Avanzato',
+};
+
+function mLevelColor(level: number | null): string {
+  return level ? (M_LEVEL_COLORS[level] ?? C.gray50) : C.gray50;
+}
+
+// Split label into at most 2 lines near the midpoint
+function pdfSplitLabel(name: string, maxLen = 16): [string, string | null] {
+  if (name.length <= maxLen) return [name, null];
+  const mid = Math.floor(name.length / 2);
+  let best = -1;
+  for (let d = 0; d <= 10; d++) {
+    if (mid + d < name.length && name[mid + d] === ' ') { best = mid + d; break; }
+    if (mid - d >= 0 && name[mid - d] === ' ') { best = mid - d; break; }
+  }
+  if (best < 0) return [name, null];
+  return [name.slice(0, best).trim(), name.slice(best).trim()];
+}
+
+type PdfMaturityArea = ReportJson['maturity'][number];
+
+// Radar SVG for PDF — static, no interactivity
+function PdfMaturityRadar({ areas }: { areas: PdfMaturityArea[] }) {
+  // A4 inner width = 499pt; we use full width, height gives room for labels
+  const W = 499, H = 330;
+  const CX = 249, CY = 178, RADIUS = 108, LABEL_R = 140;
+  const N = areas.length;
+  const angles = areas.map((_, i) => (Math.PI * 2 * i) / N - Math.PI / 2);
+
+  function gridPath(level: number): string {
+    const r = (level / 4) * RADIUS;
+    const pts = angles.map(
+      (a) => `${(CX + r * Math.cos(a)).toFixed(1)},${(CY + r * Math.sin(a)).toFixed(1)}`
+    );
+    return `M${pts[0]}${pts.slice(1).map((p) => `L${p}`).join('')}Z`;
+  }
+
+  const dataPath = (() => {
+    const pts = areas.map((area, i) => {
+      const r = ((area.current_level ?? 0) / 4) * RADIUS;
+      return `${(CX + r * Math.cos(angles[i])).toFixed(1)},${(CY + r * Math.sin(angles[i])).toFixed(1)}`;
+    });
+    return `M${pts[0]}${pts.slice(1).map((p) => `L${p}`).join('')}Z`;
+  })();
+
+  return (
+    <Svg width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
+      {/* Grid rings */}
+      {[1, 2, 3, 4].map((level) => (
+        <Path key={level} d={gridPath(level)} fill="none" stroke={C.gray50} strokeWidth={0.5} />
+      ))}
+      {/* Level index labels near top axis */}
+      {[1, 2, 3, 4].map((level) => {
+        const r = (level / 4) * RADIUS;
+        return (
+          <SvgText key={level} x={CX + 3} y={CY - r + 2} fontSize={6} fill={C.gray100}
+            fontFamily="Helvetica">
+            {String(level)}
+          </SvgText>
+        );
+      })}
+      {/* Axis lines */}
+      {angles.map((angle, i) => (
+        <Line
+          key={i}
+          x1={CX} y1={CY}
+          x2={(CX + RADIUS * Math.cos(angle)).toFixed(1)}
+          y2={(CY + RADIUS * Math.sin(angle)).toFixed(1)}
+          stroke={C.gray50}
+          strokeWidth={0.5}
+        />
+      ))}
+      {/* Data polygon */}
+      <Path d={dataPath} fill={C.blue} fillOpacity={0.15} stroke={C.blue} strokeWidth={1.5} />
+      {/* Points */}
+      {areas.map((area, i) => {
+        const r = ((area.current_level ?? 0) / 4) * RADIUS;
+        const px = CX + r * Math.cos(angles[i]);
+        const py = CY + r * Math.sin(angles[i]);
+        return (
+          <Circle key={area.area_id} cx={px} cy={py} r={4} fill={mLevelColor(area.current_level)} />
+        );
+      })}
+      {/* Axis labels */}
+      {areas.map((area, i) => {
+        const angle = angles[i];
+        const lx = CX + LABEL_R * Math.cos(angle);
+        const ly = CY + LABEL_R * Math.sin(angle);
+        const anchor =
+          lx < CX - 8 ? 'end' :
+          lx > CX + 8 ? 'start' : 'middle';
+        const [line1, line2] = pdfSplitLabel(area.area_name, 16);
+        const yStart = line2 ? ly - 5 : ly + 2;
+        return (
+          <G key={area.area_id}>
+            <SvgText x={lx} y={yStart} fontSize={6.5} fill={C.textGray}
+              fontFamily="Helvetica" textAnchor={anchor}>
+              {line1}
+            </SvgText>
+            {line2 && (
+              <SvgText x={lx} y={yStart + 9} fontSize={6.5} fill={C.textGray}
+                fontFamily="Helvetica" textAnchor={anchor}>
+                {line2}
+              </SvgText>
+            )}
+          </G>
+        );
+      })}
+    </Svg>
+  );
+}
+
+// Summary table with colored dot per area
+function PdfMaturityTable({ areas }: { areas: PdfMaturityArea[] }) {
+  return (
+    <View style={s.table}>
+      <View style={s.tableHead}>
+        <Text style={[s.tableHeadCell, { width: 22 }]}>N°</Text>
+        <Text style={[s.tableHeadCell, { flex: 1 }]}>Area</Text>
+        <Text style={[s.tableHeadCell, { width: 72 }]}>Stato attuale</Text>
+        <Text style={[s.tableHeadCell, { width: 18 }]}> </Text>
+      </View>
+      {areas.map((area, i) => (
+        <View key={area.area_id} style={s.tableRow}>
+          <Text style={[s.muted, { width: 22 }]}>{String(i + 1).padStart(2, '0')}</Text>
+          <Text style={[s.tableCell, { flex: 1 }]}>{area.area_name}</Text>
+          <Text style={[s.tableCell, { width: 72, color: area.current_level ? C.blueDark : C.gray100 }]}>
+            {area.current_level_label ?? '—'}
+          </Text>
+          <View style={{ width: 18, alignItems: 'center', justifyContent: 'center' }}>
+            <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: mLevelColor(area.current_level) }} />
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+// Level legend
+function PdfMaturityLegend() {
+  return (
+    <View style={[s.row, { gap: 14, marginTop: 8, flexWrap: 'wrap' }]}>
+      {([1, 2, 3, 4] as const).map((lvl) => (
+        <View key={lvl} style={[s.row, { alignItems: 'center', gap: 5 }]}>
+          <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: M_LEVEL_COLORS[lvl] }} />
+          <Text style={s.muted}>{lvl} — {M_LEVEL_LABELS[lvl]}</Text>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+// Detail card for one area (two-column: Analisi | Raccomandazione)
+function PdfMaturityDetailCard({ area, num }: { area: PdfMaturityArea; num: number }) {
+  return (
+    <View wrap={false} style={[s.card, s.mb12]}>
+      {/* Card header */}
+      <View style={[s.row, { gap: 8, alignItems: 'center', marginBottom: 6 }]}>
+        <Text style={[s.muted, { minWidth: 20 }]}>{String(num).padStart(2, '0')}</Text>
+        <Text style={[s.h4, { flex: 1, marginBottom: 0 }]}>{area.area_name}</Text>
+        <Text style={[s.bodySmall, { color: C.blueDark, marginRight: 6 }]}>
+          {area.current_level_label ?? '—'}
+        </Text>
+        <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: mLevelColor(area.current_level) }} />
+      </View>
+      {/* Thin divider */}
+      <View style={{ height: 1, backgroundColor: C.gray50, marginBottom: 8 }} />
+      {/* Two columns */}
+      <View style={[s.row, { gap: 10 }]}>
+        <View style={{ flex: 1 }}>
+          <Text style={[s.muted, { fontFamily: 'Helvetica-Bold', marginBottom: 4 }]}>Analisi</Text>
+          <Text style={s.bodySmall}>{area.gap_description}</Text>
+        </View>
+        <View style={{ width: 1, backgroundColor: C.gray50 }} />
+        <View style={{ flex: 1 }}>
+          <Text style={[s.muted, { fontFamily: 'Helvetica-Bold', marginBottom: 4 }]}>Raccomandazione</Text>
+          <Text style={[s.bodySmall, { color: C.blueDark, fontStyle: 'italic' }]}>
+            {area.recommendation || '—'}
+          </Text>
+        </View>
+      </View>
     </View>
   );
 }
@@ -419,20 +617,23 @@ export function ReportPdf({ report: r }: { report: ReportJson }) {
         </View>
       </Page>
 
-      {/* ── PAGE 7: Maturity ──────────────────────────────────── */}
+      {/* ── PAGE 7a: Maturity — Overview ──────────────────────── */}
       <Page size="A4" style={[s.page, s.pagePadded]}>
         <PageFooter report={r} />
         <SectionHeader num="07" title="Profilo di maturità" pageNum={7} />
+        <PdfMaturityRadar areas={r.maturity} />
+        <View style={s.mt8}>
+          <PdfMaturityTable areas={r.maturity} />
+          <PdfMaturityLegend />
+        </View>
+      </Page>
+
+      {/* ── PAGE 7b: Maturity — Dettaglio aree ───────────────── */}
+      <Page size="A4" style={[s.page, s.pagePadded]}>
+        <PageFooter report={r} />
+        <SectionHeader num="07" title="Profilo di maturità — Analisi dettagliata" pageNum={7} />
         {r.maturity.map((area, i) => (
-          <View key={i} style={[s.card, s.mb8]}>
-            <View style={[s.row, { justifyContent: 'space-between', alignItems: 'flex-start' }]}>
-              <Text style={[s.h4, { flex: 1, marginBottom: 0 }]}>{area.area_name}</Text>
-              <Text style={s.badge}>{area.current_level_label}</Text>
-            </View>
-            {area.current_level !== null && <MaturityBar level={area.current_level} />}
-            <Text style={[s.bodySmall, s.mb4]}>{area.gap_description}</Text>
-            {area.recommendation && <Text style={[s.bodySmall, { color: C.blueDark, fontStyle: 'italic' }]}>{area.recommendation}</Text>}
-          </View>
+          <PdfMaturityDetailCard key={area.area_id} area={area} num={i + 1} />
         ))}
       </Page>
 
