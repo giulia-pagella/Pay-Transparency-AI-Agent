@@ -598,17 +598,17 @@ export function ReportPdf({ report: r }: { report: ReportJson }) {
         </Text>
         <View style={s.table}>
           <View style={s.tableHead}>
-            <Text style={[s.tableHeadCell, { flex: 3 }]}>Area</Text>
-            <Text style={[s.tableHeadCell, { flex: 2 }]}>Impatto</Text>
+            <Text style={[s.tableHeadCell, { flex: 2 }]}>Area</Text>
+            <Text style={[s.tableHeadCell, { flex: 3 }]}>Impatto</Text>
             <Text style={[s.tableHeadCell, { width: 70 }]}>Attenzione</Text>
           </View>
           {r.impacts_by_area.map((area, i) => (
             <View key={i} style={s.tableRow}>
-              <View style={{ flex: 3 }}>
+              <View style={{ flex: 2 }}>
                 <Text style={s.tableCellBold}>{area.area_name}</Text>
                 {area.regulatory_reference && <Text style={[s.muted, { marginTop: 1 }]}>{area.regulatory_reference}</Text>}
               </View>
-              <Text style={[s.tableCell, { flex: 2 }]}>{area.impact_description}</Text>
+              <Text style={[s.tableCell, { flex: 3 }]}>{area.impact_description}</Text>
               <View style={{ width: 70 }}>
                 <AttPill level={area.attention_level} />
               </View>
