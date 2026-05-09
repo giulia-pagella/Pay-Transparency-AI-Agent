@@ -104,6 +104,10 @@ export const reportSchema = z.object({
       directive_articles: z.array(z.string()).optional(),
     }),
   ).max(5),
+  roadmap: z.object({
+    roadmap_intro: z.string().optional(),
+    engagement_priorities: z.array(z.string()).optional(),
+  }).optional(),
   limits: z.object({
     scope_limitations: z.string(),
     methodological_caveats: z.string(),
