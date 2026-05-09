@@ -86,7 +86,8 @@ export const reportSchema = z.object({
       current_level: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]).nullable(),
       current_level_label: z.string(),
       gap_description: z.string(),
-      recommendation: z.string(),
+      recommendation: z.string().optional(),
+      analysis: z.string().optional(),
     }),
   ),
   recommendations: z.array(
@@ -97,6 +98,10 @@ export const reportSchema = z.object({
       description: z.string(),
       related_areas: z.array(z.string()),
       related_countries: z.array(z.string()),
+      temporal_tag: z.enum(['Immediata','Entro 6 mesi','Entro 12 mesi']).optional(),
+      short_description: z.string().optional(),
+      concrete_actions: z.array(z.string()).optional(),
+      directive_articles: z.array(z.string()).optional(),
     }),
   ).max(5),
   limits: z.object({

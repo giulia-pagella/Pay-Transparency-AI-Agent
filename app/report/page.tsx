@@ -6,6 +6,7 @@ import { SessionHeader } from '@/components/session-header';
 import { Icon } from '@/components/icon';
 import { ProfiloMaturitaRadar } from '@/components/ProfiloMaturitaRadar';
 import type { ReportJson } from '@/lib/schemas/report';
+import { formatDateIT } from '@/lib/utils/date';
 
 function ScoringPanel({ report }: { report: ReportJson }) {
   const es = report.executive_summary;
@@ -210,12 +211,7 @@ export default function ReportPage() {
             ))}
           </div>
 
-          {/* Disclaimer */}
-          <div style={{ padding: 12, background: 'rgba(255,255,255,.06)', borderLeft: '2px solid var(--ntt-yellow)', borderRadius: 2, fontSize: 10, lineHeight: 1.55, color: 'rgba(255,255,255,.65)', marginBottom: 14 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: 'white', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 5 }}>⚠ Disclaimer</div>
-            Documento generato da AI, non costituisce consulenza legale né dichiarazione di conformità normativa.
-          </div>
-
+          {/* Disclaimer removed by design */}
           {/* Actions */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
             <a href="/api/pdf" className="btn btn-primary btn-sm" style={{ justifyContent: 'flex-start' }}>
@@ -252,7 +248,7 @@ export default function ReportPage() {
             <div style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap', fontSize: 13, color: 'var(--ntt-gray-100)' }}>
               <span>{r.metadata.sector} · {r.metadata.employee_range} · {r.metadata.organizational_model}</span>
               <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--ntt-gray-100)', display: 'inline-block' }} />
-              <span>Generato il {r.metadata.generated_at}</span>
+              <span>Generato il {formatDateIT(r.metadata.generated_at)}</span>
               {r.metadata.has_partial_data_flag && <span className="badge badge-yellow"><span className="badge-dot" />Dati parziali</span>}
               {r.metadata.has_draft_sources && <span className="badge badge-yellow"><span className="badge-dot" />Fonte in bozza</span>}
             </div>
@@ -490,7 +486,7 @@ export default function ReportPage() {
 
           {/* Footer */}
           <div style={{ marginTop: 44, paddingTop: 20, borderTop: '1px solid var(--ntt-gray-50)', fontSize: 11, color: 'var(--ntt-gray-100)', lineHeight: 1.6 }}>
-            Report v{r.metadata.tool_version} · Generato il {r.metadata.generated_at} · Pay Transparency Assessment Tool · NTT DATA Italia · Powered by Google Gemini 2.5 Flash · <strong>Documento AI, non costituisce consulenza legale.</strong>
+            Report v{r.metadata.tool_version} · {formatDateIT(r.metadata.generated_at)} · Pay Transparency Assessment Tool · NTT DATA Italia  · <strong>Documento AI, non costituisce consulenza legale.</strong>
           </div>
         </div>
       </div>
