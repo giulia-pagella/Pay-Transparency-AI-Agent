@@ -138,6 +138,7 @@ export function buildReportSkeleton(args: {
       current_level_label: normalizeLevelLabel(a, args.maturityValues[a.id] ?? null),
       gap_description: '',
       recommendation: '',
+      analysis: '',
     })),
 
     recommendations: [],
@@ -180,6 +181,10 @@ export function repairReportFromAi(aiDraft: any, skeleton: ReportJson): ReportJs
       ),
       related_areas: nonEmptyStrings(r?.related_areas, 5),
       related_countries: nonEmptyStrings(r?.related_countries, 5),
+      temporal_tag: str(r?.temporal_tag) || undefined,
+      short_description: str(r?.short_description) || undefined,
+      concrete_actions: nonEmptyStrings(r?.concrete_actions, 3),
+      directive_articles: nonEmptyStrings(r?.directive_articles, 6),
     }));
 
   return {
@@ -316,12 +321,8 @@ export function repairReportFromAi(aiDraft: any, skeleton: ReportJson): ReportJs
             ? 'Area non valutata.'
             : 'Gap da definire in relazione ai requisiti normativi applicabili.',
         ),
-        recommendation: minText(
-          found?.recommendation,
-          base.current_level === null
-            ? 'Completare la valutazione dell’area.'
-            : 'Definire azioni sulla base del gap rilevato.',
-        ),
+        recommendation: minText(found?.recommendation, base.current_level === null ? 'Completare la valutazione dell’area.' : 'Definire azioni sulla base del gap rilevato.'),
+        analysis: minText(found?.analysis, found?.gap_description || 'Analisi diagnostica da completare.'),
       };
     }),
 
@@ -361,5 +362,9 @@ export function repairReportFromAi(aiDraft: any, skeleton: ReportJson): ReportJs
     },
 
     sources: skeleton.sources,
+    roadmap: {
+      roadmap_intro: minText(ai?.roadmap?.roadmap_intro, 'La roadmap proposta organizza le raccomandazioni in tre orizzonti temporali.'),
+      engagement_priorities: nonEmptyStrings(ai?.roadmap?.engagement_priorities, 4),
+    },
   };
 }
