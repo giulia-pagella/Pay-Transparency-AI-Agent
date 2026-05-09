@@ -23,7 +23,7 @@ const euObligationSchema = z.object({
   source_tag: z.literal('FONTE UE').default('FONTE UE'),
   // Legacy fields still consumed by the current web/PDF renderers.
   article_reference: z.string().optional(),
-  relevance: att.optional(),
+  relevance: att.default('media'),
 });
 
 const comparisonRowSchema = z.object({

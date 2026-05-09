@@ -8,11 +8,32 @@ type GenerateInput = {
   schemaTemplate?: unknown;
 };
 
+type JsonRecord = Record<string, unknown>;
+type NormalizedError = {
+  code: string;
+  message: string;
+  issues?: string[];
+};
+
 const SUBJECTS = ['datore di lavoro', 'Stato membro', 'candidato', 'lavoratore'] as const;
 const TARGET_ATTENTIONS = ['Alta', 'Media', 'Bassa'] as const;
 const MATURITY_LEVELS = ['Iniziale', 'Parziale', 'Strutturato', 'Avanzato'] as const;
 const TEMPORAL_TAGS = ['Immediata', 'Entro 6 mesi', 'Entro 12 mesi'] as const;
 const SOURCE_TAG = 'FONTE UE';
+
+const EMPTY_RECORD: JsonRecord = {};
+
+function isRecord(value: unknown): value is JsonRecord {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function toRecord(value: unknown): JsonRecord {
+  return isRecord(value) ? value : EMPTY_RECORD;
+}
+
+function records(value: unknown): JsonRecord[] {
+  return Array.isArray(value) ? value.filter(isRecord) : [];
+}
 
 const systemPrompt = `Sei un consulente senior esperto di normativa europea sulla trasparenza retributiva, assessment HR e sistemi retributivi.
 
@@ -35,7 +56,8 @@ Regole strutturali obbligatorie:
 - Le date devono restare valori dati; non formattarle per l'utente finale nel testo del JSON.`;
 
 function runtimePrompt(input: GenerateInput, retryMessage?: string) {
-  const selectedCountries = (input.assessmentInput as any)?.selected_countries;
+  const assessmentInput = toRecord(input.assessmentInput);
+  const selectedCountries = assessmentInput.selected_countries;
   const isSingleCountry = Array.isArray(selectedCountries) && selectedCountries.length === 1;
   const base = `Genera un report di assessment sulla pay transparency in formato JSON.
 
@@ -74,10 +96,15 @@ ${JSON.stringify(input.schemaTemplate ?? {}, null, 2)}
 
 const GEMINI_TIMEOUT_MS = Number(process.env.GEMINI_TIMEOUT_MS ?? 90_000);
 
-function extractTextFromResponse(json: any) {
-  const parts = json?.candidates?.[0]?.content?.parts;
-  if (!Array.isArray(parts)) return '';
-  return parts.map((p: any) => p?.text ?? '').join('\n').trim();
+function extractTextFromResponse(json: unknown) {
+  const root = toRecord(json);
+  const candidates = Array.isArray(root.candidates) ? root.candidates : [];
+  const firstCandidate = toRecord(candidates[0]);
+  const content = toRecord(firstCandidate.content);
+  return records(content.parts)
+    .map((part) => (typeof part.text === 'string' ? part.text : ''))
+    .join('\n')
+    .trim();
 }
 
 function stripCodeFence(text: string) {
@@ -122,10 +149,19 @@ async function callGemini(apiKey: string, prompt: string) {
   }
 }
 
-function normalizeError(error: unknown) {
+function normalizeError(error: unknown): NormalizedError {
+  const errorRecord = toRecord(error);
   const msg = String(error);
-  if ((error as any)?.code) return error as any;
-  if ((error as any)?.name === 'AbortError') {
+  if (typeof errorRecord.code === 'string') {
+    return {
+      code: errorRecord.code,
+      message: typeof errorRecord.message === 'string' ? errorRecord.message : msg,
+      issues: Array.isArray(errorRecord.issues)
+        ? errorRecord.issues.filter((issue): issue is string => typeof issue === 'string')
+        : undefined,
+    };
+  }
+  if (errorRecord.name === 'AbortError') {
     return {
       code: 'TIMEOUT',
       message: 'La richiesta a Gemini ha superato il tempo massimo di attesa. Riprova tra qualche istante.',
@@ -152,7 +188,7 @@ function normalizeError(error: unknown) {
   return { code: 'UNKNOWN', message: 'Si e verificato un errore imprevisto. Riprova.' };
 }
 
-function filledString(value: unknown) {
+function filledString(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0;
 }
 
@@ -165,15 +201,15 @@ function sentenceCount(value: string) {
 }
 
 function hasTargetAttention(value: unknown): value is (typeof TARGET_ATTENTIONS)[number] {
-  return TARGET_ATTENTIONS.includes(value as any);
+  return TARGET_ATTENTIONS.includes(value as (typeof TARGET_ATTENTIONS)[number]);
 }
 
 function hasMaturityLevel(value: unknown): value is (typeof MATURITY_LEVELS)[number] {
-  return MATURITY_LEVELS.includes(value as any);
+  return MATURITY_LEVELS.includes(value as (typeof MATURITY_LEVELS)[number]);
 }
 
 function hasTemporalTag(value: unknown): value is (typeof TEMPORAL_TAGS)[number] {
-  return TEMPORAL_TAGS.includes(value as any);
+  return TEMPORAL_TAGS.includes(value as (typeof TEMPORAL_TAGS)[number]);
 }
 
 function isVagueAction(action: string) {
@@ -186,9 +222,9 @@ function isVagueAction(action: string) {
 }
 
 export function assessQuality(
-  draft: any,
+  draft: unknown,
   input: {
-    assessmentInput: any;
+    assessmentInput: unknown;
   },
 ) {
   const issues: string[] = [];
@@ -198,28 +234,31 @@ export function assessQuality(
     return issues;
   }
 
-  const assessmentInput = input?.assessmentInput ?? {};
-  const company = assessmentInput?.company ?? {};
-  const selectedCountries = Array.isArray(assessmentInput?.selected_countries)
+  const report = toRecord(draft);
+  const assessmentInput = toRecord(input.assessmentInput);
+  const company = toRecord(assessmentInput.company);
+  const selectedCountries = Array.isArray(assessmentInput.selected_countries)
     ? assessmentInput.selected_countries
     : [];
   const isMultiCountry = selectedCountries.length > 1;
+  const executiveSummary = toRecord(report.executive_summary);
+  const directive = toRecord(report.eu_directive);
+  const roadmap = toRecord(report.roadmap);
+  const comparison = toRecord(report.countries_comparison);
 
-  const headline = filledString(draft?.executive_summary?.headline)
-    ? draft.executive_summary.headline.trim()
-    : '';
-  const paragraph = filledString(draft?.executive_summary?.paragraph)
-    ? draft.executive_summary.paragraph.trim()
-    : '';
-  const keyPoints = filledStrings(draft?.executive_summary?.key_points);
-  const recommendations = Array.isArray(draft?.recommendations) ? draft.recommendations : [];
-  const maturity = Array.isArray(draft?.maturity) ? draft.maturity : [];
-  const keyObligations = Array.isArray(draft?.eu_directive?.key_obligations)
-    ? draft.eu_directive.key_obligations
-    : [];
+  const headlineValue = executiveSummary.headline;
+  const paragraphValue = executiveSummary.paragraph;
+  const companyNameValue = company.company_name;
+  const sectorValue = company.sector;
+  const headline = filledString(headlineValue) ? headlineValue.trim() : '';
+  const paragraph = filledString(paragraphValue) ? paragraphValue.trim() : '';
+  const keyPoints = filledStrings(executiveSummary.key_points);
+  const recommendations = records(report.recommendations);
+  const maturity = records(report.maturity);
+  const keyObligations = records(directive.key_obligations);
 
-  const companyName = filledString(company?.company_name) ? company.company_name.trim() : '';
-  const sector = filledString(company?.sector) ? company.sector.trim().toLowerCase() : '';
+  const companyName = filledString(companyNameValue) ? companyNameValue.trim() : '';
+  const sector = filledString(sectorValue) ? sectorValue.trim().toLowerCase() : '';
   const summaryText = `${headline} ${paragraph}`.toLowerCase();
 
   if (!headline || headline.length < 40) issues.push('Executive summary: headline troppo breve o assente.');
@@ -236,15 +275,15 @@ export function assessQuality(
     issues.push(`Direttiva UE: key_obligations deve avere 3-4 elementi, ricevuti ${keyObligations.length}.`);
   }
 
-  keyObligations.forEach((ob: any, index: number) => {
-    const missing = ['article', 'title', 'description', 'subject', 'source_tag'].filter((field) => !filledString(ob?.[field]));
+  keyObligations.forEach((ob, index) => {
+    const missing = ['article', 'title', 'description', 'subject', 'source_tag'].filter((field) => !filledString(ob[field]));
     if (missing.length > 0) {
       issues.push(`Direttiva UE: obligation ${index + 1} manca campi target: ${missing.join(', ')}.`);
     }
-    if (!SUBJECTS.includes(ob?.subject)) {
+    if (!SUBJECTS.includes(ob.subject as (typeof SUBJECTS)[number])) {
       issues.push(`Direttiva UE: obligation ${index + 1} ha subject non ammesso.`);
     }
-    if (ob?.source_tag !== SOURCE_TAG) {
+    if (ob.source_tag !== SOURCE_TAG) {
       issues.push(`Direttiva UE: obligation ${index + 1} deve avere source_tag "FONTE UE".`);
     }
   });
@@ -254,30 +293,30 @@ export function assessQuality(
   }
 
   const temporalTags: string[] = [];
-  recommendations.forEach((rec: any, index: number) => {
+  recommendations.forEach((rec, index) => {
     const missing = [
       'priority',
       'temporal_tag',
       'title',
       'short_description',
-    ].filter((field) => !filledString(rec?.[field]));
+    ].filter((field) => !filledString(rec[field]));
 
     if (missing.length > 0) {
       issues.push(`Raccomandazione ${index + 1}: manca campi target: ${missing.join(', ')}.`);
     }
-    if (!hasTargetAttention(rec?.priority)) {
+    if (!hasTargetAttention(rec.priority)) {
       issues.push(`Raccomandazione ${index + 1}: priority non ammessa.`);
     }
-    if (!hasTemporalTag(rec?.temporal_tag)) {
+    if (!hasTemporalTag(rec.temporal_tag)) {
       issues.push(`Raccomandazione ${index + 1}: temporal_tag non ammesso o assente.`);
     } else {
       temporalTags.push(rec.temporal_tag);
     }
 
-    const relatedAreas = filledStrings(rec?.related_areas);
-    const relatedCountries = filledStrings(rec?.related_countries);
-    const directiveArticles = filledStrings(rec?.directive_articles);
-    const concreteActions = filledStrings(rec?.concrete_actions);
+    const relatedAreas = filledStrings(rec.related_areas);
+    const relatedCountries = filledStrings(rec.related_countries);
+    const directiveArticles = filledStrings(rec.directive_articles);
+    const concreteActions = filledStrings(rec.concrete_actions);
 
     if (relatedAreas.length === 0) issues.push(`Raccomandazione ${index + 1}: related_areas vuoto.`);
     if (relatedCountries.length === 0) issues.push(`Raccomandazione ${index + 1}: related_countries vuoto.`);
@@ -298,25 +337,25 @@ export function assessQuality(
     issues.push('Maturity: sezione assente.');
   }
 
-  maturity.forEach((area: any, index: number) => {
-    const missing = ['area_name', 'maturity_level', 'attention', 'analysis'].filter((field) => !filledString(area?.[field]));
+  maturity.forEach((area, index) => {
+    const missing = ['area_name', 'maturity_level', 'attention', 'analysis'].filter((field) => !filledString(area[field]));
     if (missing.length > 0) {
       issues.push(`Maturity area ${index + 1}: manca campi target: ${missing.join(', ')}.`);
     }
-    if (!hasTargetAttention(area?.attention)) {
+    if (!hasTargetAttention(area.attention)) {
       issues.push(`Maturity area ${index + 1}: attention non ammessa o assente.`);
     }
-    if (!hasMaturityLevel(area?.maturity_level)) {
+    if (!hasMaturityLevel(area.maturity_level)) {
       issues.push(`Maturity area ${index + 1}: maturity_level non ammesso o assente.`);
     }
-    if (filledString(area?.recommendation)) {
+    if (filledString(area.recommendation)) {
       issues.push(`Maturity area ${index + 1}: non deve contenere recommendation; usare analysis diagnostica.`);
     }
-    const directiveArticles = filledStrings(area?.directive_articles);
+    const directiveArticles = filledStrings(area.directive_articles);
     if (directiveArticles.length === 0) {
       issues.push(`Maturity area ${index + 1}: directive_articles vuoto.`);
     }
-    if (filledString(area?.analysis) && hasTargetAttention(area?.attention)) {
+    if (filledString(area.analysis) && hasTargetAttention(area.attention)) {
       const min = area.attention === 'Alta' ? 4 : area.attention === 'Media' ? 3 : 2;
       if (sentenceCount(area.analysis) < min) {
         issues.push(`Maturity area ${index + 1}: analysis troppo breve per attention ${area.attention}.`);
@@ -324,11 +363,11 @@ export function assessQuality(
     }
   });
 
-  const roadmapIntro = draft?.roadmap?.roadmap_intro ?? draft?.roadmap?.intro ?? draft?.roadmap_intro;
+  const roadmapIntro = report.roadmap_intro ?? roadmap.roadmap_intro ?? roadmap.intro;
   const engagementPriorities =
-    draft?.roadmap?.engagement_priorities ??
-    draft?.roadmap?.engagementPriorities ??
-    draft?.engagement_priorities;
+    report.engagement_priorities ??
+    roadmap.engagement_priorities ??
+    roadmap.engagementPriorities;
 
   if (!filledString(roadmapIntro)) {
     issues.push('Roadmap: roadmap_intro assente.');
@@ -342,16 +381,15 @@ export function assessQuality(
     issues.push('Roadmap: engagement_priorities non deve citare NTT DATA, fornitori o consulenti esterni.');
   }
 
-  const comparison = draft?.countries_comparison ?? {};
-  const comparisonRows = Array.isArray(comparison?.table_rows)
+  const comparisonRows = Array.isArray(comparison.table_rows)
     ? comparison.table_rows
-    : Array.isArray(comparison?.comparison_table)
+    : Array.isArray(comparison.comparison_table)
       ? comparison.comparison_table
       : [];
-  const comparisonTimeline = Array.isArray(comparison?.timeline) ? comparison.timeline : [];
+  const comparisonTimeline = Array.isArray(comparison.timeline) ? comparison.timeline : [];
 
   if (isMultiCountry) {
-    if (!filledString(comparison?.thesis)) issues.push('Multi-country: thesis assente.');
+    if (!filledString(comparison.thesis)) issues.push('Multi-country: thesis assente.');
     if (comparisonTimeline.length === 0) issues.push('Multi-country: timeline assente.');
     if (comparisonRows.length < 4) issues.push(`Multi-country: table_rows deve avere almeno 4 righe, ricevute ${comparisonRows.length}.`);
   }
@@ -424,7 +462,7 @@ export async function generateReportJson(input: GenerateInput): Promise<unknown>
       const retryMapped = normalizeError(retryError);
       throw Object.assign(new Error(retryMapped.message ?? 'Errore generazione report'), {
         code: retryMapped.code,
-        issues: (retryError as any)?.issues,
+        issues: retryMapped.issues,
       });
     }
   }
