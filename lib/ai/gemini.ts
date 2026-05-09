@@ -8,212 +8,69 @@ type GenerateInput = {
   schemaTemplate?: unknown;
 };
 
-const systemPrompt = `Sei un consulente senior esperto di:
-- normativa europea sulla trasparenza retributiva (Direttiva UE 2023/970)
-- implementazione HR e sistemi retributivi
-- assessment di maturità organizzativa
+const SUBJECTS = ['datore di lavoro', 'Stato membro', 'candidato', 'lavoratore'] as const;
+const TARGET_ATTENTIONS = ['Alta', 'Media', 'Bassa'] as const;
+const MATURITY_LEVELS = ['Iniziale', 'Parziale', 'Strutturato', 'Avanzato'] as const;
+const TEMPORAL_TAGS = ['Immediata', 'Entro 6 mesi', 'Entro 12 mesi'] as const;
+const SOURCE_TAG = 'FONTE UE';
 
-OBIETTIVO
-Generare un report strutturato in italiano, in formato JSON valido, che NON sia generico ma specifico per l'azienda analizzata.
+const systemPrompt = `Sei un consulente senior esperto di normativa europea sulla trasparenza retributiva, assessment HR e sistemi retributivi.
 
-Devi utilizzare in modo esplicito e integrato:
-1. i dati aziendali forniti (settore, dimensione, modello organizzativo)
-2. i livelli di maturità nelle 9 aree (4 livelli categorici: Iniziale, Parziale, Strutturato, Avanzato)
-3. i livelli di attenzione determinati
-4. le fonti normative fornite
+Genera esclusivamente un oggetto JSON valido e conforme allo schema fornito.
+Lingua: italiano professionale.
+Non inserire testo fuori dal JSON.
+Non inventare fonti normative non presenti negli input.
+Non dichiarare conformita, compliance o idoneita legale.
 
-⚠️ VINCOLO CRITICO:
-Il report deve dimostrare chiaramente il collegamento tra:
-- stato attuale dell'azienda (maturità nelle 9 aree)
-- requisiti normativi
-- gap
-- azioni raccomandate
-
-Non sono accettati contenuti generici o applicabili a qualsiasi azienda.
-
----
-
-## REGOLE DI GENERAZIONE
-
-### 1. Executive Summary
-Deve evidenziare i fattori che determinano il livello di attenzione (NON giustificarlo né drammatizzarlo) e deve citare almeno:
-- 1 caratteristica aziendale (dimensione, settore, modello organizzativo)
-- 1 area di maturità con gap rilevante
-- 1 elemento normativo specifico al paese più urgente
-
-**Struttura obbligatoria dell'Executive Summary (3 campi):**
-
-a) **headline**: UNA singola frase, max 30 parole.
-   - Apre con il finding principale (non con il nome del cliente)
-   - Stile Economist: fattuale, conciso
-   - Pattern: "[Finding fattuale] espone/richiede/manca [implicazione concreta riferita a un articolo/paese]"
-   - Esempio: "Architettura retributiva da rafforzare prima del recepimento italiano per coprire i requisiti di comparabilità su 4.200 dipendenti in 3 paesi."
-
-b) **paragraph**: 3-4 frasi.
-   - Frase 1: stato di fatto con numeri (chi è il cliente, cosa è stato valutato, quanti dipendenti/paesi)
-   - Frase 2: finding principale + aree più deboli
-   - Frase 3: vincolo normativo specifico al paese più urgente
-   - Frase 4 (opzionale): raccomandazione top
-   - Verbi diretti, no condizionali
-
-c) **key_points**: ESATTAMENTE 4 bullet.
-   - Ognuno apre con l'implicazione operativa (verbo d'azione tipo "richiede", "prevede", "necessita di", "deve adeguare", "è prioritario")
-   - Pattern: "[Verbo d'azione + oggetto] per coprire [riferimento normativo + paese/timing]. [Contesto opzionale]"
-   - Max 25 parole per bullet
-   - Esempi:
-     * "I processi di Talent Attraction e Percorsi di Carriera richiedono ridisegno per coprire gli obblighi di pubblicazione delle fasce retributive (art. 5)."
-     * "Il framework di job architecture necessita di estensione per supportare i requisiti di comparabilità del 'lavoro di pari valore' (art. 4) sulle entità multi-paese."
-     * "L'adeguamento delle policy di trasparenza pre-assuntiva è prioritario per le entità polacche, dove la normativa è già vigente."
-
-**TONE OF VOICE EXECUTIVE — vincoli rigorosi (applicabili a headline, paragraph, key_points):**
-
-PROIBITE le seguenti espressioni narrative deboli:
-- "si trova ad affrontare", "rapida evoluzione", "attenta revisione"
-- "potrebbe", "rischierebbe", "in un contesto di", "alla luce di"
-- aggettivi enfatici: "elevato", "critico", "significativo", "complesso" usati come riempitivo
-
-PROIBITE le etichette tecniche di maturità ("iniziale", "parziale", "strutturato", "avanzato") usate come stato delle aree nel testo dell'Executive Summary: sono terminologia interna del questionario, non lessico da report consulenziale. Restano confinate al pannello dettagli scoring.
-
-PROIBITI i numeri di maturità (1, 2, 3, 4) come punteggi nel testo dell'Executive Summary.
-
-USARE invece descrizioni narrative consulenziali: "aree da consolidare", "ambiti con gap da colmare", "processi da ridisegnare", "policy da rafforzare", "framework da estendere", "sistemi da predisporre".
-
----
-
-### 2. Analisi dei gap (logica implicita)
-Per ogni area rilevante, identifica se la maturità è:
-- **Iniziale** → gap critico, prerequisiti normativi non coperti
-- **Parziale** → gap sostanziale, copertura disomogenea o non strutturata
-- **Strutturato** → gap residuale, area sostanzialmente conforme con margini di affinamento
-- **Avanzato** → area conforme, eventuale leva competitiva
-
-Collega ogni gap a obblighi normativi specifici delle fonti.
-
-NON scrivere questa analisi come sezione separata: usala per costruire raccomandazioni e Executive Summary.
-
----
-
-### 3. Raccomandazioni (REQUISITO PIÙ IMPORTANTE)
-
-Ogni raccomandazione deve avere queste caratteristiche:
-
-- essere SPECIFICA per l'azienda
-- derivare da almeno:
-  - una area di maturità con gap (Iniziale o Parziale)
-  - un obbligo normativo presente nelle fonti
-- spiegare chiaramente:
-  - cosa manca oggi
-  - cosa richiede la normativa
-  - cosa fare concretamente
-
-STRUTTURA LOGICA (anche se non esplicitata in JSON):
-- Gap identificato
-- Riferimento normativo
-- Azione operativa
-
-Esempio (stile atteso, NON copiare):
-"In presenza di una maturità Parziale nei processi di recruiting, e considerando l'obbligo normativo di trasparenza retributiva pre-assunzione (art. 5 Direttiva), è necessario introdurre range salariali formalizzati negli annunci e nei processi di selezione."
-
-⚠️ Vietato:
-- raccomandazioni vaghe ("monitorare", "valutare" senza contesto)
-- raccomandazioni identiche tra aziende diverse
-- raccomandazioni che non collegano gap → normativa → azione
-
----
-
-### 4. Uso delle fonti normative
-- Devi utilizzare le informazioni presenti nelle fonti
-- Quando rilevante, includi:
-  - soglie (es. 100 dipendenti)
-  - condizioni (es. gap >5%)
-  - obblighi specifici (es. reporting, trasparenza pre-assunzione)
-- Distingui sempre tra normativa vigente e bozza/in recepimento
-
-Non inventare normativa non presente nelle fonti.
-
----
-
-### 5. Personalizzazione aziendale (OBBLIGATORIA)
-Il report deve riflettere:
-- settore (es. bancario → maggiore complessità regolatoria; automotive → alta visibilità)
-- dimensione (es. >500 dipendenti → obblighi reporting rilevanti)
-- modello organizzativo (es. multi-entità → complessità governance; multi-paese → frammentazione normativa)
-
-Se questi elementi NON sono presenti nel testo → il report è considerato NON valido.
-
----
-
-### 6. Qualità del contenuto
-Il testo deve essere:
-- concreto, specifico, non ripetitivo, non generico
-- executive nel tono (Executive Summary in particolare)
-
-Se non hai abbastanza informazioni:
-- NON inventare dettagli
-- usa al massimo le informazioni disponibili
-
----
-
-## OUTPUT
-
-Restituisci ESCLUSIVAMENTE un singolo oggetto JSON conforme allo schema fornito.
-
-VINCOLI:
-- nessun testo fuori dal JSON
-- nessun commento, nessuna spiegazione
-- tutti i campi devono essere presenti
-- evitare campi vuoti quando possibile
-
----
-
-## INPUT DISPONIBILI
-- dati azienda (settore, dimensione, modello organizzativo, paesi)
-- livelli di maturità nelle 9 aree (Iniziale/Parziale/Strutturato/Avanzato)
-- livello di attenzione determinato (Bassa/Media/Alta) + score numerico + triggers
-- fonti normative (UE + paesi selezionati, con stato vigente/bozza)
-- schema JSON da rispettare
-
-Usa TUTTI questi input in modo coerente.`;
+Regole strutturali obbligatorie:
+- La sezione eu_directive e prescrittiva e neutra: non deve citare cliente, maturita, livelli di attenzione o raccomandazioni.
+- eu_directive.key_obligations contiene 3-4 obblighi ordinati per articolo, ciascuno con article, title, description, subject e source_tag="FONTE UE".
+- maturity contiene analisi diagnostica per area: usare analysis, maturity_level, attention e directive_articles. Non generare raccomandazioni dentro le aree di maturity.
+- analysis maturity deve avere almeno 2 frasi se attention e Bassa, 3 frasi se Media, 4 frasi se Alta.
+- recommendations contiene esattamente 4 raccomandazioni prescrittive con priority, temporal_tag, related_areas, related_countries, title, short_description, concrete_actions e directive_articles.
+- Ogni raccomandazione contiene 2-3 concrete_actions specifiche, non vaghe.
+- I temporal_tag coprono almeno 2 orizzonti temporali diversi.
+- roadmap contiene solo roadmap.roadmap_intro e roadmap.engagement_priorities, senza duplicare le raccomandazioni.
+- countries_comparison: se e selezionato un solo paese, thesis, timeline e table_rows devono essere vuoti o null; se i paesi sono piu di uno, valorizzali.
+- Le date devono restare valori dati; non formattarle per l'utente finale nel testo del JSON.`;
 
 function runtimePrompt(input: GenerateInput, retryMessage?: string) {
+  const selectedCountries = (input.assessmentInput as any)?.selected_countries;
+  const isSingleCountry = Array.isArray(selectedCountries) && selectedCountries.length === 1;
   const base = `Genera un report di assessment sulla pay transparency in formato JSON.
 
-Lo schema JSON fornito di seguito definisce esclusivamente la struttura attesa dell'output.
-Non copiare i testi placeholder, i fallback o le stringhe di esempio eventualmente presenti nello schema.
-Ogni campo descrittivo deve essere popolato con contenuto sostanziale, specifico per l'azienda analizzata, basato sugli input ricevuti, sui livelli di maturità, sui livelli di attenzione e sulle fonti normative.
-Se un campo è presente nello schema ma non ci sono elementi sufficienti per svilupparlo in modo approfondito, produci comunque un contenuto breve, concreto e coerente con gli input, evitando formule generiche riutilizzabili per qualsiasi azienda.
-
-## Input utente:
+## Input utente
 ${JSON.stringify(input.assessmentInput, null, 2)}
 
-## Livelli di attenzione già calcolati dal sistema:
+## Livelli di attenzione gia calcolati dal sistema
 ${JSON.stringify(input.attentionLevels, null, 2)}
 
-## Fonti normative da utilizzare:
+## Fonti normative da utilizzare
 ${JSON.stringify(input.sources, null, 2)}
 
-## STRUTTURA JSON ATTESA:
+## Struttura JSON attesa
 ${JSON.stringify(input.schemaTemplate ?? {}, null, 2)}
 
-## Istruzioni finali:
-- Rispondi solo con il JSON.
-- Compila tutti i campi testuali in italiano professionale.
-- Non copiare il contenuto dello schema: usalo solo come struttura.
-- Collega in modo esplicito maturità, gap, normativa e raccomandazioni.
-- Personalizza il testo usando settore, dimensione aziendale e modello organizzativo.
-- Se un'informazione non è disponibile, usa formulazioni prudenti ma non lasciare campi vuoti.
-- Raccomandazioni: da 3 a 5 elementi, con priorità, descrizione concreta, related_areas e related_countries quando applicabili.
-- Ogni raccomandazione deve includere temporal_tag valorizzato e concrete_actions (2-3 azioni).
-- Distribuisci le raccomandazioni su almeno 2 orizzonti temporali diversi.
-- eu_directive.key_obligations: genera 3-4 obblighi ordinati per articolo.
-- key_points nell'executive_summary: ESATTAMENTE 4 bullet, ognuno apre con verbo d'azione.
-- headline: singola frase max 30 parole, apre con il finding (non con il nome del cliente).
-- paragraph: 3-4 frasi con dati concreti e riferimento normativo al paese più urgente.
-- countries_comparison.table_rows: OBBLIGATORIO popolare con almeno 4-6 righe tematiche (es. Trasparenza pre-assunzione, Reporting retributivo, Definizione "lavoro di pari valore", Sanzioni, Tempistiche di recepimento). Per ogni riga, il campo "cells" DEVE contenere una chiave per CIASCUN paese presente in metadata.selected_countries (usa i codici paese esattamente come appaiono nello schema, es. "IT", "DE", "FR"). Il valore di ogni cella deve essere una stringa concisa (max 30 parole) che descrive la situazione normativa di quel paese per quel tema.`;
+## Regole finali
+- Rispondi solo con JSON.
+- Non copiare placeholder o fallback dello schema.
+- eu_directive.key_obligations: 3-4 elementi, ordinati per article, con article/title/description/subject/source_tag.
+- subject ammessi: "datore di lavoro", "Stato membro", "candidato", "lavoratore".
+- source_tag deve essere sempre "FONTE UE".
+- maturity: ogni area deve avere area_name, maturity_level, attention, directive_articles e analysis diagnostica.
+- Non mettere raccomandazioni dentro maturity.
+- analysis maturity: Bassa almeno 2 frasi, Media almeno 3, Alta almeno 4.
+- recommendations: esattamente 4 elementi.
+- Ogni recommendation deve avere priority ("Alta", "Media", "Bassa"), temporal_tag, related_areas, related_countries, title, short_description, concrete_actions e directive_articles.
+- concrete_actions: 2-3 azioni operative concrete. Evita azioni vaghe come "Monitorare", "Valutare" o "Considerare" senza oggetto concreto.
+- Usa almeno 2 temporal_tag diversi tra le 4 raccomandazioni.
+- roadmap: compila solo roadmap.roadmap_intro e roadmap.engagement_priorities (3-4 priorita), senza citare NTT DATA, fornitori o consulenti esterni.
+- ${isSingleCountry
+    ? 'Single-country: countries_comparison.thesis puo essere null/vuota e countries_comparison.timeline/table_rows devono essere array vuoti.'
+    : 'Multi-country: countries_comparison.thesis deve essere valorizzata, timeline deve avere i paesi selezionati e table_rows deve avere almeno 4 righe.'}`;
 
   return retryMessage ? `${retryMessage}\n\n${base}` : base;
 }
-
 
 const GEMINI_TIMEOUT_MS = Number(process.env.GEMINI_TIMEOUT_MS ?? 90_000);
 
@@ -268,20 +125,67 @@ async function callGemini(apiKey: string, prompt: string) {
 function normalizeError(error: unknown) {
   const msg = String(error);
   if ((error as any)?.code) return error as any;
-  if ((error as any)?.name === 'AbortError')
+  if ((error as any)?.name === 'AbortError') {
     return {
       code: 'TIMEOUT',
-      message:
-        'La richiesta a Gemini ha superato il tempo massimo di attesa. Riprova tra qualche istante.',
+      message: 'La richiesta a Gemini ha superato il tempo massimo di attesa. Riprova tra qualche istante.',
     };
-  if (msg.includes('429')) return { code: 'RATE_LIMIT', message: 'Hai raggiunto il limite di 5 richieste al minuto del piano Gemini.' };
-  if (msg.toLowerCase().includes('safety')) return { code: 'SAFETY', message: 'Il contenuto generato è stato filtrato dai sistemi di sicurezza di Google. Questo è raro; prova a rigenerare il report.' };
-  if (msg.toLowerCase().includes('timeout')) return { code: 'TIMEOUT', message: "La generazione del report ha impiegato più tempo del previsto. Riprova: se l'errore persiste, potrebbe essere un problema temporaneo del servizio Gemini." };
-  if (msg.includes('400')) return { code: 'BAD_REQUEST', message: 'La richiesta a Gemini non è stata accettata. Verifica la chiave API e riprova.' };
-  return { code: 'UNKNOWN', message: 'Si è verificato un errore imprevisto. Riprova.' };
+  }
+  if (msg.includes('429')) {
+    return { code: 'RATE_LIMIT', message: 'Hai raggiunto il limite di 5 richieste al minuto del piano Gemini.' };
+  }
+  if (msg.toLowerCase().includes('safety')) {
+    return {
+      code: 'SAFETY',
+      message: 'Il contenuto generato e stato filtrato dai sistemi di sicurezza di Google. Prova a rigenerare il report.',
+    };
+  }
+  if (msg.toLowerCase().includes('timeout')) {
+    return {
+      code: 'TIMEOUT',
+      message: "La generazione del report ha impiegato piu tempo del previsto. Riprova.",
+    };
+  }
+  if (msg.includes('400')) {
+    return { code: 'BAD_REQUEST', message: 'La richiesta a Gemini non e stata accettata. Verifica la chiave API e riprova.' };
+  }
+  return { code: 'UNKNOWN', message: 'Si e verificato un errore imprevisto. Riprova.' };
 }
 
-function assessQuality(
+function filledString(value: unknown) {
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
+function filledStrings(value: unknown) {
+  return Array.isArray(value) ? value.filter(filledString).map((x) => x.trim()) : [];
+}
+
+function sentenceCount(value: string) {
+  return value.split(/[.!?]+/).map((x) => x.trim()).filter(Boolean).length;
+}
+
+function hasTargetAttention(value: unknown): value is (typeof TARGET_ATTENTIONS)[number] {
+  return TARGET_ATTENTIONS.includes(value as any);
+}
+
+function hasMaturityLevel(value: unknown): value is (typeof MATURITY_LEVELS)[number] {
+  return MATURITY_LEVELS.includes(value as any);
+}
+
+function hasTemporalTag(value: unknown): value is (typeof TEMPORAL_TAGS)[number] {
+  return TEMPORAL_TAGS.includes(value as any);
+}
+
+function isVagueAction(action: string) {
+  const normalized = action.trim().replace(/\s+/g, ' ');
+  if (/^(Monitorare|Valutare|Considerare)\.?$/i.test(normalized)) return true;
+  if (/^(Monitorare|Valutare|Considerare)\b/i.test(normalized)) {
+    return normalized.split(' ').length < 4;
+  }
+  return false;
+}
+
+export function assessQuality(
   draft: any,
   input: {
     assessmentInput: any;
@@ -296,202 +200,160 @@ function assessQuality(
 
   const assessmentInput = input?.assessmentInput ?? {};
   const company = assessmentInput?.company ?? {};
-  const maturityInput = assessmentInput?.maturity ?? {};
   const selectedCountries = Array.isArray(assessmentInput?.selected_countries)
     ? assessmentInput.selected_countries
     : [];
+  const isMultiCountry = selectedCountries.length > 1;
 
-  const headline =
-    typeof draft?.executive_summary?.headline === 'string'
-      ? draft.executive_summary.headline.trim()
-      : '';
-
-  const paragraph =
-    typeof draft?.executive_summary?.paragraph === 'string'
-      ? draft.executive_summary.paragraph.trim()
-      : '';
-
-  const keyPoints = Array.isArray(draft?.executive_summary?.key_points)
-    ? draft.executive_summary.key_points.filter(
-        (x: unknown) => typeof x === 'string' && x.trim().length > 0,
-      )
+  const headline = filledString(draft?.executive_summary?.headline)
+    ? draft.executive_summary.headline.trim()
+    : '';
+  const paragraph = filledString(draft?.executive_summary?.paragraph)
+    ? draft.executive_summary.paragraph.trim()
+    : '';
+  const keyPoints = filledStrings(draft?.executive_summary?.key_points);
+  const recommendations = Array.isArray(draft?.recommendations) ? draft.recommendations : [];
+  const maturity = Array.isArray(draft?.maturity) ? draft.maturity : [];
+  const keyObligations = Array.isArray(draft?.eu_directive?.key_obligations)
+    ? draft.eu_directive.key_obligations
     : [];
 
-  const recommendations = Array.isArray(draft?.recommendations) ? draft.recommendations : [];
-  const countryAnalysis = Array.isArray(draft?.country_analysis) ? draft.country_analysis : [];
-  const impacts = Array.isArray(draft?.impacts_by_area) ? draft.impacts_by_area : [];
-  const maturity = Array.isArray(draft?.maturity) ? draft.maturity : [];
-
-  const companyName = typeof company?.company_name === 'string' ? company.company_name.trim() : '';
-  const sector =
-    typeof company?.sector === 'string' ? company.sector.trim().toLowerCase() : '';
-
+  const companyName = filledString(company?.company_name) ? company.company_name.trim() : '';
+  const sector = filledString(company?.sector) ? company.sector.trim().toLowerCase() : '';
   const summaryText = `${headline} ${paragraph}`.toLowerCase();
 
-  const maturityEntries = Object.entries(maturityInput).filter(([, value]) => value !== null);
-  const lowOrMediumAreas = Object.entries(maturityInput)
-    .filter(([, value]) => value === 1 || value === 2)
-    .map(([key]) => key);
-
-  if (!headline || headline.length < 40) {
-    issues.push('Headline troppo breve o assente.');
-  }
-
-  if (!paragraph || paragraph.length < 100) {
-    issues.push('Paragraph troppo breve o assente.');
-  }
-
-  if (keyPoints.length !== 4) {
-    issues.push(`Key points insufficienti o in eccesso: attesi 4, ricevuti ${keyPoints.length}.`);
-  }
-
-  if (String(headline).toLowerCase().includes('fallback')) {
-    issues.push('Executive summary in fallback.');
-  }
-
+  if (!headline || headline.length < 40) issues.push('Executive summary: headline troppo breve o assente.');
+  if (!paragraph || paragraph.length < 100) issues.push('Executive summary: paragraph troppo breve o assente.');
+  if (keyPoints.length !== 4) issues.push(`Executive summary: key_points deve avere esattamente 4 elementi, ricevuti ${keyPoints.length}.`);
   if (companyName && !headline.includes(companyName) && !paragraph.includes(companyName)) {
-    issues.push('Executive summary non personalizzata sul nome azienda.');
+    issues.push('Executive summary: manca personalizzazione sul nome azienda.');
   }
-
   if (sector && !summaryText.includes(sector)) {
-    issues.push('Executive summary non personalizzata sul settore.');
+    issues.push('Executive summary: manca personalizzazione sul settore.');
   }
 
-  if (recommendations.length < 3) {
-    issues.push('Raccomandazioni insufficienti.');
-  }
-
-  const recommendationsWithDescription = recommendations.filter(
-    (r: any) => typeof r?.description === 'string' && r.description.trim().length >= 80,
-  );
-
-  if (recommendationsWithDescription.length < 3) {
-    issues.push('Raccomandazioni troppo brevi o generiche.');
-  }
-
-  const recommendationsLinkedToAreas = recommendations.filter(
-    (r: any) => Array.isArray(r?.related_areas) && r.related_areas.length > 0,
-  );
-
-  if (recommendationsLinkedToAreas.length < 2) {
-    issues.push('Raccomandazioni non sufficientemente collegate alle aree di maturità.');
-  }
-
-  const recommendationsLinkedToCountries = recommendations.filter(
-    (r: any) => Array.isArray(r?.related_countries) && r.related_countries.length > 0,
-  );
-
-  if (selectedCountries.length > 0 && recommendationsLinkedToCountries.length < 1) {
-    issues.push('Raccomandazioni non collegate ai paesi selezionati.');
-  }
-
-  if (countryAnalysis.length < selectedCountries.length) {
-    issues.push('Analisi paese assente o incompleta rispetto ai paesi selezionati.');
-  }
-
-  const countryAnalysisWithContent = countryAnalysis.filter(
-    (c: any) =>
-      typeof c?.national_framework_summary === 'string' &&
-      c.national_framework_summary.trim().length >= 50,
-  );
-
-  if (selectedCountries.length > 0 && countryAnalysisWithContent.length < selectedCountries.length) {
-    issues.push('Country analysis troppo generica o incompleta.');
-  }
-
-  if (impacts.length < Math.max(3, Math.min(maturityEntries.length, 6))) {
-    issues.push('Impatti per area insufficienti.');
-  }
-
-  const impactsWithRealContent = impacts.filter(
-    (i: any) =>
-      typeof i?.impact_description === 'string' &&
-      i.impact_description.trim().length >= 40 &&
-      typeof i?.regulatory_reference === 'string' &&
-      i.regulatory_reference.trim().length >= 10,
-  );
-
-  if (impactsWithRealContent.length < Math.max(2, Math.min(maturityEntries.length, 4))) {
-    issues.push('Impacts by area troppo generici.');
-  }
-
-  if (maturity.length < Math.max(3, Math.min(maturityEntries.length, 6))) {
-    issues.push('Sezione maturity troppo incompleta.');
-  }
-
-  const maturityWithRealContent = maturity.filter(
-    (m: any) =>
-      typeof m?.gap_description === 'string' &&
-      m.gap_description.trim().length >= 40 &&
-      typeof m?.recommendation === 'string' &&
-      m.recommendation.trim().length >= 40,
-  );
-
-  if (maturityWithRealContent.length < Math.max(2, Math.min(maturityEntries.length, 4))) {
-    issues.push('Sezione maturity troppo generica o non sviluppata.');
-  }
-
-
-  const keyObligations = Array.isArray(draft?.eu_directive?.key_obligations) ? draft.eu_directive.key_obligations : [];
   if (keyObligations.length < 3 || keyObligations.length > 4) {
-    issues.push(`Obblighi Direttiva non conformi: attesi 3-4, ricevuti ${keyObligations.length}.`);
+    issues.push(`Direttiva UE: key_obligations deve avere 3-4 elementi, ricevuti ${keyObligations.length}.`);
   }
 
-  const temporalTags = recommendations
-    .map((r: any) => typeof r?.temporal_tag === 'string' ? r.temporal_tag.trim() : '')
-    .filter((x: string) => x.length > 0);
-
-  if (recommendations.length >= 3 && temporalTags.length < recommendations.length) {
-    issues.push('Temporal tag mancante in una o più raccomandazioni.');
-  }
-
-  const uniqueTemporalTags = new Set(temporalTags.map((t: string) => t.toLowerCase()));
-  if (recommendations.length >= 3 && uniqueTemporalTags.size < 2) {
-    issues.push('Distribuzione temporale insufficiente: servono almeno 2 orizzonti diversi.');
-  }
-
-  const invalidActions = recommendations.filter((r: any) => {
-    const actions = Array.isArray(r?.concrete_actions) ? r.concrete_actions.filter((a: unknown) => typeof a === 'string' && a.trim().length > 0) : [];
-    return actions.length < 2 || actions.length > 3;
-  });
-
-  if (recommendations.length >= 3 && invalidActions.length > 0) {
-    issues.push('Concrete actions non conformi: ogni raccomandazione deve avere 2-3 azioni.');
-  }
-
-
-  const maturityAnalysisChecks = maturity.filter((m: any) => typeof m?.analysis === 'string' && m.analysis.trim().length > 0);
-  if (maturity.length > 0 && maturityAnalysisChecks.length < Math.max(2, Math.min(maturity.length, 6))) {
-    issues.push('Maturity analysis assente o insufficiente per più aree.');
-  }
-
-  const invalidMaturityAnalysis = maturity.filter((m: any) => {
-    const analysis = typeof m?.analysis === 'string' ? m.analysis.trim() : '';
-    if (!analysis) return true;
-    const sentences = analysis.split(/[.!?]+/).map((x: string) => x.trim()).filter(Boolean);
-    const att = typeof m?.attention === 'string' ? m.attention.toLowerCase() : '';
-    if (att === 'alta' && sentences.length < 4) return true;
-    if (att === 'media' && sentences.length < 3) return true;
-    if (att === 'bassa' && sentences.length < 2) return true;
-    return false;
-  });
-
-  if (invalidMaturityAnalysis.length > 0) {
-    issues.push('Maturity analysis non conforme al numero minimo di frasi per livello di attenzione.');
-  }
-
-  if (lowOrMediumAreas.length > 0) {
-    const recommendationsCoveringCriticalAreas = recommendations.filter(
-      (r: any) =>
-        Array.isArray(r?.related_areas) &&
-        r.related_areas.some(
-          (areaId: unknown) => typeof areaId === 'string' && lowOrMediumAreas.includes(areaId),
-        ),
-    );
-
-    if (recommendationsCoveringCriticalAreas.length < 1) {
-      issues.push('Le raccomandazioni non coprono le aree con maturità più critica.');
+  keyObligations.forEach((ob: any, index: number) => {
+    const missing = ['article', 'title', 'description', 'subject', 'source_tag'].filter((field) => !filledString(ob?.[field]));
+    if (missing.length > 0) {
+      issues.push(`Direttiva UE: obligation ${index + 1} manca campi target: ${missing.join(', ')}.`);
     }
+    if (!SUBJECTS.includes(ob?.subject)) {
+      issues.push(`Direttiva UE: obligation ${index + 1} ha subject non ammesso.`);
+    }
+    if (ob?.source_tag !== SOURCE_TAG) {
+      issues.push(`Direttiva UE: obligation ${index + 1} deve avere source_tag "FONTE UE".`);
+    }
+  });
+
+  if (recommendations.length !== 4) {
+    issues.push(`Raccomandazioni: attese esattamente 4, ricevute ${recommendations.length}.`);
+  }
+
+  const temporalTags: string[] = [];
+  recommendations.forEach((rec: any, index: number) => {
+    const missing = [
+      'priority',
+      'temporal_tag',
+      'title',
+      'short_description',
+    ].filter((field) => !filledString(rec?.[field]));
+
+    if (missing.length > 0) {
+      issues.push(`Raccomandazione ${index + 1}: manca campi target: ${missing.join(', ')}.`);
+    }
+    if (!hasTargetAttention(rec?.priority)) {
+      issues.push(`Raccomandazione ${index + 1}: priority non ammessa.`);
+    }
+    if (!hasTemporalTag(rec?.temporal_tag)) {
+      issues.push(`Raccomandazione ${index + 1}: temporal_tag non ammesso o assente.`);
+    } else {
+      temporalTags.push(rec.temporal_tag);
+    }
+
+    const relatedAreas = filledStrings(rec?.related_areas);
+    const relatedCountries = filledStrings(rec?.related_countries);
+    const directiveArticles = filledStrings(rec?.directive_articles);
+    const concreteActions = filledStrings(rec?.concrete_actions);
+
+    if (relatedAreas.length === 0) issues.push(`Raccomandazione ${index + 1}: related_areas vuoto.`);
+    if (relatedCountries.length === 0) issues.push(`Raccomandazione ${index + 1}: related_countries vuoto.`);
+    if (directiveArticles.length === 0) issues.push(`Raccomandazione ${index + 1}: directive_articles vuoto.`);
+    if (concreteActions.length < 2 || concreteActions.length > 3) {
+      issues.push(`Raccomandazione ${index + 1}: concrete_actions deve avere 2-3 azioni.`);
+    }
+    if (concreteActions.some(isVagueAction)) {
+      issues.push(`Raccomandazione ${index + 1}: concrete_actions contiene azioni troppo vaghe.`);
+    }
+  });
+
+  if (new Set(temporalTags).size < 2) {
+    issues.push('Raccomandazioni: servono almeno 2 temporal_tag diversi.');
+  }
+
+  if (maturity.length === 0) {
+    issues.push('Maturity: sezione assente.');
+  }
+
+  maturity.forEach((area: any, index: number) => {
+    const missing = ['area_name', 'maturity_level', 'attention', 'analysis'].filter((field) => !filledString(area?.[field]));
+    if (missing.length > 0) {
+      issues.push(`Maturity area ${index + 1}: manca campi target: ${missing.join(', ')}.`);
+    }
+    if (!hasTargetAttention(area?.attention)) {
+      issues.push(`Maturity area ${index + 1}: attention non ammessa o assente.`);
+    }
+    if (!hasMaturityLevel(area?.maturity_level)) {
+      issues.push(`Maturity area ${index + 1}: maturity_level non ammesso o assente.`);
+    }
+    if (filledString(area?.recommendation)) {
+      issues.push(`Maturity area ${index + 1}: non deve contenere recommendation; usare analysis diagnostica.`);
+    }
+    const directiveArticles = filledStrings(area?.directive_articles);
+    if (directiveArticles.length === 0) {
+      issues.push(`Maturity area ${index + 1}: directive_articles vuoto.`);
+    }
+    if (filledString(area?.analysis) && hasTargetAttention(area?.attention)) {
+      const min = area.attention === 'Alta' ? 4 : area.attention === 'Media' ? 3 : 2;
+      if (sentenceCount(area.analysis) < min) {
+        issues.push(`Maturity area ${index + 1}: analysis troppo breve per attention ${area.attention}.`);
+      }
+    }
+  });
+
+  const roadmapIntro = draft?.roadmap?.roadmap_intro ?? draft?.roadmap?.intro ?? draft?.roadmap_intro;
+  const engagementPriorities =
+    draft?.roadmap?.engagement_priorities ??
+    draft?.roadmap?.engagementPriorities ??
+    draft?.engagement_priorities;
+
+  if (!filledString(roadmapIntro)) {
+    issues.push('Roadmap: roadmap_intro assente.');
+  }
+
+  const roadmapPriorities = filledStrings(engagementPriorities);
+  if (roadmapPriorities.length < 3 || roadmapPriorities.length > 4) {
+    issues.push(`Roadmap: engagement_priorities deve avere 3-4 elementi, ricevuti ${roadmapPriorities.length}.`);
+  }
+  if (roadmapPriorities.some((p) => /NTT DATA|fornitor[ei]|consulent[ei]|partner estern[oi]/i.test(p))) {
+    issues.push('Roadmap: engagement_priorities non deve citare NTT DATA, fornitori o consulenti esterni.');
+  }
+
+  const comparison = draft?.countries_comparison ?? {};
+  const comparisonRows = Array.isArray(comparison?.table_rows)
+    ? comparison.table_rows
+    : Array.isArray(comparison?.comparison_table)
+      ? comparison.comparison_table
+      : [];
+  const comparisonTimeline = Array.isArray(comparison?.timeline) ? comparison.timeline : [];
+
+  if (isMultiCountry) {
+    if (!filledString(comparison?.thesis)) issues.push('Multi-country: thesis assente.');
+    if (comparisonTimeline.length === 0) issues.push('Multi-country: timeline assente.');
+    if (comparisonRows.length < 4) issues.push(`Multi-country: table_rows deve avere almeno 4 righe, ricevute ${comparisonRows.length}.`);
   }
 
   return issues;
@@ -522,30 +384,48 @@ export async function generateReportJson(input: GenerateInput): Promise<unknown>
     }
   };
 
+  const retryForIssues = async (issues: string[]) => {
+    const retry = await attempt(
+      `ATTENZIONE: la risposta precedente non rispetta il contratto dati. Problemi specifici: ${issues.join(' ')} Rigenera un JSON completo mantenendo esattamente la struttura richiesta.`,
+    );
+    const retryIssues = assessQuality(retry, { assessmentInput: input.assessmentInput });
+    if (retryIssues.length > 0) {
+      throw Object.assign(
+        new Error(`SCHEMA_VALIDATION_ERROR: ${retryIssues.join(' ')}`),
+        { code: 'SCHEMA_VALIDATION_ERROR', issues: retryIssues },
+      );
+    }
+    return retry;
+  };
+
   try {
     const first = await attempt();
-
-    const issues = assessQuality(first, {
-      assessmentInput: input.assessmentInput,
-    });
-
-    if (issues.length === 0) {
-      return first;
-    }
-
-    const enriched = await attempt(`ATTENZIONE: la risposta è formalmente valida ma qualitativamente insufficiente. Problemi: ${issues.join(' ')}. Rigenera un report completo e concreto mantenendo esattamente la stessa struttura JSON.`);
-    return enriched;
+    const issues = assessQuality(first, { assessmentInput: input.assessmentInput });
+    return issues.length === 0 ? first : retryForIssues(issues);
   } catch (e) {
     const err = normalizeError(e);
-    if (err.code === 'RATE_LIMIT' || err.code === 'SAFETY' || err.code === 'BAD_REQUEST' || err.code === 'EMPTY_RESPONSE' || err.code === 'JSON_PARSE_ERROR' || err.code === 'TIMEOUT') {
+    if (err.code === 'RATE_LIMIT' || err.code === 'SAFETY' || err.code === 'BAD_REQUEST' || err.code === 'EMPTY_RESPONSE') {
       throw Object.assign(new Error(err.message ?? String(err)), { code: err.code });
     }
 
     try {
-      return await attempt('ATTENZIONE: la tua risposta precedente aveva problemi di parsing/validazione. Rigenera JSON valido.');
+      const retry = await attempt(
+        `ATTENZIONE: la risposta precedente aveva problemi tecnici o di validazione (${err.code}). Rigenera JSON valido e conforme al contratto dati target.`,
+      );
+      const retryIssues = assessQuality(retry, { assessmentInput: input.assessmentInput });
+      if (retryIssues.length > 0) {
+        throw Object.assign(
+          new Error(`SCHEMA_VALIDATION_ERROR: ${retryIssues.join(' ')}`),
+          { code: 'SCHEMA_VALIDATION_ERROR', issues: retryIssues },
+        );
+      }
+      return retry;
     } catch (retryError) {
       const retryMapped = normalizeError(retryError);
-      throw Object.assign(new Error(retryMapped.message ?? 'Errore generazione report'), { code: retryMapped.code });
+      throw Object.assign(new Error(retryMapped.message ?? 'Errore generazione report'), {
+        code: retryMapped.code,
+        issues: (retryError as any)?.issues,
+      });
     }
   }
 }

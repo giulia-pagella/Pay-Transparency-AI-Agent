@@ -80,7 +80,15 @@ function buildAiSchemaTemplate(skeleton: ReportJson) {
 
     eu_directive: {
       overview: '',
-      key_obligations: [],
+      key_obligations: [
+        {
+          article: 'Art. 5',
+          title: '',
+          description: '',
+          subject: 'datore di lavoro',
+          source_tag: 'FONTE UE',
+        },
+      ],
       timeline_summary: '',
     },
 
@@ -95,15 +103,26 @@ function buildAiSchemaTemplate(skeleton: ReportJson) {
     })),
 
     countries_comparison: {
-      // Provide example rows so the AI knows the exact shape of cells keys (country codes)
-      table_rows: [
-        {
-          topic: 'Esempio tema di confronto',
-          cells: Object.fromEntries(
-            skeleton.metadata.selected_countries.map((c) => [c, '']),
-          ),
-        },
-      ],
+      thesis: skeleton.metadata.selected_countries.length > 1 ? '' : null,
+      timeline: skeleton.metadata.selected_countries.length > 1
+        ? skeleton.perimeter.countries_analyzed.map((c) => ({
+            country_code: c.code,
+            country_name: c.name,
+            status: c.status === 'draft' ? 'in_bozza' : 'vigente',
+            enforcement_date: '',
+            phase_label: '',
+          }))
+        : [],
+      table_rows: skeleton.metadata.selected_countries.length > 1
+        ? [
+            {
+              topic: 'Esempio tema di confronto',
+              cells: Object.fromEntries(
+                skeleton.metadata.selected_countries.map((c) => [c, '']),
+              ),
+            },
+          ]
+        : [],
       narrative: '',
     },
 
@@ -119,13 +138,70 @@ function buildAiSchemaTemplate(skeleton: ReportJson) {
     maturity: skeleton.maturity.map((x) => ({
       area_id: x.area_id,
       area_name: x.area_name,
+      maturity_level: x.maturity_level,
+      attention: x.attention ?? 'Media',
+      directive_articles: [],
+      analysis: '',
       current_level: x.current_level,
       current_level_label: x.current_level_label,
       gap_description: '',
-      recommendation: '',
     })),
 
-    recommendations: [],
+    recommendations: [
+      {
+        id: 'R1',
+        priority: 'Alta',
+        temporal_tag: 'Immediata',
+        related_areas: [],
+        related_countries: skeleton.metadata.selected_countries,
+        title: '',
+        short_description: '',
+        concrete_actions: ['', ''],
+        directive_articles: [],
+        description: '',
+      },
+      {
+        id: 'R2',
+        priority: 'Media',
+        temporal_tag: 'Entro 6 mesi',
+        related_areas: [],
+        related_countries: skeleton.metadata.selected_countries,
+        title: '',
+        short_description: '',
+        concrete_actions: ['', ''],
+        directive_articles: [],
+        description: '',
+      },
+      {
+        id: 'R3',
+        priority: 'Media',
+        temporal_tag: 'Entro 12 mesi',
+        related_areas: [],
+        related_countries: skeleton.metadata.selected_countries,
+        title: '',
+        short_description: '',
+        concrete_actions: ['', ''],
+        directive_articles: [],
+        description: '',
+      },
+      {
+        id: 'R4',
+        priority: 'Bassa',
+        temporal_tag: 'Entro 12 mesi',
+        related_areas: [],
+        related_countries: skeleton.metadata.selected_countries,
+        title: '',
+        short_description: '',
+        concrete_actions: ['', ''],
+        directive_articles: [],
+        description: '',
+      },
+    ],
+
+    roadmap: {
+      roadmap_intro: '',
+      engagement_priorities: ['', '', ''],
+    },
 
     limits: {
       scope_limitations: '',
@@ -199,38 +275,38 @@ export async function POST(req: Request) {
 
   try {
     const skeleton = buildReportSkeleton({
-    company: parsed.data.company,
-    selectedCountries: parsed.data.selected_countries,
-    completedAreasCount: compiled,
-    hasDraftSources,
-    hasPartialDataFlag: compiled < 9,
-    selectedRegulations: selectedRegs,
-    euRegulation: eu,
-    maturityConfig,
-    maturityValues: parsed.data.maturity,
-    attentionByArea: attention.byArea as any,
-    overallAttention: attentionLevel.level,
-    attentionScore: attentionLevel.score,
-    attentionBreakdown: attentionLevel.breakdown,
-    attentionTriggers: attentionLevel.triggers,
-  });
+      company: parsed.data.company,
+      selectedCountries: parsed.data.selected_countries,
+      completedAreasCount: compiled,
+      hasDraftSources,
+      hasPartialDataFlag: compiled < 9,
+      selectedRegulations: selectedRegs,
+      euRegulation: eu,
+      maturityConfig,
+      maturityValues: parsed.data.maturity,
+      attentionByArea: attention.byArea as any,
+      overallAttention: attentionLevel.level,
+      attentionScore: attentionLevel.score,
+      attentionBreakdown: attentionLevel.breakdown,
+      attentionTriggers: attentionLevel.triggers,
+    });
 
-const schemaTemplate = buildAiSchemaTemplate(skeleton);
+    const schemaTemplate = buildAiSchemaTemplate(skeleton);
 
-const aiDraft = await generateReportJson({
-  apiKey: session.apiKey,
-  assessmentInput,
-  attentionLevels: {
-    byArea: attention.byArea,
-    overall: attentionLevel.level,
-    score: attentionLevel.score,
-    triggers: attentionLevel.triggers,
-  },
-  sources: aiSources,
-  partialData: compiled < 9,
-  hasDraftSources,
-  schemaTemplate,
-});
+    const aiDraft = await generateReportJson({
+      apiKey: session.apiKey,
+      assessmentInput,
+      attentionLevels: {
+        byArea: attention.byArea,
+        overall: attentionLevel.level,
+        score: attentionLevel.score,
+        triggers: attentionLevel.triggers,
+      },
+      sources: aiSources,
+      partialData: compiled < 9,
+      hasDraftSources,
+      schemaTemplate,
+    });
 
     const repaired = repairReportFromAi(aiDraft, skeleton);
     const report = reportSchema.parse(repaired);
