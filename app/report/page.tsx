@@ -1,12 +1,17 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { SessionHeader } from '@/components/session-header';
 import { Icon } from '@/components/icon';
 import { ProfiloMaturitaRadar } from '@/components/ProfiloMaturitaRadar';
 import type { ReportJson } from '@/lib/schemas/report';
-import { formatDateIT } from '@/lib/utils/date';
+import { ReportFooter } from './components/ReportFooter';
+import { ReportHeader } from './components/ReportHeader';
+import { ReportSidebar } from './components/ReportSidebar';
+import { ReportAccordionSection, ReportSectionHeading } from './components/ReportSection';
+import { getReportSectionById, getVisibleReportSections, isMultiCountry } from './components/reportSections';
+import { useScrollSpy } from './hooks/useScrollSpy';
 
 function ScoringPanel({ report }: { report: ReportJson }) {
   const es = report.executive_summary;
@@ -72,40 +77,11 @@ function ScoringPanel({ report }: { report: ReportJson }) {
   );
 }
 
-type Section = { id: string; num: string; title: string };
-
-const SECTIONS: Section[] = [
-  { id: 'exec',     num: '01', title: 'Executive Summary' },
-  { id: 'perimeter', num: '02', title: 'Perimetro dell\'analisi' },
-  { id: 'eu',       num: '03', title: 'Direttiva UE 2023/970' },
-  { id: 'countries', num: '04', title: 'Analisi per paese' },
-  { id: 'compare',  num: '05', title: 'Confronto multi-country' },
-  { id: 'impacts',  num: '06', title: 'Impatti per area HR' },
-  { id: 'maturity', num: '07', title: 'Profilo di maturità' },
-  { id: 'reco',     num: '08', title: 'Raccomandazioni' },
-  { id: 'limits',   num: '09', title: 'Limiti e caveat' },
-  { id: 'sources',  num: '10', title: 'Fonti normative' },
-];
-
 function AttentionPill({ level }: { level: string | null }) {
   if (!level) return <span className="attention attention-na">Non valutata</span>;
   const map: Record<string, string> = { alta: 'attention-alta', media: 'attention-media', bassa: 'attention-bassa' };
   const labels: Record<string, string> = { alta: 'Attenzione Alta', media: 'Attenzione Media', bassa: 'Attenzione Bassa' };
   return <span className={`attention ${map[level] ?? 'attention-na'}`}>{labels[level] ?? level}</span>;
-}
-
-function AccordionItem({ section, children, defaultOpen = false }: { section: Section; children: React.ReactNode; defaultOpen?: boolean }) {
-  const [open, setOpen] = useState(defaultOpen);
-  return (
-    <div id={section.id} className={`accordion-item ${open ? 'open' : ''}`}>
-      <div className="accordion-head" onClick={() => setOpen((v) => !v)}>
-        <span className="accordion-num">{section.num}</span>
-        <h3 className="accordion-title">{section.title}</h3>
-        <Icon name="plus" size={20} className="accordion-toggle" />
-      </div>
-      {open && <div className="accordion-body">{children}</div>}
-    </div>
-  );
 }
 
 function LoadingShell() {
@@ -124,10 +100,12 @@ function LoadingShell() {
 export default function ReportPage() {
   const [report, setReport] = useState<ReportJson | null>(null);
   const [error, setError] = useState('');
-  const [activeSection, setActiveSection] = useState('exec');
   const [scoringOpen, setScoringOpen] = useState(false);
   const router = useRouter();
   const mainRef = useRef<HTMLDivElement>(null);
+  const visibleSections = useMemo(() => (report ? getVisibleReportSections(report) : []), [report]);
+  const visibleSectionIds = useMemo(() => visibleSections.map((section) => section.id), [visibleSections]);
+  const activeSection = useScrollSpy(visibleSectionIds, mainRef, 'exec');
 
   useEffect(() => {
     fetch('/api/ai/session/status')
@@ -140,19 +118,6 @@ export default function ReportPage() {
       .catch(() => setError('Errore di rete durante il caricamento del report.'));
   }, []);
 
-  useEffect(() => {
-    const main = mainRef.current;
-    if (!main) return;
-    const handler = () => {
-      for (const s of SECTIONS.slice().reverse()) {
-        const el = document.getElementById(s.id);
-        if (el && el.getBoundingClientRect().top <= 120) { setActiveSection(s.id); break; }
-      }
-    };
-    main.addEventListener('scroll', handler, { passive: true });
-    return () => main.removeEventListener('scroll', handler);
-  }, []);
-
   async function resetAssessment() {
     const ok = window.confirm('Ricominciando da capo verranno cancellati tutti i dati del questionario e il report attuale, ma la tua chiave API rimarrà attiva. Vuoi procedere?');
     if (!ok) return;
@@ -161,7 +126,7 @@ export default function ReportPage() {
   }
 
   function scrollTo(id: string) {
-    const el = mainRef.current?.querySelector(`#${id}`);
+    const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
@@ -183,85 +148,38 @@ export default function ReportPage() {
   if (!report) return <LoadingShell />;
 
   const r = report;
+  const multiCountry = isMultiCountry(r);
+  const execSection = getReportSectionById(visibleSections, 'exec');
+  const euSection = getReportSectionById(visibleSections, 'eu');
+  const multiCountrySection = multiCountry ? getReportSectionById(visibleSections, 'multi-country') : null;
+  const impactsSection = getReportSectionById(visibleSections, 'impacts');
+  const maturitySection = getReportSectionById(visibleSections, 'maturity');
+  const recoSection = getReportSectionById(visibleSections, 'reco');
+  const limitsSection = getReportSectionById(visibleSections, 'limits');
+  const sourcesSection = getReportSectionById(visibleSections, 'sources');
   const attColor = { alta: 'var(--ntt-orange-100)', media: 'var(--ntt-yellow)', bassa: 'var(--ntt-green-150)' }[r.executive_summary.overall_attention] ?? 'var(--ntt-gray-100)';
-  const attBg    = { alta: 'rgba(228,38,0,.12)', media: 'rgba(255,196,0,.12)', bassa: 'rgba(0,203,93,.12)' }[r.executive_summary.overall_attention] ?? 'rgba(0,0,0,.06)';
+  const attBg = { alta: 'rgba(228,38,0,.12)', media: 'rgba(255,196,0,.12)', bassa: 'rgba(0,203,93,.12)' }[r.executive_summary.overall_attention] ?? 'rgba(0,0,0,.06)';
 
   return (
     <div className="ptt-screen">
       <SessionHeader />
 
       <div className="report-layout">
-        {/* Sidebar */}
-        <nav className="report-sidebar">
-          <div style={{ fontSize: 10, color: 'rgba(255,255,255,.45)', textTransform: 'uppercase', letterSpacing: '.12em', fontWeight: 700, marginBottom: 6 }}>Report</div>
-          <div className="serif" style={{ fontSize: 16, color: 'white', lineHeight: 1.25, marginBottom: 20 }}>
-            {r.metadata.company_name}
-          </div>
+        <ReportSidebar
+          activeSection={activeSection}
+          companyName={r.metadata.company_name}
+          sections={visibleSections}
+          onNavigate={scrollTo}
+          onEditAssessment={() => router.push('/questionario')}
+          onResetAssessment={resetAssessment}
+        />
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 1, marginBottom: 22 }}>
-            {SECTIONS.map((s) => (
-              <button
-                key={s.id}
-                className={`anchor-link ${activeSection === s.id ? 'active' : ''}`}
-                onClick={() => scrollTo(s.id)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', fontFamily: 'var(--font-sans)' }}
-              >
-                <span><span className="anchor-num">{s.num}</span>{s.title}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* Disclaimer removed by design */}
-          {/* Actions */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-            <a href="/api/pdf" className="btn btn-primary btn-sm" style={{ justifyContent: 'flex-start' }}>
-              <Icon name="download" size={13} /> Scarica PDF
-            </a>
-            <button onClick={() => router.push('/questionario')} style={{ background: 'transparent', color: 'rgba(255,255,255,.75)', border: '1px solid rgba(255,255,255,.2)', padding: '7px 12px', fontSize: 12, fontWeight: 700, fontFamily: 'var(--font-sans)', borderRadius: 2, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-              <Icon name="edit" size={12} /> Modifica assessment
-            </button>
-            <button onClick={resetAssessment} style={{ background: 'transparent', color: 'rgba(255,255,255,.5)', border: 'none', padding: '5px 0', fontSize: 11, cursor: 'pointer', fontFamily: 'var(--font-sans)', textAlign: 'left', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-              <Icon name="refresh" size={11} /> Ricomincia da capo
-            </button>
-          </div>
-        </nav>
-
-        {/* Main */}
         <div className="report-main" ref={mainRef}>
-          {/* Partial data banner */}
-          {r.metadata.has_partial_data_flag && (
-            <div className="alert alert-warn" style={{ marginBottom: 24 }}>
-              <Icon name="info" size={18} className="alert-icon" style={{ color: '#8B6B00' }} />
-              <div className="alert-body">
-                <strong>Dati parziali — assessment completato al {Math.round((r.metadata.completed_areas_count / 9) * 100)}%</strong>
-                Sono state valutate {r.metadata.completed_areas_count} aree di maturità su 9. Per un&apos;analisi più completa torna al questionario.
-              </div>
-            </div>
-          )}
+          <ReportHeader report={r} />
 
-          {/* Title block */}
-          <div style={{ marginBottom: 8 }}>
-            <div className="eyebrow" style={{ marginBottom: 12 }}>PAY TRANSPARENCY ASSESSMENT REPORT</div>
-            <h1 className="serif" style={{ fontSize: 44, lineHeight: 1.1, margin: '0 0 10px', color: 'var(--ntt-smart-navy)', letterSpacing: '-0.015em' }}>
-              {r.metadata.company_name}
-            </h1>
-            <div style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap', fontSize: 13, color: 'var(--ntt-gray-100)' }}>
-              <span>{r.metadata.sector} · {r.metadata.employee_range} · {r.metadata.organizational_model}</span>
-              <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--ntt-gray-100)', display: 'inline-block' }} />
-              <span>Generato il {formatDateIT(r.metadata.generated_at)}</span>
-              {r.metadata.has_partial_data_flag && <span className="badge badge-yellow"><span className="badge-dot" />Dati parziali</span>}
-              {r.metadata.has_draft_sources && <span className="badge badge-yellow"><span className="badge-dot" />Fonte in bozza</span>}
-            </div>
-          </div>
+          <div id={execSection.id} style={{ marginTop: 36 }}>
+            <ReportSectionHeading section={execSection} />
 
-          {/* ── 01 Executive Summary ── */}
-          <div id="exec" style={{ marginTop: 36 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
-              <span className="accordion-num" style={{ margin: 0 }}>01</span>
-              <h2 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: 'var(--ntt-smart-navy)' }}>Executive Summary</h2>
-            </div>
-
-            {/* Navy card */}
             <div style={{ background: 'var(--ntt-smart-navy)', color: 'white', padding: 28, borderRadius: 4, position: 'relative', overflow: 'hidden', marginBottom: 18 }}>
               <div style={{ position: 'absolute', right: -60, top: -60, width: 300, height: 300, backgroundImage: "url('/assets/innovation-curve-twothirds-white.svg')", backgroundSize: 'contain', backgroundRepeat: 'no-repeat', opacity: .08 }} />
               <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 32, alignItems: 'flex-start', position: 'relative', zIndex: 2 }}>
@@ -292,7 +210,6 @@ export default function ReportPage() {
               {scoringOpen && <ScoringPanel report={r} />}
             </div>
 
-            {/* KPI grid */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, marginBottom: 20 }}>
               {[
                 { n: String(r.metadata.selected_countries.length), l: r.metadata.selected_countries.length === 1 ? 'Paese analizzato' : 'Paesi analizzati', s: r.metadata.selected_countries.join(', '), c: 'var(--ntt-future-blue)' },
@@ -307,7 +224,6 @@ export default function ReportPage() {
               ))}
             </div>
 
-            {/* Key points */}
             <div className="card" style={{ padding: 22 }}>
               <div className="eyebrow" style={{ marginBottom: 14 }}>PUNTI CHIAVE</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -323,20 +239,8 @@ export default function ReportPage() {
             </div>
           </div>
 
-          {/* ── Accordion sections ── */}
           <div className="accordion" style={{ marginTop: 44 }}>
-
-            <AccordionItem section={SECTIONS[1]!}>
-              <div className="prose">
-                <p><strong>Settore:</strong> {r.perimeter.company_block['sector'] ?? r.metadata.sector} · <strong>Dipendenti:</strong> {r.metadata.employee_range} · <strong>Modello:</strong> {r.metadata.organizational_model}</p>
-                <p><strong>Paesi inclusi nell&apos;analisi:</strong>{' '}
-                  {r.perimeter.countries_analyzed.map((c) => `${c.name}${c.status === 'draft' ? ' (bozza)' : ''}`).join(', ')}
-                </p>
-                {r.perimeter.excluded_scope && <p><strong>Fuori perimetro:</strong> {r.perimeter.excluded_scope}</p>}
-              </div>
-            </AccordionItem>
-
-            <AccordionItem section={SECTIONS[2]!}>
+            <ReportAccordionSection section={euSection}>
               <div className="prose">
                 <p>{r.eu_directive.overview}</p>
                 <p>{r.eu_directive.timeline_summary}</p>
@@ -357,55 +261,55 @@ export default function ReportPage() {
                   ))}
                 </div>
               )}
-            </AccordionItem>
+            </ReportAccordionSection>
 
-            <AccordionItem section={SECTIONS[3]!}>
-              {r.country_analysis.map((ca) => (
-                <div key={ca.country_code} style={{ marginBottom: 24 }}>
-                  <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 10 }}>
-                    <h4 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: 'var(--ntt-smart-navy)' }}>{ca.country_name}</h4>
-                    {ca.status === 'draft' && <span className="badge badge-yellow"><span className="badge-dot" />Bozza</span>}
+            {multiCountrySection && (
+              <ReportAccordionSection section={multiCountrySection}>
+                {r.country_analysis.map((ca) => (
+                  <div key={ca.country_code} style={{ marginBottom: 24 }}>
+                    <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 10 }}>
+                      <h4 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: 'var(--ntt-smart-navy)' }}>{ca.country_name}</h4>
+                      {ca.status === 'draft' && <span className="badge badge-yellow"><span className="badge-dot" />Bozza</span>}
+                    </div>
+                    <div className="prose">
+                      <p>{ca.national_framework_summary}</p>
+                      {ca.key_differences_vs_eu.length > 0 && (
+                        <ul>{ca.key_differences_vs_eu.map((d, i) => <li key={i}>{d}</li>)}</ul>
+                      )}
+                      {ca.implementation_notes && <p style={{ fontStyle: 'italic', color: 'var(--ntt-gray-100)', fontSize: 13 }}>{ca.implementation_notes}</p>}
+                    </div>
                   </div>
-                  <div className="prose">
-                    <p>{ca.national_framework_summary}</p>
-                    {ca.key_differences_vs_eu.length > 0 && (
-                      <ul>{ca.key_differences_vs_eu.map((d, i) => <li key={i}>{d}</li>)}</ul>
-                    )}
-                    {ca.implementation_notes && <p style={{ fontStyle: 'italic', color: 'var(--ntt-gray-100)', fontSize: 13 }}>{ca.implementation_notes}</p>}
-                  </div>
-                </div>
-              ))}
-            </AccordionItem>
+                ))}
 
-            <AccordionItem section={SECTIONS[4]!}>
-              <div className="prose"><p>{r.countries_comparison.narrative}</p></div>
-              {r.countries_comparison.table_rows.length > 0 && (
-                <div style={{ overflowX: 'auto', marginTop: 14 }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-                    <thead>
-                      <tr style={{ borderBottom: '2px solid var(--ntt-smart-navy)' }}>
-                        <th style={{ textAlign: 'left', padding: '8px 10px', fontSize: 11, fontWeight: 700, color: 'var(--ntt-smart-navy)', textTransform: 'uppercase', letterSpacing: '.06em' }}>Tema</th>
-                        {r.metadata.selected_countries.map((c) => (
-                          <th key={c} style={{ textAlign: 'left', padding: '8px 10px', fontSize: 11, fontWeight: 700, color: 'var(--ntt-smart-navy)', textTransform: 'uppercase', letterSpacing: '.06em' }}>{c}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {r.countries_comparison.table_rows.map((row, i) => (
-                        <tr key={i} style={{ borderBottom: '1px solid var(--ntt-gray-50)' }}>
-                          <td style={{ padding: '9px 10px', fontWeight: 700, color: 'var(--ntt-smart-navy)', fontSize: 13 }}>{row.topic}</td>
+                <div className="prose"><p>{r.countries_comparison.narrative}</p></div>
+                {r.countries_comparison.table_rows.length > 0 && (
+                  <div style={{ overflowX: 'auto', marginTop: 14 }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                      <thead>
+                        <tr style={{ borderBottom: '2px solid var(--ntt-smart-navy)' }}>
+                          <th style={{ textAlign: 'left', padding: '8px 10px', fontSize: 11, fontWeight: 700, color: 'var(--ntt-smart-navy)', textTransform: 'uppercase', letterSpacing: '.06em' }}>Tema</th>
                           {r.metadata.selected_countries.map((c) => (
-                            <td key={c} style={{ padding: '9px 10px', color: 'var(--ntt-text-gray)', fontSize: 13 }}>{row.cells[c] ?? '—'}</td>
+                            <th key={c} style={{ textAlign: 'left', padding: '8px 10px', fontSize: 11, fontWeight: 700, color: 'var(--ntt-smart-navy)', textTransform: 'uppercase', letterSpacing: '.06em' }}>{c}</th>
                           ))}
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </AccordionItem>
+                      </thead>
+                      <tbody>
+                        {r.countries_comparison.table_rows.map((row, i) => (
+                          <tr key={i} style={{ borderBottom: '1px solid var(--ntt-gray-50)' }}>
+                            <td style={{ padding: '9px 10px', fontWeight: 700, color: 'var(--ntt-smart-navy)', fontSize: 13 }}>{row.topic}</td>
+                            {r.metadata.selected_countries.map((c) => (
+                              <td key={c} style={{ padding: '9px 10px', color: 'var(--ntt-text-gray)', fontSize: 13 }}>{row.cells[c] ?? '—'}</td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </ReportAccordionSection>
+            )}
 
-            <AccordionItem section={SECTIONS[5]!} defaultOpen>
+            <ReportAccordionSection section={impactsSection} defaultOpen>
               <p style={{ fontSize: 13, color: 'var(--ntt-text-gray)', marginBottom: 16, maxWidth: 700 }}>
                 Livello di attenzione per area, calcolato combinando maturità dichiarata e obbligo diretto della Direttiva.
               </p>
@@ -423,13 +327,13 @@ export default function ReportPage() {
                   </div>
                 ))}
               </div>
-            </AccordionItem>
+            </ReportAccordionSection>
 
-            <AccordionItem section={SECTIONS[6]!}>
+            <ReportAccordionSection section={maturitySection}>
               <ProfiloMaturitaRadar areas={r.maturity} />
-            </AccordionItem>
+            </ReportAccordionSection>
 
-            <AccordionItem section={SECTIONS[7]!} defaultOpen>
+            <ReportAccordionSection section={recoSection} defaultOpen>
               <p style={{ fontSize: 13, color: 'var(--ntt-text-gray)', marginBottom: 16, maxWidth: 700 }}>
                 Raccomandazioni preliminari ordinate per priorità, collegate alle aree HR e alle fonti normative.
               </p>
@@ -456,18 +360,18 @@ export default function ReportPage() {
                   );
                 })}
               </div>
-            </AccordionItem>
+            </ReportAccordionSection>
 
-            <AccordionItem section={SECTIONS[8]!}>
+            <ReportAccordionSection section={limitsSection}>
               <div className="prose">
                 <p>{r.limits.scope_limitations}</p>
                 <p>{r.limits.methodological_caveats}</p>
                 {r.limits.draft_warning && <p style={{ color: '#8B6B00' }}><strong>Fonte in bozza:</strong> {r.limits.draft_warning}</p>}
                 {r.limits.partial_data_warning && <p style={{ color: 'var(--ntt-orange-150)' }}><strong>Dati parziali:</strong> {r.limits.partial_data_warning}</p>}
               </div>
-            </AccordionItem>
+            </ReportAccordionSection>
 
-            <AccordionItem section={SECTIONS[9]!}>
+            <ReportAccordionSection section={sourcesSection}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {r.sources.map((src, i) => (
                   <div key={i} style={{ display: 'flex', gap: 14, alignItems: 'flex-start', padding: '12px 0', borderBottom: '1px solid var(--ntt-gray-50)' }}>
@@ -480,14 +384,10 @@ export default function ReportPage() {
                   </div>
                 ))}
               </div>
-            </AccordionItem>
-
+            </ReportAccordionSection>
           </div>
 
-          {/* Footer */}
-          <div style={{ marginTop: 44, paddingTop: 20, borderTop: '1px solid var(--ntt-gray-50)', fontSize: 11, color: 'var(--ntt-gray-100)', lineHeight: 1.6 }}>
-            Report v{r.metadata.tool_version} · {formatDateIT(r.metadata.generated_at)} · Pay Transparency Assessment Tool · NTT DATA Italia  · <strong>Documento AI, non costituisce consulenza legale.</strong>
-          </div>
+          <ReportFooter report={r} />
         </div>
       </div>
     </div>
