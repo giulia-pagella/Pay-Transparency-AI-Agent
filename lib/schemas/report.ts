@@ -1,12 +1,70 @@
 import { z } from 'zod';
 
 const att = z.enum(['alta', 'media', 'bassa']);
+const targetAtt = z.enum(['Alta', 'Media', 'Bassa']);
+const reportPriority = z.union([att, targetAtt]);
+const temporalTag = z.enum(['Immediata', 'Entro 6 mesi', 'Entro 12 mesi']);
+const directiveSubject = z.enum(['datore di lavoro', 'Stato membro', 'candidato', 'lavoratore']);
+const maturityLevel = z.enum(['Iniziale', 'Parziale', 'Strutturato', 'Avanzato', 'Non valutata']);
+const comparisonStatus = z.enum(['vigente', 'in_bozza', 'in_recepimento']);
 
 const attentionBreakdownSchema = z.object({
   maturity: z.object({ value: z.number(), weight: z.literal(0.5), contribution: z.number() }),
   organization: z.object({ value: z.number(), weight: z.literal(0.25), contribution: z.number() }),
   timeToCompliance: z.object({ value: z.number(), weight: z.literal(0.15), contribution: z.number() }),
   sectorRisk: z.object({ value: z.number(), weight: z.literal(0.10), contribution: z.number() }),
+});
+
+const euObligationSchema = z.object({
+  article: z.string(),
+  title: z.string(),
+  description: z.string(),
+  subject: directiveSubject,
+  source_tag: z.literal('FONTE UE').default('FONTE UE'),
+  // Legacy fields still consumed by the current web/PDF renderers.
+  article_reference: z.string().optional(),
+  relevance: att.optional(),
+});
+
+const comparisonRowSchema = z.object({
+  topic: z.string(),
+  cells: z.record(z.string(), z.string()),
+});
+
+const comparisonTimelineSchema = z.object({
+  country_code: z.string(),
+  country_name: z.string(),
+  status: comparisonStatus,
+  enforcement_date: z.string(),
+  phase_label: z.string(),
+});
+
+const maturityAreaReportSchema = z.object({
+  area_id: z.string(),
+  area_name: z.string(),
+  maturity_level: maturityLevel,
+  attention: targetAtt.nullable(),
+  directive_articles: z.array(z.string()),
+  analysis: z.string(),
+  // Legacy fields still consumed by the current web/PDF renderers.
+  current_level: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]).nullable(),
+  current_level_label: z.string(),
+  gap_description: z.string(),
+  recommendation: z.string().optional(),
+});
+
+const recommendationSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  priority: reportPriority,
+  temporal_tag: temporalTag,
+  short_description: z.string(),
+  concrete_actions: z.array(z.string()).min(2).max(3),
+  directive_articles: z.array(z.string()).min(1),
+  related_areas: z.array(z.string()).min(1),
+  related_countries: z.array(z.string()).min(1),
+  // Legacy field still consumed by the current web/PDF renderers.
+  description: z.string(),
 });
 
 export const reportSchema = z.object({
@@ -40,14 +98,7 @@ export const reportSchema = z.object({
   }),
   eu_directive: z.object({
     overview: z.string(),
-    key_obligations: z.array(
-      z.object({
-        title: z.string(),
-        description: z.string(),
-        article_reference: z.string(),
-        relevance: att,
-      }),
-    ),
+    key_obligations: z.array(euObligationSchema).min(3).max(4),
     timeline_summary: z.string(),
   }),
   country_analysis: z.array(
@@ -64,9 +115,11 @@ export const reportSchema = z.object({
     }),
   ),
   countries_comparison: z.object({
-    table_rows: z.array(
-      z.object({ topic: z.string(), cells: z.record(z.string(), z.string()) }),
-    ),
+    thesis: z.string().nullable(),
+    timeline: z.array(comparisonTimelineSchema),
+    table_rows: z.array(comparisonRowSchema),
+    comparison_table: z.array(comparisonRowSchema).optional(),
+    // Legacy narrative kept for the current renderers.
     narrative: z.string(),
   }),
   impacts_by_area: z.array(
@@ -79,35 +132,12 @@ export const reportSchema = z.object({
       regulatory_reference: z.string(),
     }),
   ),
-  maturity: z.array(
-    z.object({
-      area_id: z.string(),
-      area_name: z.string(),
-      current_level: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]).nullable(),
-      current_level_label: z.string(),
-      gap_description: z.string(),
-      recommendation: z.string().optional(),
-      analysis: z.string().optional(),
-    }),
-  ),
-  recommendations: z.array(
-    z.object({
-      id: z.string(),
-      title: z.string(),
-      priority: att,
-      description: z.string(),
-      related_areas: z.array(z.string()),
-      related_countries: z.array(z.string()),
-      temporal_tag: z.enum(['Immediata','Entro 6 mesi','Entro 12 mesi']).optional(),
-      short_description: z.string().optional(),
-      concrete_actions: z.array(z.string()).optional(),
-      directive_articles: z.array(z.string()).optional(),
-    }),
-  ).max(5),
+  maturity: z.array(maturityAreaReportSchema),
+  recommendations: z.array(recommendationSchema).length(4),
   roadmap: z.object({
-    roadmap_intro: z.string().optional(),
-    engagement_priorities: z.array(z.string()).optional(),
-  }).optional(),
+    roadmap_intro: z.string(),
+    engagement_priorities: z.array(z.string()).min(3).max(4),
+  }),
   limits: z.object({
     scope_limitations: z.string(),
     methodological_caveats: z.string(),

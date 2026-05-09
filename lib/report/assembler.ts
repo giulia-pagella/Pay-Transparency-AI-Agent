@@ -1,31 +1,41 @@
+import type { AttentionLevelBreakdown } from '@/lib/attention/rules';
 import type { MaturityAssessment } from '@/lib/schemas/maturity';
 import type { Regulation } from '@/lib/schemas/regulations';
 import type { ReportJson } from '@/lib/schemas/report';
-import type { AttentionLevelBreakdown } from '@/lib/attention/rules';
 
 type Attention = 'alta' | 'media' | 'bassa';
-type Status = 'definitive' | 'draft';
+type TargetAttention = 'Alta' | 'Media' | 'Bassa';
+type DirectiveSubject = 'datore di lavoro' | 'Stato membro' | 'candidato' | 'lavoratore';
+type TemporalTag = 'Immediata' | 'Entro 6 mesi' | 'Entro 12 mesi';
+type ComparisonStatus = 'vigente' | 'in_bozza' | 'in_recepimento';
+type MaturityLevel = ReportJson['maturity'][number]['maturity_level'];
 
-function asAtt(value: any, fallback: Attention): Attention {
-  return value === 'alta' || value === 'media' || value === 'bassa' ? value : fallback;
-}
+const TARGET_ATTENTION: Record<Attention, TargetAttention> = {
+  alta: 'Alta',
+  media: 'Media',
+  bassa: 'Bassa',
+};
 
-function asStatus(value: any, fallback: Status): Status {
-  return value === 'definitive' || value === 'draft' ? value : fallback;
-}
+const DIRECTIVE_SUBJECTS: DirectiveSubject[] = [
+  'datore di lavoro',
+  'Stato membro',
+  'candidato',
+  'lavoratore',
+];
 
-const str = (v: any, fallback = '') => (typeof v === 'string' && v.trim() ? v.trim() : fallback);
-const arr = <T>(v: any): T[] => (Array.isArray(v) ? v : []);
+const TEMPORAL_TAGS: TemporalTag[] = ['Immediata', 'Entro 6 mesi', 'Entro 12 mesi'];
+
+const str = (v: unknown, fallback = '') =>
+  typeof v === 'string' && v.trim() ? v.trim() : fallback;
+
+const arr = <T>(v: unknown): T[] => (Array.isArray(v) ? v : []);
 
 function isNonEmptyString(v: unknown): v is string {
   return typeof v === 'string' && v.trim().length > 0;
 }
 
 function nonEmptyStrings(v: unknown, max?: number): string[] {
-  const items = arr<unknown>(v)
-    .filter(isNonEmptyString)
-    .map((x) => x.trim());
-
+  const items = arr<unknown>(v).filter(isNonEmptyString).map((x) => x.trim());
   return typeof max === 'number' ? items.slice(0, max) : items;
 }
 
@@ -33,12 +43,79 @@ function minText(v: unknown, fallback: string): string {
   return isNonEmptyString(v) ? v.trim() : fallback;
 }
 
+function asAtt(value: unknown, fallback: Attention): Attention {
+  if (value === 'Alta') return 'alta';
+  if (value === 'Media') return 'media';
+  if (value === 'Bassa') return 'bassa';
+  return value === 'alta' || value === 'media' || value === 'bassa' ? value : fallback;
+}
+
+function asTargetAttention(value: unknown, fallback: TargetAttention | null): TargetAttention | null {
+  if (value === 'Alta' || value === 'Media' || value === 'Bassa') return value;
+  if (value === 'alta' || value === 'media' || value === 'bassa') return TARGET_ATTENTION[value];
+  return fallback;
+}
+
+function asSubject(value: unknown): DirectiveSubject {
+  return DIRECTIVE_SUBJECTS.includes(value as DirectiveSubject)
+    ? (value as DirectiveSubject)
+    : 'datore di lavoro';
+}
+
+function asTemporalTag(value: unknown, fallback: TemporalTag): TemporalTag {
+  return TEMPORAL_TAGS.includes(value as TemporalTag) ? (value as TemporalTag) : fallback;
+}
+
+function asComparisonStatus(value: unknown): ComparisonStatus {
+  if (value === 'vigente' || value === 'in_bozza' || value === 'in_recepimento') {
+    return value;
+  }
+  if (value === 'definitive') return 'vigente';
+  if (value === 'draft') return 'in_bozza';
+  return 'in_recepimento';
+}
+
 function normalizeLevelLabel(
   area: MaturityAssessment['areas'][number],
   current: number | null,
-): string {
+): MaturityLevel {
   if (!current) return 'Non valutata';
-  return area.levels.find((l) => l.value === current)?.label ?? 'Non valutata';
+  const label = area.levels.find((l) => l.value === current)?.label;
+  return normalizeMaturityLevel(label, 'Non valutata');
+}
+
+function normalizeMaturityLevel(value: unknown, fallback: MaturityLevel): MaturityLevel {
+  const level = str(value, fallback);
+  return ['Iniziale', 'Parziale', 'Strutturato', 'Avanzato', 'Non valutata'].includes(level)
+    ? (level as MaturityLevel)
+    : fallback;
+}
+
+function normalizeComparisonRows(value: unknown) {
+  return arr<any>(value).map((row) => ({
+    topic: str(row?.topic, 'Tema'),
+    cells: row?.cells && typeof row.cells === 'object' ? row.cells : {},
+  }));
+}
+
+function normalizeTimeline(value: unknown) {
+  return arr<any>(value)
+    .map((item) => ({
+      country_code: str(item?.country_code),
+      country_name: str(item?.country_name),
+      status: asComparisonStatus(item?.status),
+      enforcement_date: str(item?.enforcement_date, 'Data non disponibile'),
+      phase_label: str(item?.phase_label, 'Fase non specificata'),
+    }))
+    .filter((item) => item.country_code && item.country_name);
+}
+
+function firstNonEmptyStrings(values: unknown[], fallback: string[], max?: number) {
+  for (const value of values) {
+    const items = nonEmptyStrings(value, max);
+    if (items.length > 0) return items;
+  }
+  return typeof max === 'number' ? fallback.slice(0, max) : fallback;
 }
 
 export function buildReportSkeleton(args: {
@@ -118,7 +195,10 @@ export function buildReportSkeleton(args: {
     })),
 
     countries_comparison: {
+      thesis: null,
+      timeline: [],
       table_rows: [],
+      comparison_table: [],
       narrative: '',
     },
 
@@ -131,17 +211,29 @@ export function buildReportSkeleton(args: {
       regulatory_reference: '',
     })),
 
-    maturity: args.maturityConfig.areas.map((a) => ({
-      area_id: a.id,
-      area_name: a.name,
-      current_level: (args.maturityValues[a.id] ?? null) as 1 | 2 | 3 | 4 | null,
-      current_level_label: normalizeLevelLabel(a, args.maturityValues[a.id] ?? null),
-      gap_description: '',
-      recommendation: '',
-      analysis: '',
-    })),
+    maturity: args.maturityConfig.areas.map((a) => {
+      const current = (args.maturityValues[a.id] ?? null) as 1 | 2 | 3 | 4 | null;
+      const label = normalizeLevelLabel(a, current);
+      return {
+        area_id: a.id,
+        area_name: a.name,
+        maturity_level: label,
+        attention: asTargetAttention(args.attentionByArea[a.id], null),
+        directive_articles: [],
+        analysis: '',
+        current_level: current,
+        current_level_label: label,
+        gap_description: '',
+        recommendation: '',
+      };
+    }),
 
     recommendations: [],
+
+    roadmap: {
+      roadmap_intro: '',
+      engagement_priorities: [],
+    },
 
     limits: {
       scope_limitations: '',
@@ -164,28 +256,65 @@ export function buildReportSkeleton(args: {
 
 export function repairReportFromAi(aiDraft: any, skeleton: ReportJson): ReportJson {
   const ai = aiDraft && typeof aiDraft === 'object' ? aiDraft : {};
-
   const aiCountries = new Map(arr<any>(ai.country_analysis).map((c) => [c?.country_code, c]));
   const aiImpacts = new Map(arr<any>(ai.impacts_by_area).map((x) => [x?.area_id, x]));
   const aiMaturity = new Map(arr<any>(ai.maturity).map((x) => [x?.area_id, x]));
 
   const recommendations = arr<any>(ai.recommendations)
-    .slice(0, 5)
-    .map((r, idx) => ({
-      id: str(r?.id, `R${idx + 1}`),
-      title: str(r?.title, `Raccomandazione ${idx + 1}`),
-      priority: asAtt(r?.priority, 'media'),
-      description: minText(
-        r?.description,
-        'Da completare in base agli input e alle fonti disponibili.',
-      ),
-      related_areas: nonEmptyStrings(r?.related_areas, 5),
-      related_countries: nonEmptyStrings(r?.related_countries, 5),
-      temporal_tag: str(r?.temporal_tag) || undefined,
-      short_description: str(r?.short_description) || undefined,
-      concrete_actions: nonEmptyStrings(r?.concrete_actions, 3),
-      directive_articles: nonEmptyStrings(r?.directive_articles, 6),
-    }));
+    .slice(0, 4)
+    .map((r, idx) => {
+      const shortDescription = minText(
+        r?.short_description ?? r?.shortDescription ?? r?.description,
+        'Sintesi operativa da completare.',
+      );
+      return {
+        id: str(r?.id, `R${idx + 1}`),
+        title: str(r?.title, `Raccomandazione ${idx + 1}`),
+        priority: asAtt(r?.priority, 'media'),
+        temporal_tag: asTemporalTag(
+          r?.temporal_tag ?? r?.temporalTag,
+          idx === 0 ? 'Immediata' : idx === 1 ? 'Entro 6 mesi' : 'Entro 12 mesi',
+        ),
+        short_description: shortDescription,
+        concrete_actions: firstNonEmptyStrings(
+          [r?.concrete_actions, r?.concreteActions],
+          ['Definire il perimetro operativo', 'Documentare owner e scadenze'],
+          3,
+        ),
+        directive_articles: firstNonEmptyStrings(
+          [r?.directive_articles, r?.directiveArticles],
+          ['Direttiva UE 2023/970'],
+          6,
+        ),
+        description: minText(r?.description, shortDescription),
+        related_areas: firstNonEmptyStrings(
+          [r?.related_areas],
+          skeleton.maturity.slice(0, 1).map((m) => m.area_id),
+          5,
+        ),
+        related_countries: firstNonEmptyStrings(
+          [r?.related_countries],
+          skeleton.metadata.selected_countries,
+          5,
+        ),
+      };
+    });
+
+  while (recommendations.length < 4) {
+    const idx = recommendations.length;
+    recommendations.push({
+      id: `R${idx + 1}`,
+      title: `Raccomandazione ${idx + 1}`,
+      priority: skeleton.executive_summary.overall_attention,
+      temporal_tag: idx === 0 ? 'Immediata' : idx === 1 ? 'Entro 6 mesi' : 'Entro 12 mesi',
+      short_description: 'Contenuto da rigenerare.',
+      concrete_actions: ['Rigenerare il report con dati completi', 'Verificare i riferimenti normativi'],
+      directive_articles: ['Direttiva UE 2023/970'],
+      description: 'Raccomandazione da rigenerare per completare il report secondo il contratto dati.',
+      related_areas: skeleton.maturity.slice(0, 1).map((m) => m.area_id),
+      related_countries: skeleton.metadata.selected_countries,
+    });
+  }
 
   return {
     metadata: {
@@ -202,20 +331,13 @@ export function repairReportFromAi(aiDraft: any, skeleton: ReportJson): ReportJs
     },
 
     executive_summary: {
-      // overall_attention is always deterministic — never let AI override it
       overall_attention: skeleton.executive_summary.overall_attention,
-      // scoring fields come from deterministic calculation, not AI
       attention_score: skeleton.executive_summary.attention_score,
       attention_breakdown: skeleton.executive_summary.attention_breakdown,
       attention_triggers: skeleton.executive_summary.attention_triggers,
-      headline: minText(
-        ai?.executive_summary?.headline,
-        'Headline non generata in modo completo.',
-      ),
+      headline: minText(ai?.executive_summary?.headline, 'Headline non generata in modo completo.'),
       key_points: (() => {
         const pts = nonEmptyStrings(ai?.executive_summary?.key_points, 4);
-        if (pts.length === 4) return pts;
-        // Pad to exactly 4 if AI returned fewer
         while (pts.length < 4) pts.push('Punto chiave da completare.');
         return pts;
       })(),
@@ -239,19 +361,21 @@ export function repairReportFromAi(aiDraft: any, skeleton: ReportJson): ReportJs
         ai?.eu_directive?.overview,
         'Sintesi della direttiva non generata in modo completo.',
       ),
-      key_obligations:
-        arr<any>(ai?.eu_directive?.key_obligations).length > 0
-          ? arr<any>(ai.eu_directive.key_obligations).slice(0, 8).map((o) => ({
-              title: str(o?.title, 'Obbligo'),
-              description: minText(o?.description, 'Descrizione non disponibile.'),
-              article_reference: str(o?.article_reference, 'Fonte UE'),
-              relevance: asAtt(o?.relevance, 'media'),
-            }))
-          : [],
-      timeline_summary: minText(
-        ai?.eu_directive?.timeline_summary,
-        'Timeline non generata in modo completo.',
-      ),
+      key_obligations: arr<any>(ai?.eu_directive?.key_obligations)
+        .slice(0, 4)
+        .map((o) => {
+          const article = str(o?.article ?? o?.article_reference, 'Fonte UE');
+          return {
+            article,
+            title: str(o?.title, 'Obbligo'),
+            description: minText(o?.description, 'Descrizione non disponibile.'),
+            subject: asSubject(o?.subject),
+            source_tag: 'FONTE UE' as const,
+            article_reference: article,
+            relevance: asAtt(o?.relevance, 'media'),
+          };
+        }),
+      timeline_summary: minText(ai?.eu_directive?.timeline_summary, 'Timeline non generata in modo completo.'),
     },
 
     country_analysis: skeleton.country_analysis.map((base) => {
@@ -280,14 +404,15 @@ export function repairReportFromAi(aiDraft: any, skeleton: ReportJson): ReportJs
     }),
 
     countries_comparison: {
-      table_rows: arr<any>(ai?.countries_comparison?.table_rows).map((row) => ({
-        topic: str(row?.topic, 'Tema'),
-        cells: row?.cells && typeof row.cells === 'object' ? row.cells : {},
-      })),
-      narrative: minText(
-        ai?.countries_comparison?.narrative,
-        'Confronto non generato in modo completo.',
+      thesis: str(ai?.countries_comparison?.thesis) || null,
+      timeline: normalizeTimeline(ai?.countries_comparison?.timeline),
+      table_rows: normalizeComparisonRows(
+        ai?.countries_comparison?.table_rows ?? ai?.countries_comparison?.comparison_table,
       ),
+      comparison_table: normalizeComparisonRows(
+        ai?.countries_comparison?.comparison_table ?? ai?.countries_comparison?.table_rows,
+      ),
+      narrative: minText(ai?.countries_comparison?.narrative, 'Confronto non generato in modo completo.'),
     },
 
     impacts_by_area: skeleton.impacts_by_area.map((base) => {
@@ -301,18 +426,30 @@ export function repairReportFromAi(aiDraft: any, skeleton: ReportJson): ReportJs
           'Impatto da approfondire sulla base di input e fonti.',
         ),
         priority: asAtt(found?.priority, base.priority ?? 'media'),
-        regulatory_reference: minText(
-          found?.regulatory_reference,
-          'Fonte normativa integrata.',
-        ),
+        regulatory_reference: minText(found?.regulatory_reference, 'Fonte normativa integrata.'),
       };
     }),
 
     maturity: skeleton.maturity.map((base) => {
       const found = aiMaturity.get(base.area_id) ?? {};
+      const analysis = minText(
+        found?.analysis,
+        found?.gap_description || 'Analisi diagnostica da completare.',
+      );
       return {
         area_id: base.area_id,
         area_name: base.area_name,
+        maturity_level: normalizeMaturityLevel(
+          found?.maturity_level ?? found?.current_level_label,
+          base.maturity_level,
+        ),
+        attention: asTargetAttention(found?.attention, base.attention),
+        directive_articles: firstNonEmptyStrings(
+          [found?.directive_articles, found?.directiveArticles],
+          base.directive_articles,
+          6,
+        ),
+        analysis,
         current_level: base.current_level,
         current_level_label: base.current_level_label,
         gap_description: minText(
@@ -321,25 +458,16 @@ export function repairReportFromAi(aiDraft: any, skeleton: ReportJson): ReportJs
             ? 'Area non valutata.'
             : 'Gap da definire in relazione ai requisiti normativi applicabili.',
         ),
-        recommendation: minText(found?.recommendation, base.current_level === null ? 'Completare la valutazione dell’area.' : 'Definire azioni sulla base del gap rilevato.'),
-        analysis: minText(found?.analysis, found?.gap_description || 'Analisi diagnostica da completare.'),
+        recommendation: minText(
+          found?.recommendation,
+          base.current_level === null
+            ? 'Completare la valutazione dell area.'
+            : 'Definire azioni sulla base del gap rilevato.',
+        ),
       };
     }),
 
-    recommendations:
-      recommendations.length > 0
-        ? recommendations
-        : [
-            {
-              id: 'R1',
-              title: 'Completare l’analisi dei gap',
-              priority: skeleton.executive_summary.overall_attention,
-              description:
-                'Il contenuto generato non è risultato sufficientemente completo. È necessario rieseguire la generazione del report.',
-              related_areas: [],
-              related_countries: skeleton.metadata.selected_countries,
-            },
-          ],
+    recommendations,
 
     limits: {
       scope_limitations: minText(
@@ -348,23 +476,31 @@ export function repairReportFromAi(aiDraft: any, skeleton: ReportJson): ReportJs
       ),
       methodological_caveats: minText(
         ai?.limits?.methodological_caveats,
-        'Il contenuto AI richiede validazione umana prima dell’uso operativo.',
+        'Il contenuto AI richiede validazione umana prima dell uso operativo.',
       ),
       draft_warning: skeleton.metadata.has_draft_sources
         ? minText(ai?.limits?.draft_warning, 'Sono presenti fonti in bozza.')
         : null,
       partial_data_warning: skeleton.metadata.has_partial_data_flag
-        ? minText(
-            ai?.limits?.partial_data_warning,
-            'Assessment parziale: alcune aree non sono state valutate.',
-          )
+        ? minText(ai?.limits?.partial_data_warning, 'Assessment parziale: alcune aree non sono state valutate.')
         : null,
     },
 
     sources: skeleton.sources,
     roadmap: {
-      roadmap_intro: minText(ai?.roadmap?.roadmap_intro, 'La roadmap proposta organizza le raccomandazioni in tre orizzonti temporali.'),
-      engagement_priorities: nonEmptyStrings(ai?.roadmap?.engagement_priorities, 4),
+      roadmap_intro: minText(
+        ai?.roadmap?.roadmap_intro ?? ai?.roadmap?.intro ?? ai?.roadmap_intro,
+        'La roadmap proposta organizza le raccomandazioni in tre orizzonti temporali.',
+      ),
+      engagement_priorities: firstNonEmptyStrings(
+        [ai?.roadmap?.engagement_priorities, ai?.roadmap?.engagementPriorities, ai?.engagement_priorities],
+        [
+          'Consolidare il presidio HR sulle aree prioritarie.',
+          'Sequenziare gli interventi in base agli obblighi applicabili.',
+          'Preparare evidenze documentali per il reporting.',
+        ],
+        4,
+      ),
     },
   };
 }
