@@ -19,7 +19,6 @@ export type ReportSection = {
 
 type ReportSectionConfig = ReportSection & {
   visibleWhen?: 'multi-country';
-  render?: boolean;
 };
 
 export const REPORT_SECTIONS: ReportSectionConfig[] = [
@@ -29,7 +28,7 @@ export const REPORT_SECTIONS: ReportSectionConfig[] = [
   { id: 'impacts', num: '04', title: 'Impatti per area HR' },
   { id: 'maturity', num: '05', title: 'Profilo di maturità' },
   { id: 'reco', num: '06', title: 'Raccomandazioni' },
-  { id: 'roadmap', num: '07', title: 'Roadmap', render: false },
+  { id: 'roadmap', num: '07', title: 'Roadmap' },
   { id: 'limits', num: '08', title: 'Limiti e caveat' },
   { id: 'sources', num: '09', title: 'Fonti normative' },
 ];
@@ -40,7 +39,6 @@ export function isMultiCountry(report: ReportJson): boolean {
 
 export function getVisibleReportSections(report: ReportJson): ReportSection[] {
   return REPORT_SECTIONS.filter((section) => {
-    if (section.render === false) return false;
     if (section.visibleWhen === 'multi-country') return isMultiCountry(report);
     return true;
   }).map(({ id, num, title }) => ({ id, num, title }));
