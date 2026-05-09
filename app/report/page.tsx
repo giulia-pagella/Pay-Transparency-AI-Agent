@@ -4,14 +4,21 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { SessionHeader } from '@/components/session-header';
 import { Icon } from '@/components/icon';
-import { ProfiloMaturitaRadar } from '@/components/ProfiloMaturitaRadar';
 import type { ReportJson } from '@/lib/schemas/report';
+import { DirectiveSection } from './components/DirectiveSection';
+import { ImpactAreasSection } from './components/ImpactAreasSection';
+import { MaturityProfileSection } from './components/MaturityProfileSection';
+import { MultiCountrySection } from './components/MultiCountrySection';
+import { RecommendationsSection } from './components/RecommendationsSection';
 import { ReportFooter } from './components/ReportFooter';
 import { ReportHeader } from './components/ReportHeader';
 import { ReportSidebar } from './components/ReportSidebar';
 import { ReportAccordionSection, ReportSectionHeading } from './components/ReportSection';
+import { RoadmapSection } from './components/RoadmapSection';
+import { SourcesSection } from './components/SourcesSection';
 import { getReportSectionById, getVisibleReportSections, isMultiCountry } from './components/reportSections';
 import { useScrollSpy } from './hooks/useScrollSpy';
+import { getDefaultMaturityAreaId } from './utils/reportDisplay';
 
 function ScoringPanel({ report }: { report: ReportJson }) {
   const es = report.executive_summary;
@@ -77,13 +84,6 @@ function ScoringPanel({ report }: { report: ReportJson }) {
   );
 }
 
-function AttentionPill({ level }: { level: string | null }) {
-  if (!level) return <span className="attention attention-na">Non valutata</span>;
-  const map: Record<string, string> = { alta: 'attention-alta', media: 'attention-media', bassa: 'attention-bassa' };
-  const labels: Record<string, string> = { alta: 'Attenzione Alta', media: 'Attenzione Media', bassa: 'Attenzione Bassa' };
-  return <span className={`attention ${map[level] ?? 'attention-na'}`}>{labels[level] ?? level}</span>;
-}
-
 function LoadingShell() {
   return (
     <div className="ptt-screen">
@@ -101,6 +101,9 @@ export default function ReportPage() {
   const [report, setReport] = useState<ReportJson | null>(null);
   const [error, setError] = useState('');
   const [scoringOpen, setScoringOpen] = useState(false);
+  const [selectedMaturityAreaId, setSelectedMaturityAreaId] = useState<string | null>(null);
+  const [highlightedRecommendationId, setHighlightedRecommendationId] = useState<string | null>(null);
+  const [roadmapRecommendationIds, setRoadmapRecommendationIds] = useState<string[]>([]);
   const router = useRouter();
   const mainRef = useRef<HTMLDivElement>(null);
   const visibleSections = useMemo(() => (report ? getVisibleReportSections(report) : []), [report]);
@@ -118,6 +121,11 @@ export default function ReportPage() {
       .catch(() => setError('Errore di rete durante il caricamento del report.'));
   }, []);
 
+  useEffect(() => {
+    if (!report || selectedMaturityAreaId) return;
+    setSelectedMaturityAreaId(getDefaultMaturityAreaId(report.maturity));
+  }, [report, selectedMaturityAreaId]);
+
   async function resetAssessment() {
     const ok = window.confirm('Ricominciando da capo verranno cancellati tutti i dati del questionario e il report attuale, ma la tua chiave API rimarrà attiva. Vuoi procedere?');
     if (!ok) return;
@@ -128,6 +136,16 @@ export default function ReportPage() {
   function scrollTo(id: string) {
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function selectMaturityArea(areaId: string) {
+    setSelectedMaturityAreaId(areaId);
+    scrollTo('maturity');
+  }
+
+  function navigateToRecommendation(recommendationId: string) {
+    setHighlightedRecommendationId(recommendationId);
+    scrollTo('reco');
   }
 
   if (error) return (
@@ -155,8 +173,13 @@ export default function ReportPage() {
   const impactsSection = getReportSectionById(visibleSections, 'impacts');
   const maturitySection = getReportSectionById(visibleSections, 'maturity');
   const recoSection = getReportSectionById(visibleSections, 'reco');
+  const roadmapSection = getReportSectionById(visibleSections, 'roadmap');
   const limitsSection = getReportSectionById(visibleSections, 'limits');
   const sourcesSection = getReportSectionById(visibleSections, 'sources');
+  const highlightedRecommendationIds = Array.from(new Set([
+    ...roadmapRecommendationIds,
+    ...(highlightedRecommendationId ? [highlightedRecommendationId] : []),
+  ]));
   const attColor = { alta: 'var(--ntt-orange-100)', media: 'var(--ntt-yellow)', bassa: 'var(--ntt-green-150)' }[r.executive_summary.overall_attention] ?? 'var(--ntt-gray-100)';
   const attBg = { alta: 'rgba(228,38,0,.12)', media: 'rgba(255,196,0,.12)', bassa: 'rgba(0,203,93,.12)' }[r.executive_summary.overall_attention] ?? 'rgba(0,0,0,.06)';
 
@@ -241,125 +264,47 @@ export default function ReportPage() {
 
           <div className="accordion" style={{ marginTop: 44 }}>
             <ReportAccordionSection section={euSection}>
-              <div className="prose">
-                <p>{r.eu_directive.overview}</p>
-                <p>{r.eu_directive.timeline_summary}</p>
-              </div>
-              {r.eu_directive.key_obligations.length > 0 && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 16 }}>
-                  {r.eu_directive.key_obligations.map((ob, i) => (
-                    <div key={i} className="card" style={{ padding: 16, borderLeft: '3px solid var(--ntt-future-blue)' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 6 }}>
-                        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--ntt-smart-navy)' }}>{ob.title}</div>
-                        <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-                          <AttentionPill level={ob.relevance} />
-                          <span className="badge badge-blue">{ob.article_reference}</span>
-                        </div>
-                      </div>
-                      <p style={{ margin: 0, fontSize: 13, color: 'var(--ntt-text-gray)', lineHeight: 1.55 }}>{ob.description}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <DirectiveSection directive={r.eu_directive} />
             </ReportAccordionSection>
 
             {multiCountrySection && (
               <ReportAccordionSection section={multiCountrySection}>
-                {r.country_analysis.map((ca) => (
-                  <div key={ca.country_code} style={{ marginBottom: 24 }}>
-                    <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 10 }}>
-                      <h4 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: 'var(--ntt-smart-navy)' }}>{ca.country_name}</h4>
-                      {ca.status === 'draft' && <span className="badge badge-yellow"><span className="badge-dot" />Bozza</span>}
-                    </div>
-                    <div className="prose">
-                      <p>{ca.national_framework_summary}</p>
-                      {ca.key_differences_vs_eu.length > 0 && (
-                        <ul>{ca.key_differences_vs_eu.map((d, i) => <li key={i}>{d}</li>)}</ul>
-                      )}
-                      {ca.implementation_notes && <p style={{ fontStyle: 'italic', color: 'var(--ntt-gray-100)', fontSize: 13 }}>{ca.implementation_notes}</p>}
-                    </div>
-                  </div>
-                ))}
-
-                <div className="prose"><p>{r.countries_comparison.narrative}</p></div>
-                {r.countries_comparison.table_rows.length > 0 && (
-                  <div style={{ overflowX: 'auto', marginTop: 14 }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-                      <thead>
-                        <tr style={{ borderBottom: '2px solid var(--ntt-smart-navy)' }}>
-                          <th style={{ textAlign: 'left', padding: '8px 10px', fontSize: 11, fontWeight: 700, color: 'var(--ntt-smart-navy)', textTransform: 'uppercase', letterSpacing: '.06em' }}>Tema</th>
-                          {r.metadata.selected_countries.map((c) => (
-                            <th key={c} style={{ textAlign: 'left', padding: '8px 10px', fontSize: 11, fontWeight: 700, color: 'var(--ntt-smart-navy)', textTransform: 'uppercase', letterSpacing: '.06em' }}>{c}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {r.countries_comparison.table_rows.map((row, i) => (
-                          <tr key={i} style={{ borderBottom: '1px solid var(--ntt-gray-50)' }}>
-                            <td style={{ padding: '9px 10px', fontWeight: 700, color: 'var(--ntt-smart-navy)', fontSize: 13 }}>{row.topic}</td>
-                            {r.metadata.selected_countries.map((c) => (
-                              <td key={c} style={{ padding: '9px 10px', color: 'var(--ntt-text-gray)', fontSize: 13 }}>{row.cells[c] ?? '—'}</td>
-                            ))}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+                <MultiCountrySection report={r} />
               </ReportAccordionSection>
             )}
 
             <ReportAccordionSection section={impactsSection} defaultOpen>
-              <p style={{ fontSize: 13, color: 'var(--ntt-text-gray)', marginBottom: 16, maxWidth: 700 }}>
-                Livello di attenzione per area, calcolato combinando maturità dichiarata e obbligo diretto della Direttiva.
-              </p>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                {r.impacts_by_area.map((area) => (
-                  <div key={area.area_id} className="card" style={{ padding: 14, borderLeft: area.attention_level ? '3px solid var(--ntt-future-blue)' : '1px solid var(--ntt-gray-50)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10, marginBottom: 8 }}>
-                      <div>
-                        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ntt-smart-navy)' }}>{area.area_name}</div>
-                        {area.regulatory_reference && <div style={{ fontSize: 11, color: 'var(--ntt-gray-100)', marginTop: 2 }}>{area.regulatory_reference}</div>}
-                      </div>
-                      <AttentionPill level={area.attention_level} />
-                    </div>
-                    <p style={{ margin: 0, fontSize: 12, color: 'var(--ntt-text-gray)', lineHeight: 1.5 }}>{area.impact_description}</p>
-                  </div>
-                ))}
-              </div>
+              <ImpactAreasSection
+                impacts={r.impacts_by_area}
+                maturityAreas={r.maturity}
+                onSelectArea={selectMaturityArea}
+              />
             </ReportAccordionSection>
 
-            <ReportAccordionSection section={maturitySection}>
-              <ProfiloMaturitaRadar areas={r.maturity} />
+            <ReportAccordionSection section={maturitySection} defaultOpen>
+              <MaturityProfileSection
+                areas={r.maturity}
+                recommendations={r.recommendations}
+                selectedAreaId={selectedMaturityAreaId}
+                onSelectArea={setSelectedMaturityAreaId}
+                onRecommendationNavigate={navigateToRecommendation}
+              />
             </ReportAccordionSection>
 
             <ReportAccordionSection section={recoSection} defaultOpen>
-              <p style={{ fontSize: 13, color: 'var(--ntt-text-gray)', marginBottom: 16, maxWidth: 700 }}>
-                Raccomandazioni preliminari ordinate per priorità, collegate alle aree HR e alle fonti normative.
-              </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                {r.recommendations.map((rec, i) => {
-                  const borderColor = rec.priority === 'alta' ? 'var(--ntt-orange-100)' : rec.priority === 'media' ? 'var(--ntt-yellow)' : 'var(--ntt-green-150)';
-                  return (
-                    <div key={rec.id} className="card" style={{ padding: 18, borderLeft: `3px solid ${borderColor}` }}>
-                      <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
-                        <span className="serif" style={{ fontSize: 22, color: 'var(--ntt-gray-100)', lineHeight: 1, minWidth: 28 }}>
-                          {String(i + 1).padStart(2, '0')}
-                        </span>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ display: 'flex', gap: 7, alignItems: 'center', flexWrap: 'wrap', marginBottom: 7 }}>
-                            <AttentionPill level={rec.priority} />
-                            {rec.related_areas.map((a) => <span key={a} className="badge badge-gray">{a}</span>)}
-                            {rec.related_countries.map((c) => <span key={c} className="badge badge-blue">{c}</span>)}
-                          </div>
-                          <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--ntt-smart-navy)', marginBottom: 6, lineHeight: 1.35 }}>{rec.title}</div>
-                          <p style={{ margin: 0, fontSize: 13, color: 'var(--ntt-text-gray)', lineHeight: 1.6 }}>{rec.description}</p>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+              <RecommendationsSection
+                recommendations={r.recommendations}
+                highlightedRecommendationIds={highlightedRecommendationIds}
+              />
+            </ReportAccordionSection>
+
+            <ReportAccordionSection section={roadmapSection} defaultOpen>
+              <RoadmapSection
+                roadmap={r.roadmap}
+                recommendations={r.recommendations}
+                onRecommendationClick={navigateToRecommendation}
+                onHorizonHover={setRoadmapRecommendationIds}
+              />
             </ReportAccordionSection>
 
             <ReportAccordionSection section={limitsSection}>
@@ -368,22 +313,12 @@ export default function ReportPage() {
                 <p>{r.limits.methodological_caveats}</p>
                 {r.limits.draft_warning && <p style={{ color: '#8B6B00' }}><strong>Fonte in bozza:</strong> {r.limits.draft_warning}</p>}
                 {r.limits.partial_data_warning && <p style={{ color: 'var(--ntt-orange-150)' }}><strong>Dati parziali:</strong> {r.limits.partial_data_warning}</p>}
+                <p>Per un piano operativo dettagliato è necessario un workshop di approfondimento con il team HR e Legal del cliente, che include la validazione delle priorità identificate, la definizione del project team multifunzione e la selezione dei paesi pilota.</p>
               </div>
             </ReportAccordionSection>
 
             <ReportAccordionSection section={sourcesSection}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {r.sources.map((src, i) => (
-                  <div key={i} style={{ display: 'flex', gap: 14, alignItems: 'flex-start', padding: '12px 0', borderBottom: '1px solid var(--ntt-gray-50)' }}>
-                    <Icon name="document" size={16} style={{ color: 'var(--ntt-future-blue)', flexShrink: 0, marginTop: 1 }} />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ntt-smart-navy)' }}>{src.document_title}</div>
-                      <div style={{ fontSize: 11, color: 'var(--ntt-gray-100)', marginTop: 2 }}>{src.document_type} · v{src.version} · {src.date}</div>
-                    </div>
-                    {src.status === 'draft' ? <span className="badge badge-yellow"><span className="badge-dot" />Bozza</span> : <span className="badge badge-green"><span className="badge-dot" />Definitivo</span>}
-                  </div>
-                ))}
-              </div>
+              <SourcesSection sources={r.sources} />
             </ReportAccordionSection>
           </div>
 

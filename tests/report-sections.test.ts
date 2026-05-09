@@ -11,12 +11,12 @@ function reportWithCountries(selectedCountries: string[]): ReportJson {
 }
 
 describe('report sections', () => {
-  it('nasconde analisi multi-country e roadmap nel frontend single-country', () => {
+  it('nasconde analisi multi-country nel frontend single-country', () => {
     const sections = getVisibleReportSections(reportWithCountries(['IT']));
 
     expect(isMultiCountry(reportWithCountries(['IT']))).toBe(false);
     expect(sections.map((section) => section.id)).not.toContain('multi-country');
-    expect(sections.map((section) => section.id)).not.toContain('roadmap');
+    expect(sections.map((section) => section.id)).toContain('roadmap');
   });
 
   it('mostra analisi multi-country nella posizione target per report multi-country', () => {
@@ -30,14 +30,16 @@ describe('report sections', () => {
       'impacts',
       'maturity',
       'reco',
+      'roadmap',
       'limits',
       'sources',
     ]);
   });
 
-  it('mantiene roadmap in configurazione ma non renderizzata in Fase 2A', () => {
-    expect(REPORT_SECTIONS.find((section) => section.id === 'roadmap')).toMatchObject({
-      render: false,
-    });
+  it('renderizza roadmap tra raccomandazioni e limiti in Fase 2B', () => {
+    const ids = REPORT_SECTIONS.map((section) => section.id);
+
+    expect(ids.indexOf('roadmap')).toBeGreaterThan(ids.indexOf('reco'));
+    expect(ids.indexOf('roadmap')).toBeLessThan(ids.indexOf('limits'));
   });
 });
