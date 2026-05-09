@@ -7,6 +7,7 @@ import { getMaturityConfig, readProcessedRegulations } from '@/lib/report/data';
 import { buildReportSkeleton, repairReportFromAi } from '@/lib/report/assembler';
 import { reportSchema, type ReportJson } from '@/lib/schemas/report';
 import { questionnaireSchema } from '@/lib/schemas/questionnaire';
+import type { Regulation } from '@/lib/schemas/regulations';
 import { checkRateLimit, getSession, increaseRate } from '@/lib/session/store';
 
 export const maxDuration = 300;
@@ -17,8 +18,19 @@ const bodySchema = z.object({
   maturity: z.record(z.number().int().min(1).max(4).nullable()),
 });
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
 
-function compactSourcesForAi(regs: any[]) {
+function errorCode(error: unknown) {
+  return isRecord(error) && typeof error.code === 'string' ? error.code : undefined;
+}
+
+function errorName(error: unknown) {
+  return isRecord(error) && typeof error.name === 'string' ? error.name : undefined;
+}
+
+function compactSourcesForAi(regs: Regulation[]) {
   return regs.map((r) => ({
     country_code: r.country_code,
     country_name: r.country_name,
@@ -29,7 +41,7 @@ function compactSourcesForAi(regs: any[]) {
     date: r.date,
     source_url: r.source_url ?? null,
     sections: Array.isArray(r.sections)
-      ? r.sections.slice(0, 10).map((s: any) => ({
+      ? r.sections.slice(0, 10).map((s) => ({
           topic: s.topic,
           title: s.title,
           article_references: Array.isArray(s.article_references)
@@ -284,7 +296,7 @@ export async function POST(req: Request) {
       euRegulation: eu,
       maturityConfig,
       maturityValues: parsed.data.maturity,
-      attentionByArea: attention.byArea as any,
+      attentionByArea: attention.byArea,
       overallAttention: attentionLevel.level,
       attentionScore: attentionLevel.score,
       attentionBreakdown: attentionLevel.breakdown,
@@ -311,7 +323,7 @@ export async function POST(req: Request) {
     const repaired = repairReportFromAi(aiDraft, skeleton);
     const report = reportSchema.parse(repaired);
 
-    session.questionnaireData = parsed.data as any;
+    session.questionnaireData = parsed.data;
     session.reportJson = report;
     session.partialReportJson = null;
     return NextResponse.json({ ok: true });
@@ -329,16 +341,16 @@ export async function POST(req: Request) {
         has_partial_data_flag: compiled < 9,
         tool_version: '1.0.0',
       },
-    } as any;
+    };
 
-    const code = (error as any)?.code;
+    const code = errorCode(error);
     if (code === 'SAFETY') return NextResponse.json({ error: 'Il contenuto generato è stato filtrato dai sistemi di sicurezza di Google. Questo è raro; prova a rigenerare il report.' }, { status: 400 });
     if (code === 'TIMEOUT') return NextResponse.json({ error: 'La generazione del report ha impiegato più tempo del previsto. Riprova: se l\'errore persiste, potrebbe essere un problema temporaneo del servizio Gemini.' }, { status: 504 });
     if (code === 'BAD_REQUEST') return NextResponse.json({ error: 'La richiesta a Gemini non è stata accettata. Verifica la chiave API o la quota disponibile e riprova.' }, { status: 400 });
     if (code === 'JSON_PARSE_ERROR') return NextResponse.json({ error: 'Gemini ha restituito un JSON non valido. Riprova tra qualche secondo.' }, { status: 502 });
     if (code === 'SCHEMA_VALIDATION_ERROR') return NextResponse.json({ error: 'Gemini ha restituito un JSON incompleto rispetto allo schema richiesto. Riprova.' }, { status: 502 });
     if (code === 'EMPTY_RESPONSE') return NextResponse.json({ error: 'Gemini ha restituito una risposta vuota. Riprova.' }, { status: 502 });
-    if ((error as any)?.name === 'ZodError') return NextResponse.json({ error: "L'output AI è stato riparato ma resta incompleto rispetto allo schema. Riprova." }, { status: 502 });
+    if (errorName(error) === 'ZodError') return NextResponse.json({ error: "L'output AI è stato riparato ma resta incompleto rispetto allo schema. Riprova." }, { status: 502 });
     return NextResponse.json({ error: 'Si è verificato un errore nell\'elaborazione del report. Il sistema sta riprovando automaticamente...' }, { status: 500 });
   }
 }
