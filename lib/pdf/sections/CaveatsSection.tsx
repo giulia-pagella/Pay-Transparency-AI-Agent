@@ -1,5 +1,5 @@
 import React from 'react';
-import { Page, View, Text } from '@react-pdf/renderer';
+import { Page, Text } from '@react-pdf/renderer';
 import type { ReportJson } from '@/lib/schemas/report';
 import { s, C } from '@/lib/pdf/utils/pdfStyles';
 import { PageFooter } from '@/lib/pdf/components/PdfFooter';
