@@ -203,6 +203,9 @@ ${JSON.stringify(input.schemaTemplate ?? {}, null, 2)}
 - Personalizza il testo usando settore, dimensione aziendale e modello organizzativo.
 - Se un'informazione non è disponibile, usa formulazioni prudenti ma non lasciare campi vuoti.
 - Raccomandazioni: da 3 a 5 elementi, con priorità, descrizione concreta, related_areas e related_countries quando applicabili.
+- Ogni raccomandazione deve includere temporal_tag valorizzato e concrete_actions (2-3 azioni).
+- Distribuisci le raccomandazioni su almeno 2 orizzonti temporali diversi.
+- eu_directive.key_obligations: genera 3-4 obblighi ordinati per articolo.
 - key_points nell'executive_summary: ESATTAMENTE 4 bullet, ognuno apre con verbo d'azione.
 - headline: singola frase max 30 parole, apre con il finding (non con il nome del cliente).
 - paragraph: 3-4 frasi con dati concreti e riferimento normativo al paese più urgente.
@@ -426,6 +429,55 @@ function assessQuality(
 
   if (maturityWithRealContent.length < Math.max(2, Math.min(maturityEntries.length, 4))) {
     issues.push('Sezione maturity troppo generica o non sviluppata.');
+  }
+
+
+  const keyObligations = Array.isArray(draft?.eu_directive?.key_obligations) ? draft.eu_directive.key_obligations : [];
+  if (keyObligations.length < 3 || keyObligations.length > 4) {
+    issues.push(`Obblighi Direttiva non conformi: attesi 3-4, ricevuti ${keyObligations.length}.`);
+  }
+
+  const temporalTags = recommendations
+    .map((r: any) => typeof r?.temporal_tag === 'string' ? r.temporal_tag.trim() : '')
+    .filter((x: string) => x.length > 0);
+
+  if (recommendations.length >= 3 && temporalTags.length < recommendations.length) {
+    issues.push('Temporal tag mancante in una o più raccomandazioni.');
+  }
+
+  const uniqueTemporalTags = new Set(temporalTags.map((t: string) => t.toLowerCase()));
+  if (recommendations.length >= 3 && uniqueTemporalTags.size < 2) {
+    issues.push('Distribuzione temporale insufficiente: servono almeno 2 orizzonti diversi.');
+  }
+
+  const invalidActions = recommendations.filter((r: any) => {
+    const actions = Array.isArray(r?.concrete_actions) ? r.concrete_actions.filter((a: unknown) => typeof a === 'string' && a.trim().length > 0) : [];
+    return actions.length < 2 || actions.length > 3;
+  });
+
+  if (recommendations.length >= 3 && invalidActions.length > 0) {
+    issues.push('Concrete actions non conformi: ogni raccomandazione deve avere 2-3 azioni.');
+  }
+
+
+  const maturityAnalysisChecks = maturity.filter((m: any) => typeof m?.analysis === 'string' && m.analysis.trim().length > 0);
+  if (maturity.length > 0 && maturityAnalysisChecks.length < Math.max(2, Math.min(maturity.length, 6))) {
+    issues.push('Maturity analysis assente o insufficiente per più aree.');
+  }
+
+  const invalidMaturityAnalysis = maturity.filter((m: any) => {
+    const analysis = typeof m?.analysis === 'string' ? m.analysis.trim() : '';
+    if (!analysis) return true;
+    const sentences = analysis.split(/[.!?]+/).map((x: string) => x.trim()).filter(Boolean);
+    const att = typeof m?.attention === 'string' ? m.attention.toLowerCase() : '';
+    if (att === 'alta' && sentences.length < 4) return true;
+    if (att === 'media' && sentences.length < 3) return true;
+    if (att === 'bassa' && sentences.length < 2) return true;
+    return false;
+  });
+
+  if (invalidMaturityAnalysis.length > 0) {
+    issues.push('Maturity analysis non conforme al numero minimo di frasi per livello di attenzione.');
   }
 
   if (lowOrMediumAreas.length > 0) {
