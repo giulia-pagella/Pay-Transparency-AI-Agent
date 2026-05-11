@@ -18,7 +18,9 @@ Font.register({
   family: 'NotoSans',
   fonts: [
     { src: 'public/fonts/NotoSans-Regular.ttf', fontWeight: 400 },
+    { src: 'public/fonts/NotoSans-Regular.ttf', fontWeight: 400, fontStyle: 'italic' },
     { src: 'public/fonts/NotoSans-Bold.ttf', fontWeight: 700 },
+    { src: 'public/fonts/NotoSans-Bold.ttf', fontWeight: 700, fontStyle: 'italic' },
   ],
 });
 
