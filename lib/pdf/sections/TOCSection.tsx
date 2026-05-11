@@ -9,18 +9,6 @@ interface Props {
   report: ReportJson;
 }
 
-// Page numbers are estimates; they will be refined in Phase 3B.
-const ESTIMATED_PAGE: Partial<Record<string, number>> = {
-  exec:           3,
-  directive:      4,
-  'multi-country':5,
-  maturity:       6,
-  reco:           7,
-  roadmap:        8,
-  caveats:        9,
-  sources:        9,
-};
-
 export function TOCSection({ report: r }: Props) {
   const sections = getVisiblePdfSections(r);
   return (
@@ -35,10 +23,7 @@ export function TOCSection({ report: r }: Props) {
         <View key={sec.id} style={s.tocRow}>
           <Text style={s.tocNum}>{sec.num}</Text>
           <Text style={s.tocTitle}>{sec.title}</Text>
-          <Text style={s.tocPage}>
-            {/* Estimated page numbers — will be replaced with dynamic values in Phase 3B */}
-            {ESTIMATED_PAGE[sec.id] ?? '—'}
-          </Text>
+          <Text style={s.tocPage}>Sezione {sec.num}</Text>
         </View>
       ))}
 

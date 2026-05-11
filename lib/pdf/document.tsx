@@ -1,5 +1,5 @@
 import React from 'react';
-import { Document } from '@react-pdf/renderer';
+import { Document, Font } from '@react-pdf/renderer';
 import type { ReportJson } from '@/lib/schemas/report';
 import { getVisiblePdfSections, getPdfSection, isMultiCountry } from '@/lib/pdf/utils/pdfSections';
 
@@ -13,6 +13,22 @@ import { RecommendationsSection }  from '@/lib/pdf/sections/RecommendationsSecti
 import { RoadmapSection }          from '@/lib/pdf/sections/RoadmapSection';
 import { CaveatsSection }          from '@/lib/pdf/sections/CaveatsSection';
 import { SourcesSection }          from '@/lib/pdf/sections/SourcesSection';
+
+Font.register({
+  family: 'NotoSans',
+  fonts: [
+    { src: 'public/fonts/NotoSans-Regular.woff2', fontWeight: 400 },
+    { src: 'public/fonts/NotoSans-Bold.woff2', fontWeight: 700 },
+  ],
+});
+
+Font.register({
+  family: 'NotoSerif',
+  fonts: [
+    { src: 'public/fonts/NotoSerif-Regular.woff2', fontWeight: 400 },
+    { src: 'public/fonts/NotoSerif-Bold.woff2', fontWeight: 700 },
+  ],
+});
 
 export function ReportPdf({ report: r }: { report: ReportJson }) {
   const sections = getVisiblePdfSections(r);

@@ -23,15 +23,19 @@ export const C = {
 
 export const s = StyleSheet.create({
   /* Page */
-  page:       { fontFamily: 'Helvetica', fontSize: 10, color: C.textGray, backgroundColor: C.white },
+  page:       { fontFamily: 'NotoSans', fontSize: 10, color: C.textGray, backgroundColor: C.white },
   pagePadded: { padding: '40 48 48 48' },
 
   /* Cover */
-  cover:            { backgroundColor: C.navy, padding: '56 52', flex: 1, justifyContent: 'space-between' },
+  cover:            { backgroundColor: C.navy, padding: '42 52 48 52', flex: 1, justifyContent: 'space-between', position: 'relative' },
+  coverLogo:        { width: 112, height: 28, objectFit: 'contain', marginBottom: 58 },
+  coverLogoFallback:{ fontSize: 15, color: C.white, fontFamily: 'Helvetica-Bold', letterSpacing: 0.5, marginBottom: 58 },
+  coverCurve:       { position: 'absolute', right: 0, bottom: 0, width: 280, height: 210, opacity: 0.16 },
   coverEyebrow:     { fontSize: 8, color: 'rgba(255,255,255,0.55)', letterSpacing: 2, textTransform: 'uppercase', fontFamily: 'Helvetica-Bold', marginBottom: 16 },
-  coverTitle:       { fontSize: 38, color: C.white, lineHeight: 1.1, letterSpacing: -0.5, marginBottom: 16, fontFamily: 'Helvetica' },
+  coverTitle:       { fontSize: 38, color: C.white, lineHeight: 1.1, letterSpacing: -0.5, marginBottom: 16, fontFamily: 'NotoSerif' },
   coverSub:         { fontSize: 11, color: 'rgba(255,255,255,0.7)', lineHeight: 1.55, maxWidth: 340 },
-  coverMeta:        { flexDirection: 'row', gap: 36, marginTop: 20, alignItems: 'flex-end' },
+  coverScope:       { fontSize: 9, color: 'rgba(255,255,255,0.62)', lineHeight: 1.45, marginTop: 14 },
+  coverMeta:        { flexDirection: 'row', gap: 28, marginTop: 20, alignItems: 'flex-end', position: 'relative', zIndex: 2 },
   coverMetaLabel:   { fontSize: 8, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: 1.5, fontFamily: 'Helvetica-Bold', marginBottom: 5 },
   coverMetaValue:   { fontSize: 13, color: C.white },
   coverAttBox:      { borderWidth: 2, borderColor: C.orange, padding: '6 12' },
@@ -43,6 +47,7 @@ export const s = StyleSheet.create({
   pageHeaderText: { fontSize: 8, color: C.gray100, fontFamily: 'Helvetica-Bold', letterSpacing: 1, textTransform: 'uppercase' },
   pageFooter:     { position: 'absolute', bottom: 24, left: 48, right: 48, flexDirection: 'row', justifyContent: 'space-between', borderTopWidth: 1, borderTopColor: C.gray50, paddingTop: 8 },
   pageFooterText: { fontSize: 7.5, color: C.gray100 },
+  finalMeta:      { fontSize: 7.5, color: C.gray100, lineHeight: 1.45 },
 
   /* Section headings */
   eyebrow: { fontSize: 8, fontFamily: 'Helvetica-Bold', letterSpacing: 2, textTransform: 'uppercase', color: C.blue, marginBottom: 10 },
@@ -131,4 +136,6 @@ export const s = StyleSheet.create({
   /* Roadmap */
   roadmapCard:{ borderLeftWidth: 3, borderLeftColor: C.blue, padding: '10 12', marginBottom: 8, backgroundColor: C.blueLight },
   roadmapText:{ fontSize: 9.5, color: C.textGray, lineHeight: 1.55 },
+  roadmapHorizon:{ flex: 1, borderTopWidth: 3, borderTopColor: C.blue, padding: 10, backgroundColor: C.white, borderWidth: 1, borderColor: C.gray50 },
+  sourceGroupTitle:{ fontSize: 10, fontFamily: 'Helvetica-Bold', color: C.navy, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 },
 });

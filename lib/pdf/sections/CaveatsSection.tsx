@@ -29,6 +29,9 @@ export function CaveatsSection({ report: r, section }: Props) {
           Dati parziali: {r.limits.partial_data_warning}
         </Text>
       )}
+      <Text style={[s.body, s.mt12]}>
+        Per un piano operativo dettagliato è necessario un workshop di approfondimento con il team HR e Legal del cliente, che include la validazione delle priorità identificate, la definizione del project team multifunzione e la selezione dei paesi pilota.
+      </Text>
     </Page>
   );
 }

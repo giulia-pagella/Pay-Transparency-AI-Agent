@@ -3,6 +3,8 @@ import { View, Text, Svg, Path, Line, Circle, G } from '@react-pdf/renderer';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const SvgText = Text as any; // react-pdf Text doubles as SVG Text inside <Svg>
 import type { ReportJson } from '@/lib/schemas/report';
+import { AttPill } from '@/lib/pdf/components/PdfTags';
+import { getMaturityAnalysis, getMaturityArticleReferences } from '@/lib/pdf/utils/pdfDisplay';
 import { s, C } from '@/lib/pdf/utils/pdfStyles';
 
 type MaturityArea = ReportJson['maturity'][number];
@@ -31,15 +33,19 @@ function pdfSplitLabel(name: string, maxLen = 16): [string, string | null] {
   let best = -1;
   for (let d = 0; d <= 10; d++) {
     if (mid + d < name.length && name[mid + d] === ' ') { best = mid + d; break; }
-    if (mid - d >= 0 && name[mid - d] === ' ')          { best = mid - d; break; }
+    if (mid - d >= 0 && name[mid - d] === ' ') { best = mid - d; break; }
   }
   if (best < 0) return [name, null];
   return [name.slice(0, best).trim(), name.slice(best).trim()];
 }
 
 export function PdfMaturityRadar({ areas }: { areas: MaturityArea[] }) {
-  const W = 499, H = 330;
-  const CX = 249, CY = 178, RADIUS = 108, LABEL_R = 140;
+  const W = 499;
+  const H = 330;
+  const CX = 249;
+  const CY = 178;
+  const RADIUS = 108;
+  const LABEL_R = 140;
   const N = areas.length;
   const angles = areas.map((_, i) => (Math.PI * 2 * i) / N - Math.PI / 2);
 
@@ -116,30 +122,25 @@ export function PdfMaturityRadar({ areas }: { areas: MaturityArea[] }) {
 }
 
 export function PdfMaturityDetailCard({ area, num }: { area: MaturityArea; num: number }) {
+  const articleRefs = getMaturityArticleReferences(area);
+
   return (
-    <View wrap={false} style={[s.card, s.mb12]}>
+    <View style={[s.card, s.mb12]}>
       <View style={[s.row, { gap: 8, alignItems: 'center', marginBottom: 6 }]}>
         <Text style={[s.muted, { minWidth: 20 }]}>{String(num).padStart(2, '0')}</Text>
         <Text style={[s.h4, { flex: 1, marginBottom: 0 }]}>{area.area_name}</Text>
         <Text style={[s.bodySmall, { color: C.blueDark, marginRight: 6 }]}>
-          {area.current_level_label ?? '—'}
+          {area.current_level_label ?? '-'}
         </Text>
+        <AttPill level={area.attention} />
         <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: mLevelColor(area.current_level) }} />
       </View>
       <View style={{ height: 1, backgroundColor: C.gray50, marginBottom: 8 }} />
-      <View style={[s.row, { gap: 10 }]}>
-        <View style={{ flex: 1 }}>
-          <Text style={[s.muted, { fontFamily: 'Helvetica-Bold', marginBottom: 4 }]}>Analisi</Text>
-          <Text style={s.bodySmall}>{area.gap_description}</Text>
-        </View>
-        <View style={{ width: 1, backgroundColor: C.gray50 }} />
-        <View style={{ flex: 1 }}>
-          <Text style={[s.muted, { fontFamily: 'Helvetica-Bold', marginBottom: 4 }]}>Raccomandazione</Text>
-          <Text style={[s.bodySmall, { color: C.blueDark, fontStyle: 'italic' }]}>
-            {area.recommendation ?? '—'}
-          </Text>
-        </View>
-      </View>
+      <Text style={[s.muted, { fontFamily: 'Helvetica-Bold', marginBottom: 4 }]}>Analisi diagnostica</Text>
+      <Text style={s.bodySmall}>{getMaturityAnalysis(area)}</Text>
+      {articleRefs && (
+        <Text style={[s.muted, { marginTop: 6 }]}>Riferimenti Direttiva: {articleRefs}</Text>
+      )}
     </View>
   );
 }
