@@ -19,9 +19,9 @@ export function CoverSection({ report: r }: Props) {
   return (
     <Page size="A4" style={s.page}>
       <View style={s.cover}>
-        <Image src="public/assets/innovation-curve-twothirds-white.svg" style={s.coverCurve} />
+        <Image src="public/assets/innovation-curve-twothirds-white.svg" style={s.coverCurve} alt="" />
         <View>
-          <Image src="public/assets/logo-nttdata-white.svg" style={s.coverLogo} />
+          <Image src="public/assets/logo-nttdata-white.svg" style={s.coverLogo} alt="NTT DATA" />
           <Text style={s.coverEyebrow}>PAY TRANSPARENCY ASSESSMENT REPORT</Text>
           <Text style={s.coverTitle}>{r.metadata.company_name}</Text>
           <Text style={s.coverSub}>
