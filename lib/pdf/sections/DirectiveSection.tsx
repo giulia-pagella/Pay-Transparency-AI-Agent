@@ -1,7 +1,7 @@
 import React from 'react';
 import { Page, View, Text } from '@react-pdf/renderer';
 import type { ReportJson } from '@/lib/schemas/report';
-import { s } from '@/lib/pdf/utils/pdfStyles';
+import { s, C } from '@/lib/pdf/utils/pdfStyles';
 import { PageFooter } from '@/lib/pdf/components/PdfFooter';
 import { SectionHeader } from '@/lib/pdf/components/PdfSectionTitle';
 import { getArticleLabel, getSortedDirectiveObligations } from '@/lib/pdf/utils/pdfDisplay';
@@ -21,7 +21,7 @@ export function DirectiveSection({ report: r, section }: Props) {
       <SectionHeader num={section.num} title={section.title} />
 
       <Text style={[s.body, s.mb12]}>{r.eu_directive.overview}</Text>
-      <Text style={[s.bodySmall, { fontStyle: 'italic', marginBottom: 12 }]}>
+      <Text style={[s.bodySmall, { color: C.gray100, marginBottom: 12 }]}>
         {r.eu_directive.timeline_summary}
       </Text>
 
