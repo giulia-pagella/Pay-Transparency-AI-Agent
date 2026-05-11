@@ -134,8 +134,6 @@ export const s = StyleSheet.create({
   recBody: { fontSize: 9.5, color: C.textGray, lineHeight: 1.55 },
 
   /* Roadmap */
-  roadmapCard:{ borderLeftWidth: 3, borderLeftColor: C.blue, padding: '10 12', marginBottom: 8, backgroundColor: C.blueLight },
-  roadmapText:{ fontSize: 9.5, color: C.textGray, lineHeight: 1.55 },
   roadmapHorizon:{ flex: 1, borderTopWidth: 3, borderTopColor: C.blue, padding: 10, backgroundColor: C.white, borderWidth: 1, borderColor: C.gray50 },
   sourceGroupTitle:{ fontSize: 10, fontFamily: 'Helvetica-Bold', color: C.navy, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 },
 });
