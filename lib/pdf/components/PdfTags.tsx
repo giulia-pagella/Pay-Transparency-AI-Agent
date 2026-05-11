@@ -3,7 +3,7 @@ import { Text } from '@react-pdf/renderer';
 import { s } from '@/lib/pdf/utils/pdfStyles';
 
 export function AttPill({ level }: { level: string | null }) {
-  if (!level) return <Text style={s.pillNa}>—</Text>;
+  if (!level) return <Text style={s.pillNa}>-</Text>;
   const lvl = level.toLowerCase();
   const style =
     lvl === 'alta'  ? s.pillAlta  :
@@ -12,6 +12,6 @@ export function AttPill({ level }: { level: string | null }) {
   const label =
     lvl === 'alta'  ? 'Alta'  :
     lvl === 'media' ? 'Media' :
-    lvl === 'bassa' ? 'Bassa' : '—';
+    lvl === 'bassa' ? 'Bassa' : '-';
   return <Text style={style}>{label}</Text>;
 }

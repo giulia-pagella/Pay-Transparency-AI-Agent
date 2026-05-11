@@ -20,13 +20,6 @@ type PdfSectionConfig = Omit<PdfSection, 'num'> & {
   visibleWhen?: 'multi-country';
 };
 
-/**
- * Canonical PDF section order. Sections marked visibleWhen are conditional.
- * Sections removed from the PDF (vs frontend):
- *   - Perimetro dell'analisi
- *   - Analisi per paese (narrativa separata)
- *   - Impatti per area HR
- */
 export const PDF_SECTION_CONFIG: PdfSectionConfig[] = [
   { id: 'exec',          title: 'Executive Summary' },
   { id: 'directive',     title: 'Direttiva UE 2023/970' },
