@@ -17,16 +17,18 @@ import { SourcesSection }          from '@/lib/pdf/sections/SourcesSection';
 Font.register({
   family: 'NotoSans',
   fonts: [
-    { src: 'public/fonts/NotoSans-Regular.woff2', fontWeight: 400 },
-    { src: 'public/fonts/NotoSans-Bold.woff2', fontWeight: 700 },
+    { src: 'public/fonts/NotoSans-Regular.ttf', fontWeight: 400 },
+    { src: 'public/fonts/NotoSans-Italic.ttf', fontWeight: 400, fontStyle: 'italic' },
+    { src: 'public/fonts/NotoSans-Bold.ttf', fontWeight: 700 },
+    { src: 'public/fonts/NotoSans-BoldItalic.ttf', fontWeight: 700, fontStyle: 'italic' },
   ],
 });
 
 Font.register({
   family: 'NotoSerif',
   fonts: [
-    { src: 'public/fonts/NotoSerif-Regular.woff2', fontWeight: 400 },
-    { src: 'public/fonts/NotoSerif-Bold.woff2', fontWeight: 700 },
+    { src: 'public/fonts/NotoSerif-Regular.ttf', fontWeight: 400 },
+    { src: 'public/fonts/NotoSerif-Bold.ttf', fontWeight: 700 },
   ],
 });
 
