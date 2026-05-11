@@ -95,7 +95,7 @@ export default function LandingPage() {
             </div>
 
             <div style={{ marginTop: 32, paddingTop: 18, borderTop: '1px solid rgba(255,255,255,.12)', fontSize: 11, color: 'rgba(255,255,255,.5)', lineHeight: 1.6 }}>
-              Powered by Google Gemini 2.5 Flash. Il tool utilizza esclusivamente fonti normative integrate nel sistema e non attinge a conoscenza esterna.
+              Il tool utilizza esclusivamente fonti normative integrate nel sistema e non attinge a conoscenza esterna.
             </div>
           </div>
         </div>

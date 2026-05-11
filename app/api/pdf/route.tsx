@@ -14,7 +14,7 @@ export async function GET() {
   const fileName = `PayTransparency_Assessment_${sanitizeFilename(report.metadata.company_name)}_${new Date().toISOString().slice(0, 10)}.pdf`;
   const buffer = await renderToBuffer(<ReportPdf report={report} />);
 
-  return new NextResponse(buffer, {
+  return new NextResponse(new Uint8Array(buffer), {
     headers: {
       'content-type': 'application/pdf',
       'content-disposition': `attachment; filename="${fileName}"`,
