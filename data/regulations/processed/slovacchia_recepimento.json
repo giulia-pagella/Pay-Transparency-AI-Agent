@@ -1,62 +1,131 @@
 {
   "country_code": "SK",
   "country_name": "Slovacchia",
-  "document_type": "bozza_legge",
-  "document_title": "Bozza di legge per il recepimento della Direttiva (UE) 2023/970 in Slovacchia (settembre 2025)",
-  "status": "draft",
-  "version": "1.0",
-  "date": "2025-09-19",
-  "source_pdf_filename": null,
-  "source_url": "https://www.payanalytics.com/resources/articles/slovakia-transposition-law-for-eu-pay-transparency-directive",
+  "document_type": "law",
+  "document_title": "Act No. 76/2026 Coll. on Equal Pay for Men and Women for Equal Work or Work of Equal Value",
+  "status": "definitive",
+  "date": "2026-05-08",
+  "source_pdf_filename": "document.pdf",
   "sections": [
     {
       "topic": "ambito_applicazione",
-      "title": "Ambito di applicazione e struttura normativa della bozza slovacca",
-      "content": "La bozza di legge per il recepimento della Direttiva (UE) 2023/970 è stata introdotta in Slovacchia il 19 settembre 2025 e messa in consultazione pubblica fino al 9 ottobre 2025. L'approccio slovacco è quello della trasposizione al livello minimo (no gold-plating): si recepiscono tutti i requisiti della Direttiva senza aggiungere obblighi supplementari per le imprese. Il pacchetto normativo è strutturato su due componenti: (1) una nuova legge sulla trasparenza retributiva che introduce i principi fondamentali e i nuovi obblighi specifici, e (2) modifiche coordinate al Codice del Lavoro, alla Legge sull'Ispezione del Lavoro e alla Legge sui Servizi per l'Impiego. La data di entrata in vigore prevista è il 1° giugno 2026, una settimana prima del termine UE del 7 giugno 2026. La bozza si applica a tutti i datori di lavoro slovacchi, sia pubblici che privati, senza deroghe settoriali o dimensionali per le disposizioni di base sulla trasparenza.",
-      "article_references": ["Bozza Legge SK Art. 1-3", "Modifiche Codice del Lavoro SK", "Direttiva (UE) 2023/970 Art. 1"],
-      "needs_review": true
+      "title": "Scope",
+      "content": "La legge disciplina il diritto alla parità retributiva tra uomini e donne per lavoro uguale o di pari valore, si applica ai rapporti di lavoro e ad alcuni rapporti assimilati, includendo giudici e procuratori, con specifiche esclusioni previste dalla legge.",
+      "article_references": [
+        "§1"
+      ],
+      "needs_review": false
     },
     {
-      "topic": "trasparenza_preassunzione",
-      "title": "Fasce salariali obbligatorie e divieto di salary history nelle offerte di lavoro",
-      "content": "La bozza slovacca implementa pienamente i requisiti di trasparenza pre-assunzione previsti dalla Direttiva. Tutti i datori di lavoro, indipendentemente dalla dimensione aziendale, sono tenuti a indicare le fasce retributive applicabili in tutte le offerte di lavoro pubblicate, sia esternamente che internamente. La fascia deve rispecchiare fedelmente la retribuzione effettivamente prevista per la posizione e deve essere determinata applicando criteri oggettivi e non discriminatori. In parallelo, la bozza vieta esplicitamente ai datori di lavoro di richiedere ai candidati qualsiasi informazione relativa alla loro storia retributiva attuale o passata, anche durante i colloqui di selezione o attraverso moduli e questionari di candidatura. Il divieto si estende ai soggetti terzi che conducono selezioni per conto del datore di lavoro. Queste disposizioni si applicano a tutti i datori di lavoro dal 1° giugno 2026 senza periodo transitorio.",
-      "article_references": ["Bozza Legge SK Art. 5-7", "Modifiche Legge Servizi per l'Impiego SK", "Direttiva (UE) 2023/970 Art. 5", "Direttiva (UE) 2023/970 Art. 7"],
-      "needs_review": true
+      "topic": "definizioni",
+      "title": "Definitions",
+      "content": "Definisce retribuzione, componenti variabili, livello retributivo, gender pay gap medio e mediano, quartili, categorie di lavoratori e varie forme di discriminazione, inclusa quella intersezionale.",
+      "article_references": [
+        "§2"
+      ],
+      "needs_review": false
     },
     {
       "topic": "categorie_lavoratori_comparabili",
-      "title": "Lavoratori comparabili e criteri di valutazione del lavoro di pari valore",
-      "content": "La bozza slovacca recepisce integralmente il quadro metodologico della Direttiva per la definizione di 'lavoro di pari valore' e la determinazione delle categorie di lavoratori comparabili. I datori di lavoro sono tenuti a strutturare i propri sistemi retributivi applicando quattro fattori di valutazione obbligatori: (1) competenze richieste, comprensive di formazione, qualifiche ed esperienza professionale; (2) sforzo fisico e mentale richiesto dalla mansione; (3) responsabilità assegnata, in termini di risorse umane, materiali e finanziarie gestite; (4) condizioni di lavoro, inclusi rischi per la sicurezza e l'ambiente lavorativo. I sistemi di classificazione e valutazione delle mansioni devono essere obiettivi e gender-neutral, privi di qualsiasi elemento che possa introdurre o perpetuare pregiudizi di genere. I datori di lavoro devono documentare i criteri applicati e renderli disponibili ai lavoratori e alle autorità competenti su richiesta.",
-      "article_references": ["Bozza Legge SK Art. 4", "Modifiche Codice del Lavoro SK Art. 119a", "Direttiva (UE) 2023/970 Art. 4"],
-      "needs_review": true
+      "title": "Pay structures",
+      "content": "Il datore deve adottare strutture retributive basate su criteri oggettivi, neutrali rispetto al genere e applicati senza discriminazioni, considerando competenze, responsabilità, condizioni di lavoro e soft skill.",
+      "article_references": [
+        "§3"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "trasparenza_preassunzione",
+      "title": "Recruiting transparency",
+      "content": "Gli annunci devono essere gender neutral. I candidati hanno diritto a conoscere retribuzione iniziale o range retributivo e le clausole del contratto collettivo prima del colloquio o dell'assunzione.",
+      "article_references": [
+        "§4"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "divieto_salary_history",
+      "title": "Salary history",
+      "content": "È vietato richiedere ai candidati informazioni sulla retribuzione attuale o precedente.",
+      "article_references": [
+        "§4(4)"
+      ],
+      "needs_review": false
     },
     {
       "topic": "diritto_informazione",
-      "title": "Diritto all'informazione retributiva per i lavoratori in servizio",
-      "content": "La bozza di legge slovacca garantisce ai lavoratori il pieno diritto di richiedere al datore di lavoro informazioni dettagliate sulla propria situazione retributiva. Specificatamente, ogni lavoratore ha il diritto di ricevere: (1) i criteri oggettivi utilizzati dal datore di lavoro per determinare la retribuzione e la progressione retributiva; (2) il proprio livello retributivo individuale; (3) i livelli retributivi medi disaggregati per genere per la propria categoria di lavoratori comparabili. Il datore di lavoro è tenuto a rispondere alla richiesta entro due mesi dalla sua presentazione. Le informazioni devono essere fornite in forma scritta, chiara e comprensibile, consentendo al lavoratore di valutare effettivamente la propria posizione retributiva rispetto ai colleghi. Il datore di lavoro non può invocare la riservatezza commerciale per rifiutare la divulgazione, ma può adottare misure per proteggere l'identità dei singoli lavoratori nei dati aggregati.",
-      "article_references": ["Bozza Legge SK Art. 8-10", "Direttiva (UE) 2023/970 Art. 17", "Direttiva (UE) 2023/970 Art. 18"],
-      "needs_review": true
+      "title": "Right to information",
+      "content": "I lavoratori possono ottenere informazioni sulla propria retribuzione e sui livelli medi disaggregati per genere; il datore deve informare annualmente di tale diritto.",
+      "article_references": [
+        "§6"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "divieto_clausole_confidenzialita",
+      "title": "Pay secrecy",
+      "content": "Sono nulle le clausole che impediscono al lavoratore di comunicare la propria retribuzione.",
+      "article_references": [
+        "§6(6)-(8)"
+      ],
+      "needs_review": false
     },
     {
       "topic": "obblighi_reporting",
-      "title": "Rendicontazione del divario retributivo di genere: soglie e calendario",
-      "content": "La bozza slovacca replica fedelmente le soglie dimensionali e il calendario di implementazione progressiva previsti dalla Direttiva (UE) 2023/970, in coerenza con l'approccio di recepimento minimale. I datori di lavoro con 250 o più dipendenti sono soggetti all'obbligo di rendicontazione annuale del divario retributivo di genere. Quelli con 150-249 dipendenti devono rendicontare ogni tre anni. Le aziende con 100-149 dipendenti sono esonerate fino al 2031, data a partire dalla quale anche questa categoria rientrerà nell'obbligo triennale. Considerando l'entrata in vigore della legge il 1° giugno 2026, il primo anno completo di raccolta dati sarà il 2026-2027, con i primi rapporti previsti per il 2027. I rapporti devono includere gli indicatori previsti dalla Direttiva: divario retributivo mediano e medio, quota per genere per quartile retributivo, divario nelle componenti variabili e nei bonus. I dati sono trasmessi all'autorità competente e pubblicati.",
-      "article_references": ["Bozza Legge SK Art. 11-15", "Direttiva (UE) 2023/970 Art. 9", "Direttiva (UE) 2023/970 Art. 10"],
-      "needs_review": true
+      "title": "Gender pay gap reporting",
+      "content": "Obbligo di report per datori con almeno 100 dipendenti; annuale sopra 250, triennale tra 100 e 249; pubblicazione facoltativa e confronto con rappresentanti dei lavoratori.",
+      "article_references": [
+        "§8"
+      ],
+      "needs_review": false
     },
     {
-      "topic": "sanzioni",
-      "title": "Sanzioni e regime di enforcement tramite l'Ispettorato del Lavoro",
-      "content": "La bozza slovacca introduce sanzioni proporzionate alle violazioni attraverso modifiche mirate alla Legge sull'Ispezione del Lavoro. L'Ispettorato del Lavoro slovacco è designato come autorità competente per il controllo del rispetto della normativa e per l'irrogazione delle sanzioni. Le penalità sono graduate in base alla gravità della violazione: mancata pubblicazione delle fasce salariali negli annunci, violazione del divieto di salary history, rifiuto di fornire le informazioni richieste dai lavoratori, e inosservanza degli obblighi di reporting. Il principio dell'inversione dell'onere della prova — già previsto nel diritto del lavoro slovacco per le controversie discriminatorie — viene esplicitamente esteso alle controversie in materia di parità retributiva e trasparenza salariale. Le sanzioni devono essere effettive, proporzionate e dissuasive, in conformità con l'articolo 23 della Direttiva. Le imprese recidive sono soggette a sanzioni maggiorate.",
-      "article_references": ["Modifiche Legge Ispezione del Lavoro SK Art. 19-21", "Bozza Legge SK Art. 18-20", "Direttiva (UE) 2023/970 Art. 23"],
-      "needs_review": true
+      "topic": "joint_pay_assessment",
+      "title": "Joint pay assessment",
+      "content": "Scatta con divario almeno del 5%, non giustificato e non corretto entro sei mesi; richiede analisi, misure correttive e coinvolgimento dei rappresentanti.",
+      "article_references": [
+        "§9"
+      ],
+      "needs_review": false
     },
     {
       "topic": "tutele_lavoratori",
-      "title": "Tutele contro la vittimizzazione, accesso alla giustizia e periodo di prescrizione",
-      "content": "La bozza di legge slovacca garantisce un sistema completo di protezione per lavoratori e candidati che esercitano i diritti previsti dalla normativa. Il divieto di vittimizzazione si applica a qualsiasi trattamento sfavorevole — inclusi licenziamento, mancata promozione, riduzione della retribuzione o peggioramento delle condizioni di lavoro — collegato all'esercizio dei diritti di trasparenza retributiva. Il diritto di agire in giudizio o avviare procedure amministrative si estende anche al periodo successivo alla fine del rapporto di lavoro, impedendo che il datore di lavoro possa sottrarsi alle responsabilità attraverso il licenziamento. Il periodo minimo di prescrizione per le azioni legali in materia di discriminazione retributiva è fissato in tre anni, in linea con la Direttiva. Gli organismi per la parità di trattamento, i sindacati e le organizzazioni dei lavoratori sono legittimati ad agire in giudizio per conto o a sostegno dei lavoratori. I candidati che subiscono discriminazione nella fase di selezione hanno pieno accesso ai rimedi giurisdizionali.",
-      "article_references": ["Bozza Legge SK Art. 21-25", "Direttiva (UE) 2023/970 Art. 21", "Direttiva (UE) 2023/970 Art. 22", "Direttiva (UE) 2023/970 Art. 24"],
-      "needs_review": true
+      "title": "Remedies",
+      "content": "Previsti risarcimento integrale, arretrati, danni patrimoniali e non patrimoniali, prescrizione triennale e inversione dell'onere della prova nei casi previsti.",
+      "article_references": [
+        "§11",
+        "§12"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "categorie_lavoratori_comparabili",
+      "title": "Comparators",
+      "content": "Il confronto può riguardare anche lavoratori di diversi datori di lavoro con fonte comune delle condizioni retributive o situazioni comparabili.",
+      "article_references": [
+        "§13"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "sanzioni",
+      "title": "Administrative sanctions",
+      "content": "Per mancato reporting il Ministero del Lavoro può imporre un termine di adempimento e successivamente una sanzione amministrativa da 4.000 a 8.000 euro.",
+      "article_references": [
+        "§16"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "altro",
+      "title": "Monitoring and transitional provisions",
+      "content": "Il Ministero del Lavoro svolge funzioni di monitoraggio, supporto metodologico e reporting alla Commissione europea. Sono previste disposizioni transitorie e modifiche al Labour Code e ad altre leggi.",
+      "article_references": [
+        "§14",
+        "§18",
+        "Art. II-V"
+      ],
+      "needs_review": false
     }
   ]
 }
