@@ -1,62 +1,217 @@
 {
   "country_code": "MT",
   "country_name": "Malta",
-  "document_type": "avviso_legale",
-  "document_title": "Legal Notice di recepimento parziale della Direttiva (UE) 2023/970 - Malta (agosto 2025)",
+  "document_type": "regolamento",
+  "document_title": "Equal Pay (Transparency and Reporting) Regulations, 2026",
   "status": "definitive",
-  "version": "1.0",
-  "date": "2025-08-27",
-  "source_pdf_filename": null,
-  "source_url": "https://www.payanalytics.com/resources/articles/malta-implements-eu-pay-transparency-directive",
+  "version": "2026-06",
+  "date": "2026-06-05",
+  "source_pdf_filename": "document.pdf",
+  "source_url": null,
   "sections": [
     {
       "topic": "ambito_applicazione",
-      "title": "Ambito di applicazione del recepimento parziale maltese",
-      "content": "Il Legal Notice pubblicato il 27 giugno 2025 ed entrato in vigore il 27 agosto 2025 costituisce un recepimento PARZIALE della Direttiva (UE) 2023/970 a Malta. Il provvedimento copre esclusivamente due elementi: (1) il diritto dei lavoratori in servizio di richiedere una valutazione retributiva scritta rispetto ai lavoratori comparabili, e (2) il diritto dei candidati a ricevere informazioni scritte sulla fascia retributiva e sugli accordi collettivi applicabili prima dell'inizio dell'impiego. La normativa NON affronta ancora i requisiti di rendicontazione completa del divario retributivo di genere, la valutazione congiunta della retribuzione (joint pay assessment), né le comparazioni tra 'lavoro di pari valore' richieste dalla Direttiva UE. Malta si è impegnata a completare la trasposizione integrale entro il 7 giugno 2026, termine previsto dalla Direttiva. Il recepimento parziale riflette la scelta di dare priorità immediata ai diritti più diretti e di impatto per i lavoratori e i candidati.",
-      "article_references": ["Legal Notice MT 2025 Art. 1-2", "Direttiva (UE) 2023/970 Art. 5", "Direttiva (UE) 2023/970 Art. 17"],
-      "needs_review": true
+      "title": "Finalità, destinatari e ambito di applicazione",
+      "content": "Il regolamento recepisce la direttiva (UE) 2023/970 e disciplina la parità retributiva per uno stesso lavoro o per un lavoro di pari valore mediante obblighi di trasparenza e meccanismi di attuazione. Si applica ai datori di lavoro dei settori pubblico e privato e a tutti i lavoratori con un rapporto di lavoro definito dall'Employment and Industrial Relations Act; la disciplina sulla trasparenza preassuntiva si applica anche ai candidati.",
+      "article_references": [
+        "Regulation 1(1)–(3)"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "definizioni",
+      "title": "Definizioni rilevanti per la trasparenza retributiva",
+      "content": "Il regolamento definisce, tra gli altri, categoria di lavoratori, discriminazione diretta, indiretta e intersezionale, rappresentante dei lavoratori, organismo per la parità, organismo di monitoraggio, divario retributivo di genere, divario mediano, retribuzione, livello retributivo, progressione retributiva, fascia quartile e lavoro di pari valore. La retribuzione comprende il salario ordinario, di base o minimo e ogni altra componente, anche complementare o variabile, in denaro o in natura.",
+      "article_references": [
+        "Regulation 2"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "categorie_lavoratori_comparabili",
+      "title": "Parità retributiva e criteri per il lavoro di pari valore",
+      "content": "Tutti i datori di lavoro devono adottare strutture retributive che assicurino pari retribuzione per lo stesso lavoro o per lavoro di pari valore. Differenze retributive e progressioni sono ammesse soltanto sulla base di criteri oggettivi, neutrali rispetto al genere e privi di bias, inclusi prestazione e competenza. La comparabilità deve essere valutata considerando competenze, impegno, responsabilità, condizioni di lavoro, soft skill e altri fattori pertinenti, senza discriminazioni dirette o indirette fondate sul sesso.",
+      "article_references": [
+        "Regulation 3(1)–(3)"
+      ],
+      "needs_review": false
     },
     {
       "topic": "trasparenza_preassunzione",
-      "title": "Informazioni retributive obbligatorie per i candidati prima dell'assunzione",
-      "content": "Il Legal Notice maltese stabilisce che i candidati a un'offerta di lavoro hanno il diritto di ricevere, prima dell'inizio del rapporto di lavoro, informazioni scritte sulla fascia retributiva associata alla posizione e sugli accordi collettivi pertinenti. Questo obbligo di trasparenza pre-assunzione è un diritto garantito per il candidato e un obbligo vincolante per il datore di lavoro. Le informazioni devono essere fornite in forma chiara e comprensibile, in modo da consentire al candidato una valutazione informata dell'offerta. Tuttavia, il Legal Notice non introduce esplicitamente il divieto di richiedere informazioni sulla storia retributiva del candidato (salary history ban), che rappresenta una lacuna rispetto a quanto pienamente richiesto dalla Direttiva UE. Questa disposizione si applica a tutti i datori di lavoro che operano a Malta, indipendentemente dalla dimensione aziendale, ed è immediatamente efficace dall'entrata in vigore del provvedimento.",
-      "article_references": ["Legal Notice MT 2025 Art. 3", "Direttiva (UE) 2023/970 Art. 5", "Direttiva (UE) 2023/970 Art. 7"],
+      "title": "Informazioni retributive prima dell'assunzione",
+      "content": "I candidati hanno diritto a ricevere dal potenziale datore di lavoro informazioni sulla retribuzione iniziale o sul relativo intervallo, determinati mediante criteri oggettivi e neutrali rispetto al genere, e sulle disposizioni pertinenti del contratto collettivo applicabile. Le informazioni devono essere fornite prima della conclusione del processo di selezione, in modo da consentire una negoziazione informata e trasparente. Gli annunci, i titoli professionali e i processi di recruiting devono essere neutrali rispetto al genere e non discriminatori.",
+      "article_references": [
+        "Regulation 4(1)",
+        "Regulation 4(3)"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "divieto_salary_history",
+      "title": "Divieto di richiedere la storia retributiva",
+      "content": "Il datore di lavoro non può chiedere ai candidati informazioni sulla retribuzione percepita nei rapporti di lavoro attuali o precedenti. Il divieto opera durante il processo di selezione e si affianca all'obbligo di fornire preventivamente la retribuzione iniziale o il relativo intervallo.",
+      "article_references": [
+        "Regulation 4(2)"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "altro",
+      "title": "Politiche scritte sulla determinazione e progressione della retribuzione",
+      "content": "Il datore di lavoro deve adottare e mantenere politiche o criteri scritti che descrivano i criteri oggettivi e neutrali rispetto al genere utilizzati per determinare retribuzione, livelli retributivi e progressione. Tali documenti devono essere sempre accessibili ai lavoratori. I datori con meno di cinquanta lavoratori sono esentati dagli obblighi relativi alla progressione, ma il testo contiene un'incongruenza numerica nella soglia successiva, formulata come 'twenty (25) or more workers'; i datori con meno di venticinque lavoratori restano comunque soggetti al principio di parità retributiva.",
+      "article_references": [
+        "Regulation 5(1)–(2)"
+      ],
       "needs_review": true
     },
     {
       "topic": "diritto_informazione",
-      "title": "Diritto alla valutazione retributiva comparativa per i lavoratori in servizio",
-      "content": "Il Legal Notice conferisce ai lavoratori maltesi il diritto di richiedere al datore di lavoro una valutazione scritta che confronti il proprio livello retributivo con quello delle categorie di lavoratori che svolgono lo stesso lavoro. Il datore di lavoro è tenuto a fornire questa valutazione in forma documentata e comprensibile. Tuttavia, esiste una lacuna significativa rispetto alla Direttiva UE: il Legal Notice non prevede esplicitamente il diritto alla comparazione con lavoratori che svolgono un 'lavoro di pari valore' (work of equal value), che è uno degli elementi cardine della Direttiva (UE) 2023/970. Questa omissione limita la portata effettiva del diritto all'informazione rispetto a quanto richiesto a livello europeo. La piena implementazione del concetto di 'lavoro di pari valore', con i relativi criteri di valutazione basati su competenze, sforzo, responsabilità e condizioni di lavoro, è rinviata alla fase successiva di recepimento integrale prevista entro giugno 2026.",
-      "article_references": ["Legal Notice MT 2025 Art. 4", "Direttiva (UE) 2023/970 Art. 17", "Direttiva (UE) 2023/970 Art. 4"],
+      "title": "Diritto individuale alle informazioni retributive",
+      "content": "I lavoratori possono richiedere e ricevere per iscritto il proprio livello retributivo individuale e i livelli retributivi medi, disaggregati per sesso, delle categorie che svolgono lo stesso lavoro o un lavoro di pari valore. Il datore deve rispondere entro otto giorni; in caso di mancata risposta, il rappresentante può intervenire entro dodici giorni dalla scadenza e, successivamente, il lavoratore può rivolgersi all'Equality Body. Informazioni mancanti, inesatte o incomplete entro quarantacinque giorni dalla prima richiesta costituiscono un illecito ai sensi dell'Act. I datori devono informare annualmente i lavoratori del diritto e conservare i dati per almeno cinque anni.",
+      "article_references": [
+        "Regulation 6(1)–(8)"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "divieto_clausole_confidenzialita",
+      "title": "Divulgazione della propria retribuzione e limiti d'uso delle informazioni",
+      "content": "I lavoratori non possono essere impediti dal comunicare la propria retribuzione alle autorità competenti, ai rappresentanti dei lavoratori o al sindacato scelto per far valere il diritto alla parità retributiva. Il datore può tuttavia richiedere che le informazioni ottenute ai sensi del diritto di informazione, diverse da quelle sulla propria retribuzione o sul proprio livello, siano utilizzate esclusivamente per esercitare il diritto alla parità retributiva.",
+      "article_references": [
+        "Regulation 6(7)",
+        "Regulation 6(9)"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "altro",
+      "title": "Accessibilità delle informazioni",
+      "content": "Le informazioni fornite ai lavoratori e ai candidati in materia di trasparenza preassuntiva, criteri retributivi e diritto di informazione devono essere rese disponibili in un formato accessibile alle persone con disabilità, tenendo adeguatamente conto delle loro esigenze specifiche.",
+      "article_references": [
+        "Regulation 7"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "categorie_lavoratori_comparabili",
+      "title": "Comparatori, fonte unica e prova del lavoro di pari valore",
+      "content": "La comparazione non è limitata a lavoratrici e lavoratori dello stesso datore, ma può estendersi a una fonte unica che determina gli elementi retributivi, purché le imprese siano controllate dalle stesse persone e svolgano attività economiche essenzialmente della stessa natura. I ministeri e dipartimenti del servizio pubblico sono considerati una fonte unica, mentre gli altri enti pubblici sono fonti separate. La comparazione può riguardare lavoratori impiegati in periodi diversi e, in assenza di un comparatore reale, può basarsi su statistiche o altre prove.",
+      "article_references": [
+        "Regulation 8(1)–(5)"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "obblighi_reporting",
+      "title": "Contenuti del Pay Gap Report",
+      "content": "I datori con almeno cento lavoratori devono predisporre un Pay Gap Report contenente divario retributivo medio e mediano, anche per componenti complementari o variabili, quota di donne e uomini che ricevono tali componenti, distribuzione nei quartili e divario per categoria di lavoratori, distinto tra retribuzione di base e componenti aggiuntive. La correttezza dei dati deve essere confermata dalla direzione previa consultazione dei rappresentanti, che hanno accesso alle metodologie utilizzate.",
+      "article_references": [
+        "Regulation 9(1)",
+        "Regulation 9(7)"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "obblighi_reporting",
+      "title": "Soglie e scadenze del reporting retributivo",
+      "content": "I datori con almeno duecentocinquanta lavoratori devono trasmettere il report entro il 7 giugno 2027 e ogni anno, con primo periodo di riferimento dal 1° gennaio al 31 dicembre 2026. Quelli con 150–249 lavoratori devono trasmetterlo entro il 7 giugno 2027 e poi ogni tre anni. Quelli con 100–149 lavoratori devono trasmetterlo entro il 7 giugno 2031 e poi ogni tre anni, con primo periodo dal 1° gennaio al 31 dicembre 2030. Il testo aggiunge che tutti i datori devono presentare i report pertinenti entro quattordici giorni lavorativi dalla fine del relativo periodo annuale; i datori sotto cento lavoratori possono riferire volontariamente.",
+      "article_references": [
+        "Regulation 9(2)–(6)"
+      ],
       "needs_review": true
     },
     {
       "topic": "obblighi_reporting",
-      "title": "Obblighi di rendicontazione: non ancora recepiti",
-      "content": "Il recepimento parziale operato dal Legal Notice maltese non include gli obblighi di rendicontazione del divario retributivo di genere previsti dagli articoli 9 e 10 della Direttiva (UE) 2023/970. I requisiti di reporting — che prevedono la pubblicazione annuale per le aziende con 250 o più dipendenti, triennale per quelle con 150-249, e l'estensione alle aziende con 100-149 dipendenti a partire dal 2031 — rimangono da implementare attraverso una legislazione successiva. Malta dovrà pertanto adottare entro il 7 giugno 2026 ulteriori atti normativi che stabiliscano le modalità di raccolta, calcolo e pubblicazione dei dati sul divario retributivo, designino le autorità competenti per la raccolta dei report e definiscano le procedure di notifica alla Commissione europea. Questa è una delle aree di lacuna più rilevanti del recepimento parziale attuale.",
-      "article_references": ["Direttiva (UE) 2023/970 Art. 9", "Direttiva (UE) 2023/970 Art. 10", "Direttiva (UE) 2023/970 Art. 11"],
-      "needs_review": true
+      "title": "Comunicazione, pubblicazione e rimedio dei divari",
+      "content": "Il Pay Gap Report deve essere trasmesso al Monitoring Body nel formato da esso prescritto. Il datore può pubblicare sul proprio sito i dati generali e deve fornire ai lavoratori e ai rappresentanti il divario per categoria. Monitoring Body ed Equality Body possono richiedere i dati e, ove disponibili, quelli dei quattro anni precedenti. I soggetti interessati possono chiedere chiarimenti; se le differenze non sono giustificate da criteri oggettivi e neutrali rispetto al genere, il datore deve porvi rimedio entro un periodo ragionevole consultando gli organismi competenti.",
+      "article_references": [
+        "Regulation 9(8)–(10)"
+      ],
+      "needs_review": false
     },
     {
       "topic": "joint_pay_assessment",
-      "title": "Valutazione congiunta della retribuzione: non ancora recepita",
-      "content": "La valutazione congiunta della retribuzione (joint pay assessment), prevista dall'articolo 11 della Direttiva (UE) 2023/970, non è stata inclusa nel recepimento parziale maltese. Questo meccanismo, che obbliga i datori di lavoro con divari retributivi di genere superiori al 5% a effettuare — in collaborazione con i rappresentanti dei lavoratori — un'analisi approfondita delle cause del divario e ad adottare misure correttive, costituisce uno degli strumenti più incisivi della Direttiva. L'assenza di questa disposizione nel Legal Notice attuale significa che i datori di lavoro maltesi non sono ancora soggetti a tale obbligo. Malta dovrà integrare questa disciplina nella fase di recepimento completo entro giugno 2026, stabilendo le procedure di coinvolgimento delle parti sociali e i meccanismi di controllo da parte delle autorità competenti.",
-      "article_references": ["Direttiva (UE) 2023/970 Art. 11", "Direttiva (UE) 2023/970 Art. 12"],
-      "needs_review": true
+      "title": "Presupposti per la valutazione retributiva congiunta",
+      "content": "Il datore soggetto al Pay Gap Report deve effettuare, con i rappresentanti dei lavoratori, una joint pay assessment quando il report evidenzia in una categoria un divario medio tra donne e uomini pari almeno al cinque per cento, il divario non è giustificato in modo soddisfacente da criteri oggettivi e neutrali rispetto al genere e non è stato corretto entro sei mesi dalla presentazione del report.",
+      "article_references": [
+        "Regulation 10(1)"
+      ],
+      "needs_review": false
     },
     {
-      "topic": "sanzioni",
-      "title": "Sanzioni: da definire nella trasposizione completa",
-      "content": "Il Legal Notice maltese di recepimento parziale non definisce un sistema sanzionatorio specifico per le violazioni degli obblighi introdotti. Le sanzioni per il mancato rispetto delle disposizioni sulla trasparenza pre-assunzione e sul diritto all'informazione dei lavoratori restano da disciplinare nell'ambito della trasposizione completa prevista entro il 7 giugno 2026. In base ai requisiti della Direttiva (UE) 2023/970, Malta dovrà introdurre sanzioni effettive, proporzionate e dissuasive, che includano risarcimenti economici per i lavoratori vittime di discriminazione retributiva, sanzioni amministrative per i datori di lavoro inadempienti, e meccanismi di inversione dell'onere della prova nelle controversie. L'assenza di un quadro sanzionatorio esplicito nel provvedimento attuale rappresenta una debolezza del recepimento parziale, che ne limita l'efficacia deterrente.",
-      "article_references": ["Direttiva (UE) 2023/970 Art. 23", "Direttiva (UE) 2023/970 Art. 24"],
-      "needs_review": true
+      "topic": "joint_pay_assessment",
+      "title": "Contenuti, comunicazione e attuazione della valutazione congiunta",
+      "content": "La joint pay assessment deve analizzare la composizione per sesso delle categorie, i livelli retributivi medi e le componenti variabili, le differenze, le relative ragioni oggettive, gli effetti degli aumenti dopo congedi familiari, le misure correttive e l'efficacia delle misure precedenti. Deve essere resa disponibile a lavoratori e rappresentanti e comunicata al Monitoring Body entro dieci giorni lavorativi dal completamento. Le differenze ingiustificate devono essere corrette nei tempi concordati e le misure devono includere la verifica o l'introduzione di sistemi neutrali di valutazione e classificazione delle mansioni.",
+      "article_references": [
+        "Regulation 10(2)–(4)"
+      ],
+      "needs_review": false
     },
     {
       "topic": "tutele_lavoratori",
-      "title": "Tutele dei lavoratori nel recepimento parziale e impegni futuri",
-      "content": "Il Legal Notice maltese include protezioni di base per i lavoratori che esercitano i diritti conferiti dal provvedimento, in particolare il divieto di trattamenti sfavorevoli a seguito della richiesta di valutazione retributiva comparativa. Tuttavia, le protezioni procedurali complete — quali il diritto di agire in giudizio, i termini di prescrizione per le azioni legali, il diritto al risarcimento integrale del danno, e la possibilità per sindacati e organismi per la parità di agire per conto dei lavoratori — devono ancora essere pienamente istituite attraverso la successiva legislazione di trasposizione integrale. Malta ha formalmente dichiarato l'impegno a completare il recepimento entro il 7 giugno 2026, allineandosi pienamente agli standard di protezione previsti dagli articoli 15-24 della Direttiva (UE) 2023/970. Le tutele attualmente in vigore si innestano sul quadro generale del diritto del lavoro maltese.",
-      "article_references": ["Legal Notice MT 2025 Art. 5-6", "Direttiva (UE) 2023/970 Art. 21", "Direttiva (UE) 2023/970 Art. 22"],
-      "needs_review": true
+      "title": "Protezione contro vittimizzazione e trattamenti sfavorevoli",
+      "content": "È vietato vittimizzare lavoratori e rappresentanti dei lavoratori per avere esercitato i diritti previsti dal regolamento o per avere partecipato a procedimenti diretti a ottenere tutela in relazione a una presunta violazione delle disposizioni sulla parità e trasparenza retributiva.",
+      "article_references": [
+        "Regulation 13"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "tutele_lavoratori",
+      "title": "Recupero delle retribuzioni perse e risarcimento",
+      "content": "Chi subisce una perdita retributiva per la violazione del principio di parità può rivolgersi all'Industrial Tribunal e ottenere il pagamento integrale delle somme perse, incluse arretrate, bonus e prestazioni in natura, oltre a un risarcimento reale, effettivo, proporzionato e dissuasivo per opportunità perdute, danni non patrimoniali e altri fattori rilevanti. Il risarcimento superiore alle retribuzioni perse è previsto soltanto quando la discriminazione è intenzionale e vessatoria.",
+      "article_references": [
+        "Regulation 14(1)–(8)"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "tutele_lavoratori",
+      "title": "Onere della prova, prescrizione e azione in giudizio",
+      "content": "Nei procedimenti non penali, quando il ricorrente presenta fatti concreti dai quali si possa presumere una discriminazione retributiva, il datore deve provare l'assenza di discriminazione. Se non ha attuato gli obblighi delle regulation 4, 5, 6, 9 e 10, l'onere ricade sul datore salvo violazione manifestamente involontaria e di lieve entità. Le azioni per retribuzioni perse e risarcimento possono essere promosse entro tre anni dalla conoscenza, effettiva o ragionevolmente esigibile, della violazione; il termine è sospeso o interrotto anche da un reclamo al datore o dall'avvio del procedimento davanti al Tribunal.",
+      "article_references": [
+        "Regulation 15(1)–(3)",
+        "Regulation 16(1)–(4)"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "tutele_lavoratori",
+      "title": "Legittimazione, tutela collettiva e provvedimenti provvisori",
+      "content": "Il lavoratore può agire davanti al Tribunal anche dopo la cessazione del rapporto. Associazioni, Equality Body, rappresentanti o altri enti con interesse legittimo possono intervenire, con il consenso del lavoratore, in suo nome o a suo sostegno. In presenza di prova prima facie di una violazione, il Tribunal può ordinare la cessazione dell'infrazione o misure specifiche; l'udienza deve essere fissata entro quindici giorni dal deposito e la domanda cautelare decisa entro venti giorni lavorativi.",
+      "article_references": [
+        "Regulation 17(1)–(4)",
+        "Regulation 21(1)–(4)"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "sanzioni",
+      "title": "Sanzioni pecuniarie",
+      "content": "La violazione del regolamento costituisce reato ed è punita, in caso di condanna, con una multa da 2.500 a 5.000 euro. Se l'illecito riguarda o è connesso a una violazione della parità retributiva fondata sul genere e sulla discriminazione intersezionale, la multa è compresa tra 5.000 e 7.000 euro. In caso di reiterazione, il giudice deve applicare una pena più severa entro i limiti previsti.",
+      "article_references": [
+        "Regulation 20(1)–(3)"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "altro",
+      "title": "Protezione dei dati personali",
+      "content": "Il trattamento e la pubblicazione delle informazioni previste dalle regulation 6, 9 e 10 devono rispettare il regolamento (UE) 2016/679. I dati possono essere utilizzati esclusivamente per applicare il principio di parità retributiva. Quando la comunicazione renderebbe identificabile la retribuzione di un singolo lavoratore, l'accesso è limitato ai rappresentanti dei lavoratori, all'Equality Body e al Monitoring Body, con divieto di rivelare ai lavoratori i livelli retributivi individuali.",
+      "article_references": [
+        "Regulation 10(7)",
+        "Regulation 19(1)–(3)"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "altro",
+      "title": "Disposizioni transitorie per lavoratori distaccati e contratti collettivi",
+      "content": "Il regolamento prevede misure transitorie per lavoratori distaccati o forniti a enti parastatali o governativi in seguito alla chiusura di altri enti, quando un contratto collettivo resta in vigore alla data di entrata in vigore delle norme. Durante tale vigenza sono limitate determinate azioni relative alle differenze retributive; alla scadenza del contratto, il lavoratore distaccato ha diritto alla stessa retribuzione e agli stessi benefici dei dipendenti dell'ente ricevente, salvo condizioni più favorevoli collegate a mansioni diverse o aggiuntive valutate con criteri oggettivi.",
+      "article_references": [
+        "Regulation 23(1)–(6)"
+      ],
+      "needs_review": false
     }
   ]
 }
