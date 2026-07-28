@@ -1,0 +1,232 @@
+{
+"country_code": "GR",
+"country_name": "Grecia",
+"document_type": "Legge",
+"document_title": "Legge n. 5316 – Rafforzamento dell’applicazione della parità retributiva tra uomini e donne per uno stesso lavoro o per un lavoro di pari valore e altre disposizioni – Recepimento della Direttiva (UE) 2023/970 – Disposizioni pensionistiche",
+"status": "definitive",
+"version": "2026-07",
+"date": "2026-07-06",
+"source_pdf_filename": null,
+"source_url": null,
+"sections": [
+{
+"topic": "ambito_applicazione",
+"title": "Ambito soggettivo e settoriale delle disposizioni sulla trasparenza retributiva",
+"content": "Le disposizioni generali sulla parità si applicano alle persone occupate o candidate all'impiego nel settore pubblico, nel settore pubblico allargato e nel settore privato, indipendentemente dal rapporto o dalla forma di occupazione, comprese le prestazioni d'opera, il mandato retribuito, le libere professioni e la formazione professionale. Le specifiche disposizioni sulle strutture retributive, sul diritto di informazione, sul reporting, sulla valutazione congiunta e sulla protezione dei dati si applicano ai datori di lavoro e ai lavoratori subordinati del settore privato, al settore pubblico definito dalla legge, alle società quotate indicate e alle società per azioni disciplinate dalla legge richiamata. Le disposizioni sulla trasparenza preassuntiva si applicano ai candidati all'impiego.",
+"article_references": [
+"Art. 4",
+"Art. 47, parr. 1-3, del Codice del lavoro"
+],
+"needs_review": false
+},
+{
+"topic": "definizioni",
+"title": "Definizioni rilevanti per la parità e la trasparenza retributiva",
+"content": "La legge definisce, tra l'altro, la retribuzione come il salario o stipendio ordinario, di base o minimo, e ogni altra prestazione in denaro o in natura ricevuta direttamente o indirettamente dal lavoratore come corrispettivo del lavoro. Definisce inoltre livello retributivo, divario retributivo di genere, livello retributivo mediano, divario retributivo mediano di genere, quartile retributivo, lavoro di pari valore, categoria di lavoratori, discriminazione intersezionale, Ispettorato del lavoro e rappresentanti dei lavoratori.",
+"article_references": [
+"Art. 5",
+"Art. 35, lett. e) e da z) a ist), del Codice del lavoro"
+],
+"needs_review": false
+},
+{
+"topic": "categorie_lavoratori_comparabili",
+"title": "Criteri per il lavoro di pari valore e la formazione delle categorie di lavoratori",
+"content": "I datori di lavoro devono adottare e applicare strutture retributive basate su criteri oggettivi e neutrali rispetto al genere, documentate per iscritto, soggette a revisione e idonee a consentire il confronto tra posizioni e categorie di lavoratori. I criteri devono considerare almeno competenze, impegno, responsabilità e condizioni di lavoro, oltre agli altri fattori pertinenti, come anzianità e competenze non tecniche. Quando esistono rappresentanti dei lavoratori, i criteri devono essere concordati con essi. Le categorie comprendono i lavoratori che svolgono lo stesso lavoro o un lavoro di pari valore e devono essere formate in modo non arbitrario sulla base dei medesimi criteri neutrali rispetto al genere.",
+"article_references": [
+"Art. 5",
+"Art. 8",
+"Art. 35, lett. ig) e id), del Codice del lavoro",
+"Art. 37, parr. 2 e 3, del Codice del lavoro"
+],
+"needs_review": false
+},
+{
+"topic": "categorie_lavoratori_comparabili",
+"title": "Estensione del confronto retributivo oltre il medesimo datore di lavoro",
+"content": "La valutazione della comparabilità tra lavoratrici e lavoratori non è limitata alle persone impiegate dallo stesso datore di lavoro, ma si estende ai casi in cui un unico soggetto determina gli elementi retributivi rilevanti per il confronto. Il confronto non è inoltre limitato ai lavoratori occupati contemporaneamente alla persona interessata.",
+"article_references": [
+"Art. 18",
+"Art. 54, parr. 4 e 5, del Codice del lavoro"
+],
+"needs_review": false
+},
+{
+"topic": "trasparenza_preassunzione",
+"title": "Informazioni retributive da fornire prima dell'assunzione",
+"content": "Il candidato ha diritto a ricevere dal futuro datore di lavoro informazioni sulla retribuzione iniziale o sulla relativa fascia, determinate sulla base di criteri oggettivi e neutrali rispetto al genere, nonché sulle disposizioni della contrattazione collettiva eventualmente applicabili alla posizione. Le informazioni devono essere fornite per iscritto o oralmente, con qualsiasi mezzo adeguato, in tempo utile prima del colloquio oppure, quando non è previsto un colloquio, prima della conclusione del contratto. Gli annunci, i titoli delle posizioni e le procedure di assunzione devono essere neutrali rispetto al genere e non discriminatorie. Le informazioni devono essere accessibili alle persone con disabilità.",
+"article_references": [
+"Art. 9",
+"Art. 41, parr. 2, 3 e 5, del Codice del lavoro"
+],
+"needs_review": false
+},
+{
+"topic": "divieto_salary_history",
+"title": "Divieto di domande sulla storia retributiva",
+"content": "Il datore di lavoro e chiunque agisca per suo conto non possono chiedere ai candidati, durante il colloquio o in altre comunicazioni relative all'accesso all'impiego, informazioni sulla storia retributiva maturata nei rapporti di lavoro attuali o precedenti.",
+"article_references": [
+"Art. 9",
+"Art. 41, par. 4, del Codice del lavoro"
+],
+"needs_review": false
+},
+{
+"topic": "diritto_informazione",
+"title": "Accesso individuale alle informazioni sui livelli retributivi",
+"content": "Su richiesta del lavoratore, il datore di lavoro deve fornire per iscritto il livello retributivo individuale e i livelli retributivi medi, suddivisi per genere, della categoria di lavoratori che svolge lo stesso lavoro o un lavoro di pari valore. La richiesta può essere presentata personalmente, tramite i rappresentanti dei lavoratori o tramite il Difensore civico. In caso di informazioni inesatte o incomplete possono essere richiesti chiarimenti ragionevoli e una risposta motivata. Le informazioni devono essere fornite entro un termine ragionevole e comunque entro due mesi dalla richiesta. Il datore può rifiutare una richiesta manifestamente sproporzionata o abusiva, in particolare perché ripetitiva; in tal caso il lavoratore può rivolgersi al Difensore civico. I datori devono informare annualmente tutti i lavoratori dell'esistenza del diritto e delle modalità per esercitarlo.",
+"article_references": [
+"Art. 10",
+"Art. 56A, parr. 1-5, del Codice del lavoro"
+],
+"needs_review": false
+},
+{
+"topic": "divieto_clausole_confidenzialita",
+"title": "Inefficacia delle clausole che impediscono la divulgazione della propria retribuzione",
+"content": "I contratti individuali e collettivi e i regolamenti di lavoro non possono impedire ai lavoratori di divulgare la propria retribuzione quando la divulgazione è finalizzata alla tutela del principio di parità retributiva. Il datore può tuttavia imporre che le ulteriori informazioni ricevute nell'esercizio del diritto di informazione siano utilizzate esclusivamente per far valere il diritto alla parità retributiva. Lavoratori e rappresentanti devono rispettare la riservatezza dei dati retributivi ricevuti; in caso di violazione il datore può chiedere il risarcimento del danno subito.",
+"article_references": [
+"Art. 10",
+"Art. 56A, par. 6, del Codice del lavoro"
+],
+"needs_review": false
+},
+{
+"topic": "obblighi_reporting",
+"title": "Contenuto del reporting sul divario retributivo di genere",
+"content": "I datori di lavoro con almeno 100 lavoratori devono comunicare il divario retributivo complessivo di genere, il divario relativo agli elementi complementari o variabili, il divario mediano complessivo e quello relativo agli elementi complementari o variabili, la percentuale di donne e uomini che ricevono tali elementi, la distribuzione di donne e uomini nei quattro quartili retributivi e il divario per categoria di lavoratori, distinto tra salario base ordinario ed elementi complementari o variabili. Il calcolo utilizza la retribuzione annua lorda complessiva e la corrispondente retribuzione oraria lorda di ciascun lavoratore attivo, includendo lavoratori a tempo parziale e lavoratori temporanei.",
+"article_references": [
+"Art. 11",
+"Art. 56B, parr. 1-3, del Codice del lavoro"
+],
+"needs_review": false
+},
+{
+"topic": "obblighi_reporting",
+"title": "Soglie, frequenze e prime scadenze del reporting",
+"content": "I datori con almeno 250 lavoratori devono comunicare i dati relativi all'anno precedente entro il 7 giugno 2027 e successivamente ogni anno entro la stessa data. I datori con 150-249 lavoratori devono effettuare la prima comunicazione entro il 7 giugno 2027 e successivamente ogni tre anni. I datori con 100-149 lavoratori devono effettuare la prima comunicazione entro il 7 giugno 2031 e successivamente ogni tre anni. Il numero dei lavoratori è determinato sulla base della media dell'anno solare precedente. I datori con meno di 100 lavoratori possono comunicare volontariamente i dati ogni tre anni secondo la scadenza prevista per la fascia 100-149. Nella prima applicazione, il periodo di riferimento per le prime due fasce decorre dall'entrata in vigore della legge fino al 31 dicembre 2026.",
+"article_references": [
+"Art. 11",
+"Art. 30",
+"Art. 56B, par. 4, del Codice del lavoro"
+],
+"needs_review": false
+},
+{
+"topic": "obblighi_reporting",
+"title": "Convalida, comunicazione, accesso e misure correttive",
+"content": "L'esattezza delle informazioni deve essere confermata per iscritto dalla direzione, previa consultazione dei rappresentanti dei lavoratori, quando presenti; questi ultimi hanno accesso alle metodologie applicate. I dati devono essere comunicati al Difensore civico e possono essere pubblicati dal datore sul proprio sito o con altri mezzi. Le informazioni sul divario per categoria devono essere fornite a tutti i lavoratori e ai loro rappresentanti; nel settore pubblico, i datori con almeno 100 lavoratori devono pubblicarle sul proprio sito. Su richiesta dell'Ispettorato del lavoro o del Difensore civico, i dati e, se disponibili, quelli dei quattro anni precedenti devono essere forniti entro due mesi. Eventuali richieste di chiarimenti devono ricevere una risposta motivata entro due mesi. Le differenze non giustificate da criteri oggettivi e neutrali rispetto al genere devono essere corrette entro sei mesi, in collaborazione con i rappresentanti dei lavoratori, l'Ispettorato e il Difensore civico.",
+"article_references": [
+"Art. 11",
+"Art. 56B, parr. 5-9, del Codice del lavoro"
+],
+"needs_review": false
+},
+{
+"topic": "joint_pay_assessment",
+"title": "Presupposti della valutazione retributiva congiunta",
+"content": "I datori soggetti al reporting devono svolgere, in collaborazione con i rappresentanti dei lavoratori, una valutazione retributiva congiunta quando ricorrono cumulativamente tre condizioni: il reporting evidenzia una differenza di almeno il 5% nel livello retributivo medio tra donne e uomini in una categoria di lavoratori; la differenza non è giustificata da criteri oggettivi e neutrali rispetto al genere; il datore non l'ha corretta entro sei mesi dalla comunicazione dei dati. In assenza di un'organizzazione sindacale, i lavoratori sono rappresentati dai tre dipendenti con maggiore anzianità aziendale, salvo che scelgano una diversa modalità di rappresentanza.",
+"article_references": [
+"Art. 12",
+"Art. 56Γ, parr. 1 e 2, del Codice del lavoro"
+],
+"needs_review": false
+},
+{
+"topic": "joint_pay_assessment",
+"title": "Contenuto, comunicazione e attuazione della valutazione congiunta",
+"content": "La valutazione congiunta deve analizzare la distribuzione di donne e uomini nelle categorie, i livelli retributivi medi e gli elementi complementari o variabili, le differenze riscontrate e le relative giustificazioni, la quota di lavoratrici e lavoratori che hanno beneficiato di miglioramenti retributivi dopo congedi familiari, le misure correttive e l'efficacia delle precedenti valutazioni. Il documento deve essere messo a disposizione dei lavoratori e dei loro rappresentanti, fornito all'Ispettorato su richiesta e comunicato al Difensore civico. Il datore deve attuare le misure risultanti dalla valutazione e correggere le differenze ingiustificate entro un anno dalla sua comunicazione.",
+"article_references": [
+"Art. 12",
+"Art. 56Γ, parr. 3-5, del Codice del lavoro"
+],
+"needs_review": false
+},
+{
+"topic": "sanzioni",
+"title": "Risarcimento integrale per violazioni della parità e della trasparenza retributiva",
+"content": "La discriminazione di genere e la violazione di diritti o obblighi connessi alla parità e alla trasparenza retributiva danno diritto alla cessazione della violazione e al pieno risarcimento del danno emergente, del lucro cessante e del danno morale, senza limite massimo. Il risarcimento deve essere reale, effettivo, dissuasivo e proporzionato. Nel determinarlo si considerano in particolare arretrati, premi e prestazioni in natura, interessi di mora, perdita di reddito e opportunità professionali e danni derivanti da discriminazioni intersezionali.",
+"article_references": [
+"Art. 16",
+"Art. 53, par. 1, del Codice del lavoro"
+],
+"needs_review": false
+},
+{
+"topic": "sanzioni",
+"title": "Sanzioni amministrative e misure di conformità",
+"content": "Le violazioni della parità retributiva e degli obblighi di trasparenza costituiscono violazioni della legislazione del lavoro e sono soggette alle sanzioni amministrative previste dal Codice del lavoro, tenendo conto delle circostanze aggravanti o attenuanti, comprese le discriminazioni intersezionali. L'Ispettorato del lavoro, in collaborazione con il Difensore civico, può ordinare la cessazione della violazione e l'adozione di misure di conformità. Se il datore non esegue l'ordine, è applicata una sanzione pecuniaria ripetuta per ogni periodo di tre mesi di mancata attuazione, considerando dimensione dell'impresa, gravità, colpa e recidiva. Il metodo di calcolo e l'importo delle sanzioni sono rimessi a successivi provvedimenti ministeriali.",
+"article_references": [
+"Art. 16",
+"Art. 17",
+"Art. 31",
+"Art. 53, par. 2, del Codice del lavoro",
+"Art. 573, par. 3A, del Codice del lavoro",
+"Art. 576A del Codice del lavoro"
+],
+"needs_review": false
+},
+{
+"topic": "tutele_lavoratori",
+"title": "Tutela giudiziaria e rappresentanza del lavoratore",
+"content": "Ogni persona che ritenga di essere stata danneggiata dalla violazione delle disposizioni, anche dopo la cessazione del rapporto nel quale si sarebbe verificata la discriminazione o la violazione della parità retributiva, può ricorrere alle autorità giudiziarie e amministrative e alle procedure di mediazione. Con il consenso della presunta vittima, il Difensore civico, le persone giuridiche, le associazioni e le organizzazioni sindacali aventi un interesse legittimo possono agire in suo nome o intervenire a suo sostegno.",
+"article_references": [
+"Art. 15",
+"Art. 52 del Codice del lavoro"
+],
+"needs_review": false
+},
+{
+"topic": "tutele_lavoratori",
+"title": "Inversione dell'onere della prova e accesso agli elementi probatori",
+"content": "Quando il lavoratore presenta fatti o elementi dai quali possa presumersi una discriminazione diretta o indiretta, spetta alla controparte dimostrare che non vi è stata violazione. L'inversione dell'onere opera anche nelle controversie retributive quando il datore non ha rispettato gli obblighi di trasparenza, salvo che dimostri che la violazione era manifestamente involontaria e di minima rilevanza; non si applica nei procedimenti penali. Nelle cause sulla parità retributiva il giudice può ordinare al convenuto di produrre gli elementi probatori sotto il suo controllo, comprese informazioni riservate, imponendo misure contro la loro divulgazione.",
+"article_references": [
+"Art. 18",
+"Art. 54, parr. 1, 3 e 6, del Codice del lavoro"
+],
+"needs_review": false
+},
+{
+"topic": "tutele_lavoratori",
+"title": "Protezione contro licenziamenti, ritorsioni e trattamenti sfavorevoli",
+"content": "Sono vietati il licenziamento, la cessazione del rapporto e qualsiasi altro trattamento sfavorevole motivati dal genere o dalla situazione familiare, dal rifiuto di molestie, oppure adottati come reazione a reclami, denunce, testimonianze o altre iniziative collegate all'applicazione della normativa. La protezione comprende lavoratori e rappresentanti dei lavoratori che presentano reclami interni o partecipano a procedimenti amministrativi o giudiziari per far valere diritti e obblighi relativi alla parità retributiva.",
+"article_references": [
+"Art. 20",
+"Art. 44 del Codice del lavoro"
+],
+"needs_review": false
+},
+{
+"topic": "tutele_lavoratori",
+"title": "Prescrizione delle azioni relative alla parità retributiva",
+"content": "Per le pretese derivanti dalla violazione dell'obbligo di parità retributiva, la prescrizione non inizia prima che la persona danneggiata abbia avuto conoscenza della violazione o potesse ragionevolmente averne conoscenza. Si presume, salvo prova contraria, che la conoscenza sia avvenuta con la ricezione delle informazioni retributive individuali oppure con la cessazione del rapporto di lavoro. Per i dipendenti pubblici, le pretese derivanti dalle violazioni indicate dalla legge si prescrivono in tre anni dal momento in cui il dipendente ne ha avuto o avrebbe ragionevolmente dovuto averne conoscenza. La nuova disciplina si applica alle pretese sorte dopo l'entrata in vigore della legge.",
+"article_references": [
+"Art. 16",
+"Art. 19",
+"Art. 30",
+"Art. 53, par. 3, del Codice del lavoro",
+"Art. 140, par. 3, della legge 4270/2014"
+],
+"needs_review": false
+},
+{
+"topic": "altro",
+"title": "Protezione dei dati personali nelle procedure di trasparenza retributiva",
+"content": "I dati personali trattati nell'ambito del diritto di informazione, del reporting e della valutazione congiunta devono essere gestiti secondo il regolamento generale sulla protezione dei dati e la normativa nazionale applicabile e non possono essere utilizzati per finalità diverse dall'applicazione della parità retributiva. Quando la comunicazione può rendere identificabile la retribuzione di un singolo lavoratore, l'accesso è limitato ai rappresentanti dei lavoratori, all'Ispettorato del lavoro e al Difensore civico, senza divulgazione ai lavoratori dei livelli effettivi dei singoli comparatori.",
+"article_references": [
+"Art. 13",
+"Art. 56Δ del Codice del lavoro"
+],
+"needs_review": false
+},
+{
+"topic": "altro",
+"title": "Entrata in vigore",
+"content": "La legge entra in vigore dalla data della sua pubblicazione nella Gazzetta ufficiale greca. Le disposizioni degli articoli da 8 a 20, relative agli obblighi di trasparenza retributiva e ai principali mezzi di tutela, nonché l'articolo 27, entrano invece in vigore il 1° novembre 2026.",
+"article_references": [
+"Art. 48"
+],
+"needs_review": false
+}
+]
+}
