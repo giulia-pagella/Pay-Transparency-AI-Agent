@@ -1,0 +1,232 @@
+{
+  "country_code": "IT",
+  "country_name": "Italia",
+  "document_type": "decreto_legislativo",
+  "document_title": "Decreto legislativo 7 maggio 2026, n. 96 - Attuazione della direttiva (UE) 2023/970",
+  "status": "definitive",
+  "version": "2026-06",
+  "date": "2026-05-07",
+  "effective_date": "2026-06-07",
+  "publication_reference": "GU n. 125 del 1° giugno 2026",
+  "source_pdf_filename": "Pasted text(3).txt",
+  "sections": [
+    {
+      "topic": "ambito_applicazione",
+      "title": "Oggetto e ambito di applicazione",
+      "content": "Il decreto attua la direttiva (UE) 2023/970 e si applica ai datori di lavoro pubblici e privati e ai rapporti di lavoro subordinato a tempo determinato o indeterminato, anche part-time e dirigenziale. Sono esclusi lavoro domestico e intermittente; le regole preassuntive si applicano anche ai candidati.",
+      "article_references": [
+        "Art. 1",
+        "Art. 2"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "definizioni",
+      "title": "Definizioni",
+      "content": "Sono definiti retribuzione, livello retributivo, divario retributivo medio e mediano, quartile retributivo, lavoro di pari valore, categoria di lavoratori, discriminazione diretta, indiretta e intersezionale, organismo per la parità e rappresentanti dei lavoratori.",
+      "article_references": [
+        "Art. 3"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "categorie_lavoratori_comparabili",
+      "title": "Stesso lavoro e lavoro di pari valore",
+      "content": "Lo stesso lavoro riguarda mansioni identiche o riconducibili alla stessa qualifica nel medesimo livello e categoria legale; il lavoro di pari valore riguarda mansioni diverse ma comparabili. La valutazione usa criteri comuni, oggettivi e gender neutral, inclusi competenze, responsabilità e condizioni di lavoro.",
+      "article_references": [
+        "Art. 4, commi 1-4"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "comparatori",
+      "title": "Comparazione tra datori diversi",
+      "content": "La comparazione può riguardare lavoratori di datori diversi quando le condizioni retributive derivano dalla stessa legge, dallo stesso CCNL o da contratti e regolamenti applicati a più imprese di un gruppo.",
+      "article_references": [
+        "Art. 4, comma 5"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "trasparenza_preassunzione",
+      "title": "Trasparenza prima dell'assunzione",
+      "content": "Avvisi e bandi devono indicare la retribuzione iniziale o la fascia e le pertinenti disposizioni del contratto collettivo. Procedure, annunci e titoli professionali devono essere neutrali rispetto al genere e non discriminatori.",
+      "article_references": [
+        "Art. 5, commi 1 e 3"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "divieto_salary_history",
+      "title": "Divieto di salary history",
+      "content": "È vietato chiedere o acquisire, anche indirettamente o tramite soggetti incaricati della selezione, informazioni sulle retribuzioni attuali o precedenti del candidato.",
+      "article_references": [
+        "Art. 5, comma 2"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "politiche_retributive",
+      "title": "Criteri retributivi e progressione",
+      "content": "I datori rendono accessibili i criteri per determinare retribuzioni, livelli e progressione economica. L'informativa all'assunzione è modalità ordinaria di adempimento; per chi applica un CCNL rappresentativo può bastare il rinvio ai criteri del CCNL e degli accordi aziendali.",
+      "article_references": [
+        "Art. 6, commi 1 e 2"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "esenzioni",
+      "title": "Esenzione sotto 50 dipendenti",
+      "content": "I datori con meno di cinquanta dipendenti non sono tenuti a rendere disponibili i criteri per la progressione economica.",
+      "article_references": [
+        "Art. 6, comma 3"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "diritto_informazione",
+      "title": "Diritto individuale di informazione",
+      "content": "Il lavoratore può ottenere per iscritto, entro due mesi e una volta all'anno, anche tramite rappresentanti o organismi per la parità delegati, i livelli retributivi medi per sesso delle categorie che svolgono lo stesso lavoro o un lavoro di pari valore.",
+      "article_references": [
+        "Art. 7, comma 1"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "diritto_informazione",
+      "title": "Pubblicazione e informativa annuale",
+      "content": "Il datore può pubblicare i dati in intranet o area riservata, deve informare annualmente i lavoratori del diritto e deve fornire chiarimenti motivati se i dati sono incompleti o imprecisi.",
+      "article_references": [
+        "Art. 7, commi 2-5"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "divieto_clausole_confidenzialita",
+      "title": "Divieto di pay secrecy",
+      "content": "Non può essere impedito ai lavoratori di rendere nota la propria retribuzione; sono vietate le clausole contrattuali che limitano tale facoltà.",
+      "article_references": [
+        "Art. 7, comma 6"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "accessibilita",
+      "title": "Accessibilità",
+      "content": "Le informazioni rivolte a lavoratori e candidati devono essere rese con modalità accessibili alle persone con disabilità e adeguate alle specifiche esigenze.",
+      "article_references": [
+        "Art. 8"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "reporting_contenuti",
+      "title": "Contenuti del reporting",
+      "content": "Il reporting comprende gender pay gap medio e mediano, divari sulle componenti variabili, percentuali per genere che ricevono tali componenti, distribuzione nei quartili e divario per categoria distinto tra base e componenti variabili.",
+      "article_references": [
+        "Art. 9, comma 1"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "reporting_governance",
+      "title": "Validazione e chiarimenti",
+      "content": "Il datore conferma l'esattezza previa consultazione dei rappresentanti, che accedono alle metodologie. È ammessa l'aggregazione nazionale di gruppo. I chiarimenti richiesti devono ricevere risposta motivata entro sessanta giorni.",
+      "article_references": [
+        "Art. 9, commi 2, 3 e 7"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "reporting_pubblicazione",
+      "title": "Pubblicazione e accesso",
+      "content": "I dati generali sono trasmessi all'organismo di monitoraggio, che pubblica quelli previsti. I dati per categoria sono accessibili a lavoratori e rappresentanti e, su richiesta, a Ispettorato e organismi per la parità, anche per i quattro anni precedenti se disponibili.",
+      "article_references": [
+        "Art. 9, commi 5 e 6"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "reporting_scadenze",
+      "title": "Soglie e scadenze",
+      "content": "Obbligo da 100 dipendenti: almeno 250, entro 7 giugno 2027 e poi annualmente; 150-249, entro 7 giugno 2027 e poi ogni tre anni; 100-149, entro 7 giugno 2031 e poi ogni tre anni.",
+      "article_references": [
+        "Art. 9, commi 8 e 9"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "joint_pay_assessment_presupposti",
+      "title": "Presupposti della valutazione congiunta",
+      "content": "La valutazione è obbligatoria se emerge un divario medio di almeno il 5% in una categoria, non giustificato con criteri oggettivi e gender neutral e non corretto entro sei mesi.",
+      "article_references": [
+        "Art. 10, comma 1"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "joint_pay_assessment_contenuti",
+      "title": "Contenuti della valutazione congiunta",
+      "content": "Comprende composizione per genere, livelli medi, componenti variabili, differenze e ragioni, aumenti dopo congedi, misure correttive e verifica delle misure precedenti. Gli esiti sono condivisi e le misure attuate con i rappresentanti entro un termine ragionevole.",
+      "article_references": [
+        "Art. 10, commi 2-5"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "gdpr",
+      "title": "Protezione dei dati",
+      "content": "Il trattamento avviene nel rispetto del GDPR. Se i dati identificano la retribuzione individuale, l'accesso è riservato a rappresentanti, Ispettorato e organismi per la parità. I dati sono utilizzabili solo per parità retributiva e monitoraggio.",
+      "article_references": [
+        "Art. 11"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "tutele",
+      "title": "Tutela giudiziaria e ritorsioni",
+      "content": "Si applicano i mezzi di tutela del Codice delle pari opportunità. Possono agire su delega rappresentanti, sindacati e associazioni legittimate. È vietato ogni trattamento meno favorevole per l'esercizio dei diritti previsti.",
+      "article_references": [
+        "Art. 12"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "sanzioni",
+      "title": "Adempimenti e sanzioni",
+      "content": "In caso di discriminazioni accertate si applica l'articolo 41 del Codice delle pari opportunità. Il decreto rinvia quindi al sistema sanzionatorio già previsto dal decreto legislativo n. 198/2006.",
+      "article_references": [
+        "Art. 13"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "monitoraggio",
+      "title": "Organismo di monitoraggio",
+      "content": "È istituito presso il Ministero del lavoro un organismo che raccoglie e pubblica dati, analizza il gender pay gap, raccoglie valutazioni congiunte, reclami e ricorsi e riferisce alla Commissione europea.",
+      "article_references": [
+        "Art. 14"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "statistiche",
+      "title": "Statistiche",
+      "content": "Dal 31 gennaio 2028, con riferimento al 2026, il Ministero trasmette annualmente a Eurostat dati sul divario retributivo distinti per sesso, settore, tempo pieno/part-time, pubblico/privato ed età.",
+      "article_references": [
+        "Art. 15"
+      ],
+      "needs_review": false
+    },
+    {
+      "topic": "disposizioni_finali",
+      "title": "Entrata in vigore",
+      "content": "Il decreto entra in vigore il 7 giugno 2026 e non comporta nuovi o maggiori oneri per la finanza pubblica.",
+      "article_references": [
+        "Art. 16",
+        "Art. 17"
+      ],
+      "needs_review": false
+    }
+  ]
+}

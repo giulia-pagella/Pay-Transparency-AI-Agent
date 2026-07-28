@@ -1,0 +1,88 @@
+{
+"country_code": "AT",
+"country_name": "Austria",
+"document_type": "Legge regionale",
+"document_title": "Gesetz vom 7. Juli 2026, mit dem das Steiermärkische Landes-Gleichbehandlungsgesetz 2023 geändert wird",
+"status": "definitive",
+"version": "2026-07",
+"date": "2026-07-07",
+"source_pdf_filename": "LGBLA_ST_20260721_70.rtf",
+"source_url": null,
+"sections": [
+{
+"topic": "definizioni",
+"title": "Definizione di retribuzione minima",
+"content": "È introdotta la definizione di retribuzione minima, intesa come la retribuzione o lo stipendio mensile minimo spettante al lavoratore.",
+"article_references": [
+"§ 3 Z 7"
+],
+"needs_review": false
+},
+{
+"topic": "trasparenza_preassunzione",
+"title": "Indicazione della retribuzione minima negli annunci di lavoro",
+"content": "Per ogni posto o funzione oggetto di selezione deve essere indicata la retribuzione minima spettante alla posizione pubblicizzata.",
+"article_references": [
+"§ 7 Abs. 3"
+],
+"needs_review": false
+},
+{
+"topic": "divieto_salary_history",
+"title": "Divieto di richiedere informazioni sulla retribuzione precedente",
+"content": "Durante la procedura di selezione è vietato porre domande sull'evoluzione della retribuzione percepita nei rapporti di lavoro o di servizio attuali o precedenti.",
+"article_references": [
+"§ 8"
+],
+"needs_review": false
+},
+{
+"topic": "categorie_lavoratori_comparabili",
+"title": "Classificazione delle posizioni e lavoro di pari valore",
+"content": "Nell'inquadramento delle posizioni e delle funzioni non possono essere utilizzati criteri discriminatori. In caso di violazione del principio di parità retributiva per lavoro uguale o riconosciuto come equivalente, il dipendente ha diritto al pagamento della differenza retributiva e al risarcimento del pregiudizio personale.",
+"article_references": [
+"§ 9",
+"§ 18"
+],
+"needs_review": false
+},
+{
+"topic": "diritto_informazione",
+"title": "Diritto del lavoratore a ottenere informazioni retributive",
+"content": "Su richiesta del dipendente, il responsabile per la parità deve fornire per iscritto, entro due mesi, informazioni sull'importo della retribuzione del richiedente e sulla retribuzione media, suddivisa per genere, del gruppo di lavoratori cui appartiene, qualora tali informazioni non siano già state rese disponibili dal datore di lavoro.",
+"article_references": [
+"§ 44 Abs. 1 Z 15"
+],
+"needs_review": false
+},
+{
+"topic": "obblighi_reporting",
+"title": "Relazioni sulla parità e rapporti sul divario retributivo dei comuni",
+"content": "La Commissione e il Responsabile per la parità devono predisporre programmi di lavoro e relazioni periodiche. I comuni con almeno 250 dipendenti devono pubblicare annualmente un rapporto sul divario retributivo di genere; quelli con 100-249 dipendenti ogni tre anni. Il rapporto deve suddividere il personale in quattro gruppi di pari dimensione in base alla retribuzione ed essere pubblicato sul sito web del comune. Il Responsabile per la parità può richiedere chiarimenti aggiuntivi, ai quali il comune deve rispondere entro quattro settimane.",
+"article_references": [
+"§ 51",
+"§ 51a"
+],
+"needs_review": false
+},
+{
+"topic": "tutele_lavoratori",
+"title": "Tutela contro le ritorsioni e inversione dell'onere della prova",
+"content": "I dipendenti e i candidati non possono essere licenziati, penalizzati o trattati sfavorevolmente per aver presentato reclami, avviato procedimenti o sostenuto altri lavoratori nella tutela dei diritti previsti dalla normativa. Nei procedimenti per discriminazione, quando il ricorrente dimostra fatti idonei a far presumere una discriminazione, spetta all'amministrazione o al presunto autore dimostrare l'assenza della discriminazione.",
+"article_references": [
+"§ 27 Abs. 7",
+"§ 28"
+],
+"needs_review": false
+},
+{
+"topic": "altro",
+"title": "Disposizioni transitorie e prima applicazione",
+"content": "Sono stabilite le prime scadenze applicative: il programma di lavoro sarà predisposto per la prima volta nel 2027, il rapporto annuale nel 2028 e il rapporto quadriennale nel 2031. I rapporti sul divario retributivo dei comuni saranno introdotti progressivamente dal 2027, con differenziazione in base al numero dei dipendenti.",
+"article_references": [
+"§ 57b"
+],
+"needs_review": false
+}
+]
+}
