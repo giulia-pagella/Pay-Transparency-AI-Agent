@@ -1,55 +1,51 @@
 {
-  "country_code": "BE",
-  "country_name": "Belgio",
-  "document_type": "recepimento_parziale_regionale",
-  "document_title": "Recepimento parziale della Direttiva (UE) 2023/970 in Belgio: trasposizione completa nella Comunità Francese (settembre 2024), parziale in Fiandre (2025), proposta federale (2026)",
-  "status": "draft",
-  "version": "1.0",
-  "date": "2026-01-01",
-  "source_pdf_filename": null,
-  "source_url": "https://www.beqom.com/blog/belgium-pay-equity-laws-eu-pay-transparency-directive",
-  "sections": [
-    {
-      "topic": "ambito_applicazione",
-      "title": "Struttura federale belga e tre livelli di recepimento",
-      "content": "Il Belgio affronta il recepimento della Direttiva (UE) 2023/970 attraverso la propria complessa struttura federale, che genera tre livelli distinti di trasposizione con stati di avanzamento differenti. Primo livello — Comunità Francese (Fédération Wallonie-Bruxelles): ha completato la trasposizione integrale in legge con effetto dal settembre 2024, diventando la prima giurisdizione dell'UE a recepire completamente la Direttiva. Secondo livello — Regione Fiandre (Fiandre): ha avviato una trasposizione parziale limitata al settore pubblico, con decreto bozza pubblicato nella seconda metà del 2025. Il settore privato fiammingo resta in attesa di una disciplina federale. Terzo livello — Governo federale: nel gennaio 2026 è stata presentata alla Camera dei Rappresentanti una proposta di legge che si concentra sul settore privato e propone modifiche minime al diritto sociale esistente, con l'obiettivo esplicito di non andare oltre i requisiti minimi della Direttiva UE (no gold-plating), per proteggere la competitività delle imprese belghe.",
-      "article_references": ["Decreto Comunità Francese settembre 2024", "Bozza Decreto Fiandre 2025", "Proposta federale gennaio 2026", "Direttiva (UE) 2023/970 Art. 1"],
-      "needs_review": true
-    },
-    {
-      "topic": "trasparenza_preassunzione",
-      "title": "Trasparenza retributiva pre-assunzione: attuazione differenziata per livello",
-      "content": "Gli obblighi di trasparenza retributiva pre-assunzione — pubblicazione obbligatoria delle fasce salariali nelle offerte di lavoro e divieto di richiedere la storia retributiva ai candidati — sono stati attuati in modo differenziato a seconda del livello istituzionale. Nella Comunità Francese, entrambe le disposizioni sono pienamente operative dal settembre 2024: tutti i datori di lavoro nel settore di competenza sono tenuti a indicare le fasce retributive negli annunci di lavoro e non possono richiedere informazioni sulle retribuzioni precedenti dei candidati. In Fiandre, l'implementazione è in corso per il solo settore pubblico: le amministrazioni pubbliche fiamminghe si stanno adeguando, mentre il settore privato della regione attende la legislazione federale. A livello federale, la proposta del gennaio 2026 prevede l'estensione di tali obblighi al settore privato su tutto il territorio belga, con modalità coerenti con i requisiti minimi della Direttiva.",
-      "article_references": ["Decreto Comunità Francese Art. 3-5", "Bozza Decreto Fiandre Art. 2", "Proposta federale Art. 4-6", "Direttiva (UE) 2023/970 Art. 5 e 7"],
-      "needs_review": true
-    },
-    {
-      "topic": "diritto_informazione",
-      "title": "Diritto all'informazione retributiva: implementato nella Comunità Francese, pendente altrove",
-      "content": "Il diritto dei lavoratori di richiedere informazioni sulla propria retribuzione individuale e sulla retribuzione media disaggregata per genere nella propria categoria di lavoratori comparabili è pienamente implementato nella Comunità Francese dal settembre 2024. I datori di lavoro nel settore di competenza della Fédération Wallonie-Bruxelles sono obbligati a rispondere alle richieste dei lavoratori entro i termini di legge, fornendo dati comprensibili e disaggregati per genere. In Fiandre, il diritto all'informazione è in corso di implementazione nel settore pubblico attraverso la bozza di decreto. Nel settore privato sia fiammingo che federale, l'introduzione di questo diritto è attesa con la proposta federale in discussione alla Camera dei Rappresentanti. L'approccio federale mira a stabilire procedure uniformi su tutto il territorio, evitando disomogeneità applicative tra regioni.",
-      "article_references": ["Decreto Comunità Francese Art. 8-10", "Direttiva (UE) 2023/970 Art. 17", "Direttiva (UE) 2023/970 Art. 18"],
-      "needs_review": true
-    },
-    {
-      "topic": "obblighi_reporting",
-      "title": "Rendicontazione del divario retributivo: sistema esistente e adeguamento alla Direttiva UE",
-      "content": "Il Belgio dispone già di uno dei sistemi più avanzati di rendicontazione sull'equità retributiva nell'UE. Le aziende con 50 o più dipendenti sono già tenute a presentare ogni due anni alla Banca Nazionale del Belgio un'analisi dettagliata della struttura retributiva aziendale, che deve includere la disaggregazione per genere delle retribuzioni. L'audit annuale obbligatorio deve coprire le differenze retributive di genere. Questo sistema preesistente costituisce una base solida per adeguarsi agli obblighi di reporting della Direttiva (UE) 2023/970, che richiede la rendicontazione annuale per le aziende con 250+ dipendenti, triennale per quelle con 150-249, e l'estensione alle aziende con 100-149 dipendenti dal 2031. La proposta federale del gennaio 2026 prevede di armonizzare il sistema di reporting esistente con i requisiti europei, evitando duplicazioni amministrative. Il completamento dell'adeguamento normativo è atteso entro il 7 giugno 2026.",
-      "article_references": ["Normativa belga esistente reporting parità salariale", "Proposta federale Art. 7-10", "Direttiva (UE) 2023/970 Art. 9", "Direttiva (UE) 2023/970 Art. 10"],
-      "needs_review": true
-    },
-    {
-      "topic": "sanzioni",
-      "title": "Sanzioni: applicazione del diritto esistente e approccio minimalista federale",
-      "content": "Il Belgio si distingue per un approccio consapevolmente minimalista nella definizione delle nuove sanzioni, in coerenza con la scelta di non goldplating rispetto alla Direttiva UE. Le sanzioni esistenti nel diritto del lavoro belga continuano ad applicarsi alle violazioni della normativa sull'uguaglianza di trattamento e sulla non discriminazione retributiva. La proposta federale del gennaio 2026 mira a limitare l'introduzione di nuove sanzioni a quelle strettamente richieste dalla Direttiva, senza aggiungere ulteriori oneri per le imprese. Nel quadro della Comunità Francese, le sanzioni sono già operative per le violazioni della normativa di recepimento. Il principio dell'inversione dell'onere della prova, già presente nel diritto belga antidiscriminatorio, viene esteso espressamente alle controversie in materia di trasparenza retributiva. Le autorità di controllo — ispettorati del lavoro e organismi per la parità — hanno competenza piena in materia.",
-      "article_references": ["Decreto Comunità Francese Art. 15-18", "Proposta federale Art. 12-14", "Direttiva (UE) 2023/970 Art. 23"],
-      "needs_review": true
-    },
-    {
-      "topic": "tutele_lavoratori",
-      "title": "Tutele dei lavoratori: quadro esistente rafforzato progressivamente",
-      "content": "Il Belgio dispone già di un quadro di protezione dei lavoratori particolarmente robusto, che include tutele contro la discriminazione, il diritto a ricorsi effettivi e meccanismi di azione collettiva tramite sindacati e organismi per la parità. Le tutele complete previste dalla Direttiva (UE) 2023/970 — in particolare il divieto di vittimizzazione, il diritto al risarcimento integrale, la legittimazione attiva degli organismi di parità, e il diritto di agire in giudizio anche dopo la fine del rapporto di lavoro — vengono progressivamente incorporate nei recepimenti regionali e nella proposta federale. Nella Comunità Francese, tali protezioni sono già pienamente operative dal settembre 2024. A livello fiammingo e federale, l'integrazione delle nuove tutele specifiche è in corso nel quadro dei rispettivi iter legislativi. Il completamento del quadro protettivo su tutto il territorio belga è atteso entro il 7 giugno 2026.",
-      "article_references": ["Decreto Comunità Francese Art. 19-22", "Proposta federale Art. 15-18", "Direttiva (UE) 2023/970 Art. 21", "Direttiva (UE) 2023/970 Art. 22"],
-      "needs_review": true
-    }
-  ]
+"country_code": "BE",
+"country_name": "Belgio",
+"document_type": "Decreto del Governo della Regione di Bruxelles-Capitale",
+"document_title": "Besluit van de Brusselse Hoofdstedelijke Regering van 11 juni 2026 tot uitvoering van artikel 4 van de ordonnantie van 21 maart 2024 tot oprichting van een gegevensbank genaamd talentAnalytics.brussels",
+"status": "definitive",
+"version": "2026-06",
+"date": "2026-06-11",
+"source_pdf_filename": "NIM_202604731_BG_TXT.pdf",
+"source_url": null,
+"sections": [
+{
+"topic": "obblighi_reporting",
+"title": "Trasmissione periodica dei dati alla banca dati talentAnalytics.brussels",
+"content": "Ogni ente rientrante nell'ambito dell'ordinanza del 21 marzo 2024 deve trasmettere mensilmente, oppure su richiesta, al servizio regionale Bruxelles Fonction publique, tramite l'integratore regionale che pseudonimizza i dati, le informazioni individuali relative alla situazione amministrativa e retributiva del personale elencate nell'Allegato I. L'allegato definisce per ciascun dato la definizione, la frequenza e il formato richiesti.",
+"article_references": [
+"Art. 3",
+"Allegato I"
+],
+"needs_review": false
+},
+{
+"topic": "definizioni",
+"title": "Definizione di ordinanza",
+"content": "Ai fini dell'applicazione del decreto, il termine "ordinanza" indica l'ordinanza del 21 marzo 2024 che istituisce la banca dati denominata talentAnalytics.brussels.",
+"article_references": [
+"Art. 2"
+],
+"needs_review": false
+},
+{
+"topic": "altro",
+"title": "Oggetto del provvedimento e recepimento parziale",
+"content": "Il decreto costituisce un recepimento parziale della Direttiva (UE) 2023/970 e disciplina l'attuazione dell'articolo 4 dell'ordinanza regionale relativa alla banca dati talentAnalytics.brussels.",
+"article_references": [
+"Art. 1"
+],
+"needs_review": false
+},
+{
+"topic": "altro",
+"title": "Entrata in vigore ed esecuzione",
+"content": "Il decreto entra in vigore il giorno della pubblicazione nel Moniteur belge. L'esecuzione del provvedimento è affidata al ministro competente per la funzione pubblica.",
+"article_references": [
+"Art. 4",
+"Art. 5"
+],
+"needs_review": false
+}
+]
 }
