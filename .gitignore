@@ -4,3 +4,13 @@
 
 # TypeScript build artifacts
 *.tsbuildinfo
+
+# Dependencies
+node_modules/
+
+# Next.js build output
+.next/
+out/
+
+# Env files
+.env*.local
