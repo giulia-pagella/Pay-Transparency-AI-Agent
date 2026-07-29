@@ -346,6 +346,7 @@ export async function POST(req: Request) {
       activeSession.partialReportJson = null;
       return JSON.stringify({ ok: true });
     } catch (error) {
+      console.error('[api/ai/generate] Generazione report fallita:', error);
       activeSession.partialReportJson = {
         metadata: {
           company_name: questionnaire.company.company_name,

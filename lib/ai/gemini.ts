@@ -442,6 +442,7 @@ export async function generateReportJson(input: GenerateInput): Promise<unknown>
     const issues = assessQuality(first, { assessmentInput: input.assessmentInput });
     return issues.length === 0 ? first : retryForIssues(issues);
   } catch (e) {
+    console.error('[gemini] Primo tentativo fallito:', e);
     const err = normalizeError(e);
     if (err.code === 'RATE_LIMIT' || err.code === 'SAFETY' || err.code === 'BAD_REQUEST' || err.code === 'EMPTY_RESPONSE') {
       throw Object.assign(new Error(err.message ?? String(err)), { code: err.code });
@@ -457,6 +458,7 @@ export async function generateReportJson(input: GenerateInput): Promise<unknown>
       }
       return retry;
     } catch (retryError) {
+      console.error('[gemini] Retry dopo errore tecnico fallito anch\'esso:', retryError);
       const retryMapped = normalizeError(retryError);
       throw Object.assign(new Error(retryMapped.message ?? 'Errore generazione report'), {
         code: retryMapped.code,
