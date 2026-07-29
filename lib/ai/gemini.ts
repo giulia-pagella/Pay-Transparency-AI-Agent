@@ -428,10 +428,11 @@ export async function generateReportJson(input: GenerateInput): Promise<unknown>
     );
     const retryIssues = assessQuality(retry, { assessmentInput: input.assessmentInput });
     if (retryIssues.length > 0) {
-      throw Object.assign(
-        new Error(`SCHEMA_VALIDATION_ERROR: ${retryIssues.join(' ')}`),
-        { code: 'SCHEMA_VALIDATION_ERROR', issues: retryIssues },
-      );
+      // Il secondo tentativo resta imperfetto rispetto al controllo qualita, ma e
+      // comunque un JSON valido: si affida a repairReportFromAi/reportSchema per
+      // completare i campi mancanti invece di scartare una risposta gia costata
+      // due round-trip a Gemini.
+      console.warn('Gemini: retry ancora con issue di qualita, procedo con repair a valle.', retryIssues);
     }
     return retry;
   };
@@ -452,10 +453,7 @@ export async function generateReportJson(input: GenerateInput): Promise<unknown>
       );
       const retryIssues = assessQuality(retry, { assessmentInput: input.assessmentInput });
       if (retryIssues.length > 0) {
-        throw Object.assign(
-          new Error(`SCHEMA_VALIDATION_ERROR: ${retryIssues.join(' ')}`),
-          { code: 'SCHEMA_VALIDATION_ERROR', issues: retryIssues },
-        );
+        console.warn('Gemini: retry dopo errore tecnico ancora con issue di qualita, procedo con repair a valle.', retryIssues);
       }
       return retry;
     } catch (retryError) {
