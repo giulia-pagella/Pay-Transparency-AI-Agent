@@ -285,72 +285,133 @@ export async function POST(req: Request) {
     tool_version: '1.0.0',
   };
 
-  try {
-    const skeleton = buildReportSkeleton({
-      company: parsed.data.company,
-      selectedCountries: parsed.data.selected_countries,
-      completedAreasCount: compiled,
-      hasDraftSources,
-      hasPartialDataFlag: compiled < 9,
-      selectedRegulations: selectedRegs,
-      euRegulation: eu,
-      maturityConfig,
-      maturityValues: parsed.data.maturity,
-      attentionByArea: attention.byArea,
-      overallAttention: attentionLevel.level,
-      attentionScore: attentionLevel.score,
-      attentionBreakdown: attentionLevel.breakdown,
-      attentionTriggers: attentionLevel.triggers,
-    });
+  // Da qui in poi la generazione puo' richiedere anche diversi minuti (chiamate a
+  // Gemini). Alcuni proxy intermedi (es. il port-forwarding di GitHub Codespaces)
+  // chiudono le connessioni HTTP/2 che restano "silenziose" troppo a lungo: la
+  // risposta viene quindi inviata come stream, con heartbeat periodici (whitespace,
+  // innocuo per JSON.parse che ignora gli spazi bianchi iniziali) che mantengono la
+  // connessione attiva finche' il risultato non e' pronto. Lo status HTTP resta
+  // sempre 200: esito ed eventuale errore sono nel body JSON (vedi `data.error` lato
+  // client in app/paesi/page.tsx).
+  //
+  // Le costanti sotto ricatturano valori gia' "narrowed" (session non-null, parsed.data
+  // definito, eu definito): il narrowing di TypeScript non attraversa i confini di una
+  // closure, quindi vanno assegnati a variabili dedicate prima di essere usati dentro
+  // runGeneration.
+  const activeSession = session;
+  const questionnaire = parsed.data;
+  const euRegulation = eu;
 
-    const schemaTemplate = buildAiSchemaTemplate(skeleton);
+  async function runGeneration(): Promise<string> {
+    try {
+      const skeleton = buildReportSkeleton({
+        company: questionnaire.company,
+        selectedCountries: questionnaire.selected_countries,
+        completedAreasCount: compiled,
+        hasDraftSources,
+        hasPartialDataFlag: compiled < 9,
+        selectedRegulations: selectedRegs,
+        euRegulation,
+        maturityConfig,
+        maturityValues: questionnaire.maturity,
+        attentionByArea: attention.byArea,
+        overallAttention: attentionLevel.level,
+        attentionScore: attentionLevel.score,
+        attentionBreakdown: attentionLevel.breakdown,
+        attentionTriggers: attentionLevel.triggers,
+      });
 
-    const aiDraft = await generateReportJson({
-      apiKey: session.apiKey,
-      assessmentInput,
-      attentionLevels: {
-        byArea: attention.byArea,
-        overall: attentionLevel.level,
-        score: attentionLevel.score,
-        triggers: attentionLevel.triggers,
-      },
-      sources: aiSources,
-      partialData: compiled < 9,
-      hasDraftSources,
-      schemaTemplate,
-    });
+      const schemaTemplate = buildAiSchemaTemplate(skeleton);
 
-    const repaired = repairReportFromAi(aiDraft, skeleton);
-    const report = reportSchema.parse(repaired);
+      const aiDraft = await generateReportJson({
+        apiKey: activeSession.apiKey,
+        assessmentInput,
+        attentionLevels: {
+          byArea: attention.byArea,
+          overall: attentionLevel.level,
+          score: attentionLevel.score,
+          triggers: attentionLevel.triggers,
+        },
+        sources: aiSources,
+        partialData: compiled < 9,
+        hasDraftSources,
+        schemaTemplate,
+      });
 
-    session.questionnaireData = parsed.data;
-    session.reportJson = report;
-    session.partialReportJson = null;
-    return NextResponse.json({ ok: true });
-  } catch (error) {
-    session.partialReportJson = {
-      metadata: {
-        company_name: parsed.data.company.company_name,
-        sector: parsed.data.company.sector,
-        employee_range: parsed.data.company.employee_range,
-        organizational_model: parsed.data.company.organizational_model,
-        generated_at: new Date().toISOString(),
-        selected_countries: parsed.data.selected_countries,
-        completed_areas_count: compiled,
-        has_draft_sources: hasDraftSources,
-        has_partial_data_flag: compiled < 9,
-        tool_version: '1.0.0',
-      },
-    };
+      const repaired = repairReportFromAi(aiDraft, skeleton);
+      const report = reportSchema.parse(repaired);
 
-    const code = errorCode(error);
-    if (code === 'SAFETY') return NextResponse.json({ error: 'Il contenuto generato è stato filtrato dai sistemi di sicurezza di Google. Questo è raro; prova a rigenerare il report.' }, { status: 400 });
-    if (code === 'TIMEOUT') return NextResponse.json({ error: 'La generazione del report ha impiegato più tempo del previsto. Riprova: se l\'errore persiste, potrebbe essere un problema temporaneo del servizio Gemini.' }, { status: 504 });
-    if (code === 'BAD_REQUEST') return NextResponse.json({ error: 'La richiesta a Gemini non è stata accettata. Verifica la chiave API o la quota disponibile e riprova.' }, { status: 400 });
-    if (code === 'JSON_PARSE_ERROR') return NextResponse.json({ error: 'Gemini ha restituito un JSON non valido. Riprova tra qualche secondo.' }, { status: 502 });
-    if (code === 'SCHEMA_VALIDATION_ERROR') return NextResponse.json({ error: 'Gemini ha restituito un JSON incompleto rispetto allo schema richiesto. Riprova.' }, { status: 502 });
-    if (code === 'EMPTY_RESPONSE') return NextResponse.json({ error: 'Gemini ha restituito una risposta vuota. Riprova.' }, { status: 502 });
-    if (errorName(error) === 'ZodError') return NextResponse.json({ error: "L'output AI è stato riparato ma resta incompleto rispetto allo schema. Riprova." }, { status: 502 });
-    return NextResponse.json({ error: 'Si è verificato un errore nell\'elaborazione del report. Il sistema sta riprovando automaticamente...' }, { status: 500 });
+      activeSession.questionnaireData = questionnaire;
+      activeSession.reportJson = report;
+      activeSession.partialReportJson = null;
+      return JSON.stringify({ ok: true });
+    } catch (error) {
+      activeSession.partialReportJson = {
+        metadata: {
+          company_name: questionnaire.company.company_name,
+          sector: questionnaire.company.sector,
+          employee_range: questionnaire.company.employee_range,
+          organizational_model: questionnaire.company.organizational_model,
+          generated_at: new Date().toISOString(),
+          selected_countries: questionnaire.selected_countries,
+          completed_areas_count: compiled,
+          has_draft_sources: hasDraftSources,
+          has_partial_data_flag: compiled < 9,
+          tool_version: '1.0.0',
+        },
+      };
+
+      const code = errorCode(error);
+      let message = 'Si è verificato un errore nell\'elaborazione del report. Il sistema sta riprovando automaticamente...';
+      if (code === 'SAFETY') message = 'Il contenuto generato è stato filtrato dai sistemi di sicurezza di Google. Questo è raro; prova a rigenerare il report.';
+      else if (code === 'TIMEOUT') message = 'La generazione del report ha impiegato più tempo del previsto. Riprova: se l\'errore persiste, potrebbe essere un problema temporaneo del servizio Gemini.';
+      else if (code === 'BAD_REQUEST') message = 'La richiesta a Gemini non è stata accettata. Verifica la chiave API o la quota disponibile e riprova.';
+      else if (code === 'JSON_PARSE_ERROR') message = 'Gemini ha restituito un JSON non valido. Riprova tra qualche secondo.';
+      else if (code === 'SCHEMA_VALIDATION_ERROR') message = 'Gemini ha restituito un JSON incompleto rispetto allo schema richiesto. Riprova.';
+      else if (code === 'EMPTY_RESPONSE') message = 'Gemini ha restituito una risposta vuota. Riprova.';
+      else if (errorName(error) === 'ZodError') message = "L'output AI è stato riparato ma resta incompleto rispetto allo schema. Riprova.";
+      return JSON.stringify({ error: message });
+    }
   }
+
+  const encoder = new TextEncoder();
+  const heartbeatMs = Number(process.env.GENERATE_HEARTBEAT_MS ?? 15_000);
+  let heartbeat: ReturnType<typeof setInterval> | undefined;
+
+  const stream = new ReadableStream<Uint8Array>({
+    start(controller) {
+      heartbeat = setInterval(() => {
+        try {
+          controller.enqueue(encoder.encode('\n'));
+        } catch {
+          clearInterval(heartbeat);
+        }
+      }, heartbeatMs);
+
+      runGeneration().then(
+        (resultText) => {
+          clearInterval(heartbeat);
+          controller.enqueue(encoder.encode(resultText));
+          controller.close();
+        },
+        () => {
+          clearInterval(heartbeat);
+          controller.enqueue(encoder.encode(JSON.stringify({ error: 'Si è verificato un errore imprevisto durante la generazione del report.' })));
+          controller.close();
+        },
+      );
+    },
+    cancel() {
+      clearInterval(heartbeat);
+    },
+  });
+
+  return new Response(stream, {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'no-store',
+      'X-Accel-Buffering': 'no',
+    },
+  });
 }
