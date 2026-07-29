@@ -367,6 +367,7 @@ export async function POST(req: Request) {
       if (code === 'SAFETY') message = 'Il contenuto generato è stato filtrato dai sistemi di sicurezza di Google. Questo è raro; prova a rigenerare il report.';
       else if (code === 'TIMEOUT') message = 'La generazione del report ha impiegato più tempo del previsto. Riprova: se l\'errore persiste, potrebbe essere un problema temporaneo del servizio Gemini.';
       else if (code === 'BAD_REQUEST') message = 'La richiesta a Gemini non è stata accettata. Verifica la chiave API o la quota disponibile e riprova.';
+      else if (code === 'SERVICE_UNAVAILABLE') message = 'Il servizio Gemini è al momento sovraccarico o temporaneamente non disponibile. Riprova tra qualche minuto.';
       else if (code === 'JSON_PARSE_ERROR') message = 'Gemini ha restituito un JSON non valido. Riprova tra qualche secondo.';
       else if (code === 'SCHEMA_VALIDATION_ERROR') message = 'Gemini ha restituito un JSON incompleto rispetto allo schema richiesto. Riprova.';
       else if (code === 'EMPTY_RESPONSE') message = 'Gemini ha restituito una risposta vuota. Riprova.';
