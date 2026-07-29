@@ -113,7 +113,9 @@ export default function PaesiPage() {
       clearTimeout(timeoutId);
       const data = await parseApiResponse(res);
       setLoading(false);
-      if (!res.ok) { setGenError(data.error ?? 'Errore durante la generazione del report.'); return; }
+      // Lo status resta 200 anche per gli errori tardivi (vedi commento nella route):
+      // l'esito reale e' nel body, quindi va controllato `data.error` a prescindere da res.ok.
+      if (!res.ok || data.error) { setGenError(data.error ?? 'Errore durante la generazione del report.'); return; }
       router.push('/report');
     } catch (err) {
       clearTimeout(timeoutId);
