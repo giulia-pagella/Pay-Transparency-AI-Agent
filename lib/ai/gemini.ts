@@ -107,6 +107,15 @@ function extractTextFromResponse(json: unknown) {
     .trim();
 }
 
+function isSafetyBlocked(json: unknown) {
+  const root = toRecord(json);
+  const promptFeedback = toRecord(root.promptFeedback);
+  if (typeof promptFeedback.blockReason === 'string' && promptFeedback.blockReason.length > 0) return true;
+  const candidates = Array.isArray(root.candidates) ? root.candidates : [];
+  const firstCandidate = toRecord(candidates[0]);
+  return firstCandidate.finishReason === 'SAFETY';
+}
+
 function stripCodeFence(text: string) {
   return text
     .replace(/^```json\s*/i, '')
@@ -141,6 +150,9 @@ async function callGemini(apiKey: string, prompt: string) {
     }
 
     const json = await response.json();
+    if (isSafetyBlocked(json)) {
+      throw Object.assign(new Error('SAFETY'), { code: 'SAFETY' });
+    }
     const text = extractTextFromResponse(json);
     if (!text) throw Object.assign(new Error('EMPTY_RESPONSE'), { code: 'EMPTY_RESPONSE' });
     return stripCodeFence(text);
@@ -167,8 +179,25 @@ function normalizeError(error: unknown): NormalizedError {
       message: 'La richiesta a Gemini ha superato il tempo massimo di attesa. Riprova tra qualche istante.',
     };
   }
-  if (msg.includes('429')) {
+
+  // callGemini costruisce i propri errori HTTP come `${status}:${body}`: lo status
+  // e' ancorato all'inizio del messaggio, quindi va estratto da li' invece di cercare
+  // le cifre ovunque nel testo (un corpo di risposta potrebbe contenerle per caso).
+  const rawMessage = typeof errorRecord.message === 'string' ? errorRecord.message : msg;
+  const statusMatch = rawMessage.match(/^(\d{3}):/);
+  const httpStatus = statusMatch ? Number(statusMatch[1]) : null;
+
+  if (httpStatus === 429) {
     return { code: 'RATE_LIMIT', message: 'Hai raggiunto il limite di 5 richieste al minuto del piano Gemini.' };
+  }
+  if (httpStatus === 500 || httpStatus === 502 || httpStatus === 503) {
+    return {
+      code: 'SERVICE_UNAVAILABLE',
+      message: 'Il servizio Gemini e al momento sovraccarico o temporaneamente non disponibile.',
+    };
+  }
+  if (httpStatus === 400) {
+    return { code: 'BAD_REQUEST', message: 'La richiesta a Gemini non e stata accettata. Verifica la chiave API e riprova.' };
   }
   if (msg.toLowerCase().includes('safety')) {
     return {
@@ -181,9 +210,6 @@ function normalizeError(error: unknown): NormalizedError {
       code: 'TIMEOUT',
       message: "La generazione del report ha impiegato piu tempo del previsto. Riprova.",
     };
-  }
-  if (msg.includes('400')) {
-    return { code: 'BAD_REQUEST', message: 'La richiesta a Gemini non e stata accettata. Verifica la chiave API e riprova.' };
   }
   return { code: 'UNKNOWN', message: 'Si e verificato un errore imprevisto. Riprova.' };
 }
@@ -442,9 +468,18 @@ export async function generateReportJson(input: GenerateInput): Promise<unknown>
     const issues = assessQuality(first, { assessmentInput: input.assessmentInput });
     return issues.length === 0 ? first : retryForIssues(issues);
   } catch (e) {
+    console.error('[gemini] Primo tentativo fallito:', e);
     const err = normalizeError(e);
     if (err.code === 'RATE_LIMIT' || err.code === 'SAFETY' || err.code === 'BAD_REQUEST' || err.code === 'EMPTY_RESPONSE') {
       throw Object.assign(new Error(err.message ?? String(err)), { code: err.code });
+    }
+
+    if (err.code === 'SERVICE_UNAVAILABLE') {
+      // Ritentare subito contro un servizio che ha appena segnalato sovraccarico
+      // (503/500/502) raramente aiuta: una breve attesa da' al servizio la possibilita'
+      // reale di essersi liberato.
+      const backoffMs = Number(process.env.GEMINI_RETRY_BACKOFF_MS ?? 4_000);
+      await new Promise((resolve) => setTimeout(resolve, backoffMs));
     }
 
     try {
@@ -457,6 +492,7 @@ export async function generateReportJson(input: GenerateInput): Promise<unknown>
       }
       return retry;
     } catch (retryError) {
+      console.error('[gemini] Retry dopo errore tecnico fallito anch\'esso:', retryError);
       const retryMapped = normalizeError(retryError);
       throw Object.assign(new Error(retryMapped.message ?? 'Errore generazione report'), {
         code: retryMapped.code,
